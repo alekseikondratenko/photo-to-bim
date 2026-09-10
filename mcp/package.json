@@ -1,0 +1,40 @@
+{
+  "name": "photo-to-threejs-mcp",
+  "version": "0.5.2",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/run.mjs",
+    "build": "vite build",
+    "serve": "tsx main.ts",
+    "stdio": "tsx main.ts --stdio",
+    "typecheck": "tsc --noEmit",
+    "build:server": "node build-server.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "MCP server exposing the photo-to-threejs viewer as an MCP App panel",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
+    "three": "^0.185.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "@types/pngjs": "^6.0.5",
+    "@types/three": "^0.185.4",
+    "cross-env": "^10.1.0",
+    "tsx": "^4.23.8",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>photo-to-threejs viewer</title>
+  </head>
+  <body>
+    <div id="stage">
+      <iframe id="viewer" title="Reconstruction viewer" allow="fullscreen"></iframe>
+      <div id="empty">waiting for open_viewer…</div>
+      <div id="hud">
+        <span id="status">connecting…</span>
+        <button id="open-btn" type="button" hidden>open in browser</button>
+        <button id="size-btn" type="button" hidden>fullscreen</button>
+      </div>
+    </div>
+    <script type="module" src="/src/mcp-app.ts"></script>
+  </body>
+</html>

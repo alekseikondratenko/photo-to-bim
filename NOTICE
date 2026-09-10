@@ -1,0 +1,61 @@
+photo-to-threejs
+Copyright 2026 Aleksei Kondratenko
+
+This product includes software developed as an original work by the copyright
+holder, licensed under the Apache License, Version 2.0 (see LICENSE).
+
+--------------------------------------------------------------------------------
+Prior work
+--------------------------------------------------------------------------------
+
+The first reconstruction in this project (Residential Tower AM271) was produced
+with the help of the img2threejs process harness:
+
+    img2threejs
+    https://github.com/img2threejs/img2threejs
+    Licensed under the Apache License, Version 2.0
+
+What was actually carried over from it is set out honestly in README.md under
+"Provenance". In summary: one utility function was genuinely reused
+(`build_detail_inventory.load_image`, a standard-library PNG decoder); its
+spec/gating and PBR-extraction steps were used for one development subject only;
+and its honesty discipline shaped the documentation conventions throughout. The
+viewer, the geometry library, the measurement harness, the scoring loop and all
+three 3D models in this repository are original work.
+
+--------------------------------------------------------------------------------
+Third-party runtime dependencies
+--------------------------------------------------------------------------------
+
+three.js — MIT License — https://github.com/mrdoob/three.js
+Vite — MIT License — https://github.com/vitejs/vite
+@modelcontextprotocol/sdk — MIT License
+@modelcontextprotocol/ext-apps — MIT License
+
+--------------------------------------------------------------------------------
+Reference photographs
+--------------------------------------------------------------------------------
+
+Reference imagery is licensed separately from the code and is NOT covered by the
+Apache License above. See docs/LICENSING.md for the per-image position.
+
+Included in this repository:
+
+  viewer/public/reference-whitehouse.jpg
+      Photograph by Tomasz Zielonka, via Unsplash.
+      Unsplash License (https://unsplash.com/license).
+
+  viewer/public/reference-taipei101.jpg
+      "Taipei 101" by AngMoKio, via Wikimedia Commons.
+      Licensed CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
+      Edited by Mylius. Reused here under the same licence.
+
+  viewer/public/reference-empirestate.jpg
+      Photograph by Aleksei Kondratenko, 19 August 2020. Nikon Coolpix P900.
+      Licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+
+Deliberately NOT included: the stock photograph the White House model was
+originally solved against, whose provenance could not be established. The 3D
+model built from it is unaffected and remains part of this repository —
+depicting a building is separate from redistributing a photograph of it
+(17 U.S.C. §120(a); UK CDPA s.62). See docs/LICENSING.md.

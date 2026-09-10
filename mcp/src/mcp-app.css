@@ -1,0 +1,60 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: var(--stage-h, 560px);
+}
+
+#viewer {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #10141a;
+}
+
+#empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #8b97a8;
+  background: #10141a;
+}
+
+#empty[hidden] {
+  display: none;
+}
+
+#hud {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, Canvas 75%, transparent);
+  color: CanvasText;
+  backdrop-filter: blur(4px);
+  max-width: calc(100% - 32px);
+}
+
+#status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  flex: none;
+}

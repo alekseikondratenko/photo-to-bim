@@ -1,0 +1,10 @@
+node_modules/
+dist/
+# ...except the server bundle the plugin ships prebuilt:
+!mcp/dist/
+!mcp/dist/server.mjs
+!mcp/dist/mcp-app.html
+.DS_Store
+*.log
+handshake.log
+__pycache__/

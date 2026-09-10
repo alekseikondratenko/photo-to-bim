@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "photo-to-bim": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/dist/server.mjs", "--stdio", "--profile", "ifc"]
+    }
+  }
+}
