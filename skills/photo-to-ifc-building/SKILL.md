@@ -1,6 +1,6 @@
 ---
 name: photo-to-ifc-building
-description: Rebuild a building from a single photograph as a measured IFC/BIM model, authored in Blender through Bonsai (ifcopenshell). Use when the user supplies a building photo and wants IFC, BIM, a Revit/ArchiCAD-openable model, a Blender reconstruction, or asks to "do the photo-to-bim thing". Covers the measurement-first workflow (pixel evidence, camera solve, world coordinates), IFC-native authoring with real IfcWall/IfcRoof/IfcWindow entities, the render-vs-photograph scoring loop, and the deterministic IFC delivery gate.
+description: Rebuild a building from a single photograph as a measured IFC/BIM model, authored in Blender through Bonsai (ifcopenshell). Use when the user supplies a building photo and wants IFC, BIM, a Revit/ArchiCAD-openable model, a Blender reconstruction, or asks to "do the photo-to-bim thing". Covers the camera-first, draft-then-verify workflow (solve the camera, draft whole, measure what the score indicts), IFC-native authoring with real IfcWall/IfcRoof/IfcWindow entities, the render-vs-photograph scoring loop, and the deterministic IFC delivery gate.
 ---
 
 # Photograph → measured IFC model
@@ -99,19 +99,22 @@ subject is "not a house", stop: the subject is one of these two classes.
    shifted-lens/cropped-frame case (parallel verticals ⇒ principal point on
    the horizon ⇒ `shift_y`, zero tilt). Verify with ONE render before building.
 
-## Step 2 — measure what the massing needs, and nothing more
+## Step 2 — draft whole, measure on demand
 
-Measure footprint extents, eave, ridge, the big wings — via `trace_edge` and,
-once the camera is solved, **`unproject`** (image points + a named plane →
-world metres, with a reprojection check per point). One `unproject` call
-replaces what a field run spent 25 minutes measuring in pixels; three field
-runs hand-rolled this math with the tool sitting unlocked. Do not be the
-fourth.
+With the camera accepted, **build the entire first draft from your visual read
+of the photograph** — massing, roof planes AND openings — and score it
+immediately. Your spatial read is good; what it cannot give you is *which
+parts are wrong*, and that is the score's job: `worst_segments` names the
+columns and the direction, you know which element lives there, and **only
+indicted elements earn measurement**. A field run that measured first spent 30
+`trace_edge` calls before its first render; the score then pointed at a
+handful of elements. Do not pay that toll — anchor scale on ONE measured
+dimension (a door head, a storey height via `measure_pitch`), draft the rest.
 
-**Step 2.9, the boundary: do not measure windows, doors or trim before the
-first scored massing.** A feature measured against an unverified frame goes
-stale the moment the frame moves. After the massing scores, `unproject` places
-features directly.
+When the score indicts an element, correct it with **`unproject`** (image
+points + a named plane → world metres, reprojection-checked) or a targeted
+`trace_edge` — never re-derive camera math by hand; three field runs
+hand-rolled it with the tool unlocked. Do not be the fourth.
 
 As soon as you know the subject's column extent in the photograph, call
 `photostudio.set_span(x0, x1)` — the flanks of a real photograph measure trees
@@ -127,9 +130,9 @@ right the first time; runs that guessed API shapes burned half an hour
 debugging them.
 
 **One script per phase, executed whole** via `execute_blender_code`:
-`build` (spatial tree + massing) → `detail` (walls, roof, openings, fills) →
-`refine` (fixes from scores) → `finish` (gate + manifest). Four big
-executions, not forty snippets.
+`draft` (spatial tree + the whole building: walls, roof, openings, fills,
+styles — parameters in params.json) → `refine` (fixes from scores) →
+`finish` (gate + manifest). Three big executions, not forty snippets.
 
 Load the template once (it travels with this skill, in
 `assets/blender-template/`):
@@ -151,13 +154,28 @@ import ifc_helpers as H, photostudio as P
 | `H.opening_grid(ctx, wall, rows, cols, ...)` | tower fenestration in one call |
 | `H.save(ctx, path)` / `H.gate_report(path)` | write; the delivery gate |
 
-**Massing gate, unchanged in spirit:** block the ENTIRE building as massing,
-`H.save`, `bpy.ops.bim.load_project` it, `P.render_and_score('p1-massing')` —
-and only after it scores do openings and detail begin. A wrong yaw shows in the
-massing overlay in minutes; found later it invalidates hours.
+**First-draft checkpoint:** the draft — openings included — must be saved,
+loaded (`bpy.ops.bim.load_project`) and scored (`P.render_and_score('p1-draft')`)
+before ANY refinement pass. The score, not element type, decides what happens
+next: a wrong yaw or scale shows in this overlay in minutes and invalidates
+everything downstream, so nothing proceeds until the first number exists.
+
+**Parameterise the build** — the convention a field run invented and proved:
+dimensions live in `params.json`, the build script reads them, and a
+correction is a one-line parameter edit plus a re-run, never code surgery.
 
 To SEE the model, save and reload (`bpy.ops.bim.load_project(filepath=...)`) —
 authoring is in the file, viewing is in the scene; keep the file the truth.
+
+## Materials: sampled from the photograph, not invented
+
+A grey model reads as unfinished even when its dimensions are perfect — a
+field run delivered exactly that because nothing asked for colour. Colours are
+measurements like everything else: `view_crop` the wall, the roof, the accent
+gable; read the dominant RGB; register each as `H.style('render-white',
+(r, g, b))` and pass `style_name=` to every element helper. Windows get a
+glass style. Three to five styles cover a building; decoration beyond flat
+measured colour is not the deliverable.
 
 ## Context: massing only, and it never enters the IFC
 
@@ -203,12 +221,16 @@ Cookbook pages in `references/` (roof geometry, scale anchors) apply unchanged
 ## Bug checklist (each item has already cost a run a review cycle)
 
 1. **Scoring a screenshot instead of a render.** Screenshots rescale;
-   `render_and_score` renders at the exact reference size — use it only.
+   `render_and_score` renders at the exact reference size — use it only. It
+   PINS PhotoCam; presentation shots go through `render_view` and are never
+   scored (a field run scored a beauty camera and planted a 416 px ghost
+   regression in its own history).
 2. **Re-deriving the camera.** `camera_for_blender` is paste-ready; the only
    legitimate follow-up is one verification render (negate shifts if mirrored).
 3. **Hand-rolled unprojection.** If you are writing ray×plane code, stop —
    that is `unproject`, with a reprojection check you will not write.
-4. **Detail before scored massing** — the frame moves, everything re-measures.
+4. **Refining before the first scored draft** — the frame moves, everything
+   re-measures. Draft whole, score, then refine.
 5. **Trusting the full-frame skyline on a real photograph.** Flanks measure
    trees and clouds; `set_span` early, read `subject_span`.
 6. **A converged score against invented targets.** Measure before scoring;
@@ -223,5 +245,7 @@ Cookbook pages in `references/` (roof geometry, scale anchors) apply unchanged
 11. **Editing the loaded Bonsai project while also writing the file from
     `ifc_helpers`** — pick ONE authoring path per phase; mixing them silently
     forks the model.
-12. **Unit drift.** `new_model` declares SI metres; if a number looks 1000×
+12. **Grey delivery.** No styles = unfinished to every human reviewer;
+    sample colours from the photo and style every element class.
+13. **Unit drift.** `new_model` declares SI metres; if a number looks 1000×
     off, a millimetre convention leaked in — fix the source, not the symptom.

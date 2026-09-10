@@ -160,7 +160,28 @@ def plane_mesh(polygon3d, thickness=0.06):
     return verts, faces
 
 
-def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None):
+_STYLES = {}
+
+
+def style(name, rgb):
+    """An IfcSurfaceStyle. `rgb` = (r, g, b) floats 0-1 — SAMPLE THEM FROM THE
+    PHOTOGRAPH (view_crop the wall/roof/gable and read the dominant colour);
+    a measured colour is evidence like any other. Pass the name to any element
+    helper as `style_name=`."""
+    st = _run("style.add_style", name=name)
+    _run(
+        "style.add_surface_style",
+        style=st,
+        attributes={
+            "SurfaceColour": {"Red": float(rgb[0]), "Green": float(rgb[1]), "Blue": float(rgb[2])},
+            "Transparency": 0.0,
+        },
+    )
+    _STYLES[name] = st
+    return st
+
+
+def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None, style_name=None):
     """Create an entity with a mesh Body representation, contained in `storey`."""
     el = _run("root.create_entity", ifc_class=ifc_class, name=name)
     if predefined_type is not None and hasattr(el, "PredefinedType"):
@@ -175,6 +196,8 @@ def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None):
         faces=[[list(fc) for fc in faces]],
     )
     _run("geometry.assign_representation", product=el, representation=rep)
+    if style_name is not None:
+        _run("style.assign_representation_styles", shape_representation=rep, styles=[_STYLES[style_name]])
     if storey is not None:
         _run("spatial.assign_container", products=[el], relating_structure=storey)
     return el
@@ -182,15 +205,15 @@ def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None):
 
 # ---------------------------------------------------------------- elements
 
-def massing(ctx, storey, footprint, height, z0=0.0, name="MASSING-block"):
+def massing(ctx, storey, footprint, height, z0=0.0, name="MASSING-block", style_name=None):
     """Whole-building massing placeholder. Deliberately an
     IfcBuildingElementProxy: the delivery gate fails on proxies, so massing
     MUST be replaced by real walls/roof/slabs before the run can finish."""
     verts, faces = prism_mesh(footprint, z0, z0 + height)
-    return element(ctx, "IfcBuildingElementProxy", name, storey, verts, faces)
+    return element(ctx, "IfcBuildingElementProxy", name, storey, verts, faces, style_name=style_name)
 
 
-def wall(ctx, storey, p1, p2, height, thickness=0.3, z0=0.0, name="Wall"):
+def wall(ctx, storey, p1, p2, height, thickness=0.3, z0=0.0, name="Wall", style_name=None):
     """Straight wall from plan point p1 to p2 (metres), extruded to `height`."""
     dx, dy = p2[0] - p1[0], p2[1] - p1[1]
     ln = math.hypot(dx, dy) or 1.0
@@ -202,7 +225,7 @@ def wall(ctx, storey, p1, p2, height, thickness=0.3, z0=0.0, name="Wall"):
         (p1[0] - nx, p1[1] - ny),
     ]
     verts, faces = prism_mesh(footprint, z0, z0 + height)
-    el = element(ctx, "IfcWall", name, storey, verts, faces, "SOLIDWALL")
+    el = element(ctx, "IfcWall", name, storey, verts, faces, "SOLIDWALL", style_name=style_name)
     el.ObjectType = "photo-to-bim wall"
     _WALL_AXES[el.id()] = (p1, p2, thickness, z0)
     return el
@@ -211,12 +234,12 @@ def wall(ctx, storey, p1, p2, height, thickness=0.3, z0=0.0, name="Wall"):
 _WALL_AXES = {}
 
 
-def slab(ctx, storey, footprint, thickness=0.2, z_top=0.0, name="Slab", predefined="FLOOR"):
+def slab(ctx, storey, footprint, thickness=0.2, z_top=0.0, name="Slab", predefined="FLOOR", style_name=None):
     verts, faces = prism_mesh(footprint, z_top - thickness, z_top)
-    return element(ctx, "IfcSlab", name, storey, verts, faces, predefined)
+    return element(ctx, "IfcSlab", name, storey, verts, faces, predefined, style_name=style_name)
 
 
-def roof(ctx, storey, planes, thickness=0.08, name="Roof"):
+def roof(ctx, storey, planes, thickness=0.08, name="Roof", style_name=None):
     """One IfcRoof from ANY set of 3D plane polygons. A gable is two quads, a
     hip four, a Zwerchgiebel adds two more, a flat tower cap is one."""
     verts, faces = [], []
@@ -225,7 +248,7 @@ def roof(ctx, storey, planes, thickness=0.08, name="Roof"):
         base = len(verts)
         verts += v
         faces += [[i + base for i in fc] for fc in fs]
-    return element(ctx, "IfcRoof", name, storey, verts, faces)
+    return element(ctx, "IfcRoof", name, storey, verts, faces, style_name=style_name)
 
 
 def opening(ctx, wall_el, x_along, sill, width, height, name="Opening"):
@@ -251,21 +274,31 @@ def opening(ctx, wall_el, x_along, sill, width, height, name="Opening"):
     verts, faces = prism_mesh(footprint, z0 + sill, z0 + sill + height)
     op = element(ctx, "IfcOpeningElement", name, None, verts, faces)
     _run("feature.add_feature", feature=op, element=wall_el)
-    _OPENING_GEO[op.id()] = (footprint, z0 + sill, height)
+    _OPENING_GEO[op.id()] = (corners[0], corners[1], (nx, ny), z0 + sill, height)
     return op
 
 
 _OPENING_GEO = {}
 
 
-def fill(ctx, opening_el, kind="window", storey=None, name=None):
-    """Fill an opening with an IfcWindow or IfcDoor (thin box in the void)."""
-    footprint, z0, h = _OPENING_GEO[opening_el.id()]
-    cx = [sum(p[0] for p in footprint) / 4, sum(p[1] for p in footprint) / 4]
-    shrink = [((p[0] - cx[0]) * 0.35 + cx[0], (p[1] - cx[1]) * 0.35 + cx[1]) for p in footprint]
-    verts, faces = prism_mesh(shrink, z0, z0 + h)
+def fill(ctx, opening_el, kind="window", storey=None, name=None, style_name=None, pane_t=0.08):
+    """Fill an opening with an IfcWindow or IfcDoor.
+
+    The pane spans the FULL opening width and height and is thin only THROUGH
+    the wall. (The first version shrank both axes, which rendered as a narrow
+    plank floating inside every void — a field run's facade grew "alien" slats
+    between its windows. The pane is the size of the hole, by construction.)
+    """
+    A, B, (nx, ny), z0, h = _OPENING_GEO[opening_el.id()]
+    footprint = [
+        (A[0] + nx * pane_t / 2, A[1] + ny * pane_t / 2),
+        (B[0] + nx * pane_t / 2, B[1] + ny * pane_t / 2),
+        (B[0] - nx * pane_t / 2, B[1] - ny * pane_t / 2),
+        (A[0] - nx * pane_t / 2, A[1] - ny * pane_t / 2),
+    ]
+    verts, faces = prism_mesh(footprint, z0, z0 + h)
     cls = "IfcDoor" if kind == "door" else "IfcWindow"
-    el = element(ctx, cls, name or kind.capitalize(), storey, verts, faces)
+    el = element(ctx, cls, name or kind.capitalize(), storey, verts, faces, style_name=style_name)
     _run("feature.add_filling", opening=opening_el, element=el)
     return el
 

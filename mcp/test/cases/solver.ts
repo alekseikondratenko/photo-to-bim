@@ -82,8 +82,8 @@ const say = (n: string, cond: boolean, d = "") => console.log(`${n} | ${cond ? "
   const { W, H, lines } = synth(12);
   const r: any = solveCamera([W, H], lines, { height_m: 14 });
   say("usable solve carries a next block", Array.isArray(r.next?.do) && r.next.do.length > 0);
-  say("usable solve routes to MASSING before detail",
-      /MASSING/.test(r.next.do.join(" ")) && /do NOT measure/i.test(r.next.do.join(" ")),
+  say("usable solve routes to the draft-first build",
+      /DRAFT/.test(r.next.do.join(" ")) && /Do not pixel-measure/i.test(r.next.do.join(" ")),
       r.next?.do?.[0]?.slice(0, 50));
   say("usable solve with verticals reports unproject UNLOCKED",
       r.next.unproject_locked === false && r.camera_for_unproject !== null,
@@ -130,6 +130,6 @@ const say = (n: string, cond: boolean, d = "") => console.log(`${n} | ${cond ? "
         ? /Re-pick|re-pick/.test(doTxt) && /unproject/.test(doTxt)
         : true,
       `verdict=${rw.cross_check.verdict}`);
-  say("routing includes the massing-first instruction on every buildable verdict",
-      /MASSING/.test(doTxt), "");
+  say("routing includes the draft-first instruction on every buildable verdict",
+      /DRAFT/.test(doTxt), "");
 }

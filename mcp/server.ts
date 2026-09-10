@@ -119,7 +119,7 @@ function profileFromArgv(): "all" | "ifc" | "web" {
 export function createServer(): McpServer {
   const profile = profileFromArgv();
   const webTarget = profile !== "ifc";
-  const server = new McpServer({ name: "photo-to-bim", version: "0.6.0" });
+  const server = new McpServer({ name: "photo-to-bim", version: "0.6.1" });
 
   server.registerTool(
     "classify_reference",

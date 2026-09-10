@@ -12,10 +12,12 @@ import ifc_helpers as H
 ctx = H.new_model('Test house', [('Ground', 0.0), ('Upper', 2.8)], building_name='House')
 H.evidence_pset(ctx, {'Source': 'house.jpg', 'StoreyHeight_m': 2.8, 'RoofPitch_deg': 44.4})
 m = H.massing(ctx, ctx['storeys']['Ground'], [(0,0),(10,0),(10,8),(4,8),(4,6),(0,6)], 5.5)  # L-shape (concave!)
-w1 = H.wall(ctx, ctx['storeys']['Ground'], (0,0), (10,0), 5.5)
+H.style('render-white', (0.79, 0.77, 0.71))
+H.style('glass', (0.45, 0.30, 0.14))
+w1 = H.wall(ctx, ctx['storeys']['Ground'], (0,0), (10,0), 5.5, style_name='render-white')
 w2 = H.wall(ctx, ctx['storeys']['Ground'], (10,0), (10,8), 5.5)
 op = H.opening(ctx, w1, 2.0, 0.9, 1.2, 1.4)
-win = H.fill(ctx, op, 'window', storey=ctx['storeys']['Ground'])
+win = H.fill(ctx, op, 'window', storey=ctx['storeys']['Ground'], style_name='glass')
 dop = H.opening(ctx, w1, 6.0, 0.0, 1.0, 2.135)
 H.fill(ctx, dop, 'door', storey=ctx['storeys']['Ground'])
 H.slab(ctx, ctx['storeys']['Ground'], [(0,0),(10,0),(10,8),(0,8)], 0.2, 0.0)
@@ -45,4 +47,18 @@ print('TOWER gate:', rep2['verdict'], '| schema', rep2['schema'], '| geom', rep2
 print('  census:', {k:v for k,v in rep2['census'].items() if v})
 assert rep2['verdict'] == 'PASS', 'tower model must pass the gate'
 assert rep2['census']['IfcWindow'] == 35, 'grid should give 35 windows'
+# 0.6.1: the fill must SPAN its opening (the 'alien slats' regression) and
+# styles must reach the file.
+import ifcopenshell, ifcopenshell.geom
+f = ifcopenshell.open(p)
+w = f.by_type('IfcWindow')[0]
+settings = ifcopenshell.geom.settings()
+sh = ifcopenshell.geom.create_shape(settings, w)
+vs = sh.geometry.verts
+xs = vs[0::3]; zs = vs[2::3]
+w_extent = max(xs) - min(xs); h_extent = max(zs) - min(zs)
+assert abs(w_extent - 1.2) < 0.05, f'window pane width {w_extent} != opening width 1.2'
+assert abs(h_extent - 1.4) < 0.05, f'window pane height {h_extent} != opening height 1.4'
+assert len(f.by_type('IfcSurfaceStyle')) >= 2, 'styles missing from the file'
+print('fill spans opening:', round(w_extent,3), 'x', round(h_extent,3), '| styles:', len(f.by_type('IfcSurfaceStyle')))
 print('ALL HELPER CHECKS PASS')

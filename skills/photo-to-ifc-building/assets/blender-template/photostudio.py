@@ -71,6 +71,7 @@ def setup(camera_for_blender, reference_path, out_dir=None, span=None):
         bg.inputs["Color"].default_value = (0.62, 0.71, 0.82, 1)
         bg.inputs["Strength"].default_value = 0.6
     _STATE["ref"] = reference_path
+    _STATE["res"] = (int(w), int(h))
     _STATE["out_dir"] = out_dir or os.path.dirname(os.path.abspath(reference_path))
     _STATE["span"] = tuple(span) if span else None
     return f"PhotoCam ready: lens {cb['lens_mm']} mm, shift ({cb['shift_x']}, {cb['shift_y']}), {w}x{h}"
@@ -225,12 +226,35 @@ def _verdict(history, score, diag):
 
 # ---------------------------------------------------------------- the gate
 
+def render_view(name, camera=None):
+    """UNSCORED render — presentation shots, rear checks, any camera. Never
+    pushes a number into the history. Use render_and_score for evidence."""
+    scene = bpy.context.scene
+    prev = scene.camera
+    if camera:
+        scene.camera = bpy.data.objects[camera] if isinstance(camera, str) else camera
+    out = os.path.join(_STATE["out_dir"] or ".", f"{name}.png")
+    scene.render.filepath = out
+    bpy.ops.render.render(write_still=True)
+    scene.camera = prev
+    return out
+
+
 def render_and_score(name):
     """Render PhotoCam to <out_dir>/<name>.png and score it against the
     reference in the same call. Returns the score dict; also appends to
-    <out_dir>/score-history.json."""
+    <out_dir>/score-history.json.
+
+    The camera is PINNED to PhotoCam here — a field run switched to a beauty
+    camera and scored it, planting a 416 px "regression" in its history. Only
+    the photograph's viewpoint may be scored; use render_view for everything
+    else."""
     assert _STATE["ref"], "call setup() first"
     scene = bpy.context.scene
+    scene.camera = bpy.data.objects["PhotoCam"]
+    w, h = _STATE.get("res") or (scene.render.resolution_x, scene.render.resolution_y)
+    scene.render.resolution_x, scene.render.resolution_y = int(w), int(h)
+    scene.render.resolution_percentage = 100
     out = os.path.join(_STATE["out_dir"], f"{name}.png")
     scene.render.filepath = out
     bpy.ops.render.render(write_still=True)

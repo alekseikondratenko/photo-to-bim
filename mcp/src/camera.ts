@@ -713,15 +713,23 @@ export function solveCamera(
     // because this instruction used to ship only with `usable`, each of them
     // hand-wrote its own unprojection math (four Python files in one run, a
     // scipy least-squares fit in another) while the tool sat unlocked.
+    //
+    // Draft-first (v0.6.1): with the camera solved, the model's own read of
+    // the photograph is a good first draft — build it WHOLE (massing, roof,
+    // openings) and let the SCORE, not a measuring ritual, decide what gets
+    // measured. Measured against field runs, up-front feature measurement
+    // spent ~30 trace calls before the first render; the score then indicted
+    // only a handful of elements.
     nextSteps.push(
-      "Build the MASSING first (footprint, eave, ridge, wings) and score it. Do NOT measure " +
-      "windows, doors or trim until the massing has scored — a feature measured against an " +
-      "unverified frame goes stale the moment the frame moves.",
+      "Build the whole DRAFT now — massing, roof planes AND openings, from your read of " +
+      "the photograph — and score it from this camera immediately. Do not pixel-measure " +
+      "features up front: the score's worst_segments will name the columns that are wrong, " +
+      "and only those elements earn measurement.",
     );
     if (unprojectReady) {
       nextSteps.push(
-        "For EVERY feature position after that, call `unproject` — never re-derive camera " +
-        "math by hand and never pixel-measure a feature the plane geometry can place. " +
+        "When the score indicts an element, correct it with `unproject` — never re-derive " +
+        "camera math by hand and never pixel-measure what plane geometry can place. " +
         "Worked call: unproject({image, camera: <the camera_for_unproject block in this " +
         "result, verbatim>, points: [[x, y]], plane: {axis: \"y\", value: 0}} (ground; " +
         "the facade is {axis: \"z\", value: 0}, a gable wall {axis: \"x\", ...}). One call " +

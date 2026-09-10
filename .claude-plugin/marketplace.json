@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Rebuild a building from one photograph as a measured IFC/BIM model, authored in Blender through Bonsai",
-    "version": "0.6.0"
+    "version": "0.6.1"
   },
   "plugins": [
     {

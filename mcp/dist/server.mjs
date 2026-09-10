@@ -62690,11 +62690,11 @@ function solveCamera(size, segments, known) {
   }
   if (verdict !== "inconsistent") {
     nextSteps.push(
-      "Build the MASSING first (footprint, eave, ridge, wings) and score it. Do NOT measure windows, doors or trim until the massing has scored \u2014 a feature measured against an unverified frame goes stale the moment the frame moves."
+      "Build the whole DRAFT now \u2014 massing, roof planes AND openings, from your read of the photograph \u2014 and score it from this camera immediately. Do not pixel-measure features up front: the score's worst_segments will name the columns that are wrong, and only those elements earn measurement."
     );
     if (unprojectReady) {
       nextSteps.push(
-        'For EVERY feature position after that, call `unproject` \u2014 never re-derive camera math by hand and never pixel-measure a feature the plane geometry can place. Worked call: unproject({image, camera: <the camera_for_unproject block in this result, verbatim>, points: [[x, y]], plane: {axis: "y", value: 0}} (ground; the facade is {axis: "z", value: 0}, a gable wall {axis: "x", ...}). One call returns world metres with a reprojection check per point.'
+        'When the score indicts an element, correct it with `unproject` \u2014 never re-derive camera math by hand and never pixel-measure what plane geometry can place. Worked call: unproject({image, camera: <the camera_for_unproject block in this result, verbatim>, points: [[x, y]], plane: {axis: "y", value: 0}} (ground; the facade is {axis: "z", value: 0}, a gable wall {axis: "x", ...}). One call returns world metres with a reprojection check per point.'
       );
     }
   }
@@ -64140,7 +64140,7 @@ function profileFromArgv() {
 function createServer() {
   const profile = profileFromArgv();
   const webTarget = profile !== "ifc";
-  const server = new McpServer({ name: "photo-to-bim", version: "0.6.0" });
+  const server = new McpServer({ name: "photo-to-bim", version: "0.6.1" });
   server.registerTool(
     "classify_reference",
     {
