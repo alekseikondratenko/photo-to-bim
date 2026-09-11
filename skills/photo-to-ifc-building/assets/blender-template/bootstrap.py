@@ -4,7 +4,7 @@ import importlib.util
 import pathlib
 import sys
 
-VERSION = "0.7.1"
+VERSION = "0.7.2"
 
 def load():
     root = pathlib.Path(__file__).resolve().parent

@@ -297,6 +297,35 @@ try {
       "trace_edges",
       "view_crop",
     ]);
+    // Regression: tuple-style items arrays were listed by MCP, then silently
+    // rejected by the client's model-tool translator (test 8).
+    function portableArrays(schema: any) {
+      if (!schema || typeof schema !== "object") return;
+      assert.ok(
+        !Array.isArray(schema.items),
+        "Tuple-style items are not portable",
+      );
+      for (const value of Object.values(schema)) {
+        if (Array.isArray(value)) value.forEach(portableArrays);
+        else portableArrays(value);
+      }
+    }
+    tools.forEach((t) => portableArrays(t.inputSchema));
+    const planeTool = tools.find((t) => t.name === "place_features")!;
+    const normalSchema = (planeTool.inputSchema.properties as any).plane
+      .properties.normal;
+    assert.equal(normalSchema.minItems, 3);
+    assert.equal(normalSchema.maxItems, 3);
+    assert.equal(normalSchema.items.type, "number");
+    const invalidVector = await client.callTool({
+      name: "place_features",
+      arguments: {
+        camera,
+        plane: { origin: [0, 0, 0], normal: [0, 1] },
+        features: [{ id: "p", pixel: [100, 80] }],
+      },
+    });
+    assert.equal(invalidVector.isError, true);
     const cropError = await client.callTool({
       name: "view_crop",
       arguments: {

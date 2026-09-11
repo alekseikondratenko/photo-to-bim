@@ -15,12 +15,16 @@ import {
   type V3,
 } from "./src/frame.ts";
 import { evaluate, type EvaluationRequest } from "./src/evaluate.ts";
-const v3 = z.tuple([
-  z.number().finite(),
-  z.number().finite(),
-  z.number().finite(),
-]);
-const pixel = z.tuple([z.number().finite(), z.number().finite()]);
+// Homogeneous vectors use bounded arrays. Tuple schemas emit items:[{...}],
+// which some MCP clients cannot translate into callable model tools.
+const v3 = z
+  .array(z.number().finite())
+  .length(3)
+  .transform((v) => v as V3);
+const pixel = z
+  .array(z.number().finite())
+  .length(2)
+  .transform((v) => v as [number, number]);
 const crop = z.object({
   x0: z.number(),
   y0: z.number(),
@@ -30,10 +34,10 @@ const crop = z.object({
 const frame = z.object({
   schema_version: z.literal(1),
   convention: z.literal("Z_UP_RIGHT_HANDED"),
-  image_size: z.tuple([
-    z.number().int().positive(),
-    z.number().int().positive(),
-  ]),
+  image_size: z
+    .array(z.number().int().positive())
+    .length(2)
+    .transform((v) => v as [number, number]),
   focal_px: z.number().positive(),
   principal_point: pixel,
   world_from_camera: z.array(z.array(z.number().finite()).length(4)).length(4),
@@ -49,7 +53,7 @@ const unique = (ids: string[]) => {
     throw Error("Observation IDs must be unique");
 };
 export function createIfcServer() {
-  const s = new McpServer({ name: "photo-to-bim", version: "0.7.1" });
+  const s = new McpServer({ name: "photo-to-bim", version: "0.7.2" });
   s.registerTool(
     "classify_reference",
     {

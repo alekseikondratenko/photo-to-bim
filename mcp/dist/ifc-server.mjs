@@ -37191,7 +37191,7 @@ function evaluate(req) {
   const verdict = status === "INCOMPLETE" ? "unavailable" : status === "PASS" ? "satisfied" : stable ? "stalled" : "needs_refinement";
   const report = {
     schema_version: 1,
-    version: "0.7.1",
+    version: "0.7.2",
     status,
     verdict,
     loss,
@@ -37207,7 +37207,7 @@ function evaluate(req) {
       status: "UNDETERMINED",
       note: "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either."
     },
-    note: status === "INCOMPLETE" ? "No photographic pass is claimed. Add usable observations or explicitly deliver with photographic validation incomplete." : "Only fixed observations and explicit masks control this assessment."
+    note: status === "INCOMPLETE" ? "No photographic pass is claimed. Add usable observations or explicitly deliver with photographic validation incomplete." : "Only fixed observations and explicit masks control this assessment. A threshold miss is not an instruction to repeat; refine only when evidence and expected benefit justify another pass."
   };
   const entry = {
     name: req.name ?? "comparison",
@@ -37234,12 +37234,8 @@ function evaluate(req) {
 }
 
 // ifc-server.ts
-var v3 = external_exports.tuple([
-  external_exports.number().finite(),
-  external_exports.number().finite(),
-  external_exports.number().finite()
-]);
-var pixel = external_exports.tuple([external_exports.number().finite(), external_exports.number().finite()]);
+var v3 = external_exports.array(external_exports.number().finite()).length(3).transform((v) => v);
+var pixel = external_exports.array(external_exports.number().finite()).length(2).transform((v) => v);
 var crop = external_exports.object({
   x0: external_exports.number(),
   y0: external_exports.number(),
@@ -37249,10 +37245,7 @@ var crop = external_exports.object({
 var frame = external_exports.object({
   schema_version: external_exports.literal(1),
   convention: external_exports.literal("Z_UP_RIGHT_HANDED"),
-  image_size: external_exports.tuple([
-    external_exports.number().int().positive(),
-    external_exports.number().int().positive()
-  ]),
+  image_size: external_exports.array(external_exports.number().int().positive()).length(2).transform((v) => v),
   focal_px: external_exports.number().positive(),
   principal_point: pixel,
   world_from_camera: external_exports.array(external_exports.array(external_exports.number().finite()).length(4)).length(4)
@@ -37267,7 +37260,7 @@ var unique = (ids) => {
     throw Error("Observation IDs must be unique");
 };
 function createIfcServer() {
-  const s = new McpServer({ name: "photo-to-bim", version: "0.7.1" });
+  const s = new McpServer({ name: "photo-to-bim", version: "0.7.2" });
   s.registerTool(
     "classify_reference",
     {

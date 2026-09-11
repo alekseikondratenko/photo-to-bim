@@ -1,7 +1,7 @@
 # photo-to-bim
 
 Photo-guided building reconstruction as semantic IFC, using a small agent skill,
-measurement tools, and Blender with Bonsai. Version **0.7.1** focuses on repeatable
+measurement tools, and Blender with Bonsai. Version **0.7.2** focuses on repeatable
 execution and honest validation. It does not claim survey accuracy from one image
 or a demonstrated speed advantage over a capable agent with Blender alone.
 
@@ -10,6 +10,25 @@ hierarchy, SI metre units, and typed walls, roofs, slabs, windows and doors.
 Dimensions derived from pixels remain conditional on camera, scale and assumed
 planes. Hidden geometry is an explicit assumption. Downstream application
 interoperability must be tested; schema validation alone does not establish it.
+
+## What changed in 0.7.2
+
+- Fixed a client compatibility defect in MCP schemas: coordinate vectors now
+  advertise homogeneous arrays with exact length bounds. Input values and the
+  six-tool interface are unchanged. In test 8, the server started, but Codex
+  rejected the camera/placement/comparison tools while building its tool catalog.
+  A successful standalone handshake alone did not catch this.
+- Early quantitative checks remain optional. Reuse fitting residuals or a
+  compatible existing render when they can resolve a useful uncertainty. Cheap
+  drafts stay unscored; no minimum or fixed count of reconstruction passes is set.
+- Repeat checks only after relevant changes or new evidence when the expected
+  benefit justifies the cost. A threshold miss or the three-result stall detector
+  does not instruct the agent to keep evaluating. Final checks still report their
+  actual outcome, including incomplete or failed results.
+
+The shared skill and MCP schemas apply to both Codex and Claude Code. Setup
+instructions belong to the respective client sections below; tool responses do
+not carry client-specific routing or installation instructions.
 
 ## What changed in 0.7.1
 
@@ -71,7 +90,7 @@ MCP; the measurement server does not launch Blender.
 From this repository:
 
 ```bash
-python3 scripts/setup_codex_project.py ~/Desktop/blender-test-8 \
+python3 scripts/setup_codex_project.py ~/Desktop/blender-test-9 \
   --reference /absolute/path/to/house.jpg \
   --blender-command /absolute/path/to/uvx
 ```
@@ -101,6 +120,29 @@ measurement runtime entry point for both is `mcp/dist/ifc-server.mjs`. Plugin
 root substitution uses the supported `${CLAUDE_PLUGIN_ROOT}` compatibility
 variable; the scoped installer writes resolved paths instead.
 
+## Claude Code
+
+The existing Claude marketplace packaging and `.mcp.json` remain supported. For
+session-local development, load this directory without a global installation:
+
+```bash
+claude --plugin-dir /absolute/path/to/photo-to-bim
+```
+
+For a frozen test folder, point `--plugin-dir` at its
+`.agents/plugins/photo-to-bim` directory. Blender MCP must also be available in
+that client. See the [Claude plugin reference](https://code.claude.com/docs/en/plugins-reference).
+
+## Verify client availability
+
+Check the client tool catalog once at task startup: the intended tools are listed
+below. If a tool is missing, distinguish server startup from schema exposure;
+restart after a setup change and inspect the client's error. Confirm a small
+read-only call in that client before a benchmark run. A standalone MCP handshake
+or enabled configuration does not establish that model-visible tools were accepted.
+This is a setup check, not a repeated modelling phase. Missing tools should be
+reported explicitly; the skill permits a limited fallback without repeated probing.
+
 ## Runtime surface
 
 | Tool | Purpose |
@@ -115,7 +157,7 @@ variable; the scoped installer writes resolved paths instead.
 The [skill](skills/photo-to-ifc-building/SKILL.md) describes the working method.
 Its [runtime reference](skills/photo-to-ifc-building/references/runtime.md)
 contains bootstrap, IFC, camera and observation examples. The camera/observation schema version is `1`; the IFC style registry is `2`
-(with legacy v1 reading), and the package version is `0.7.1`.
+(with legacy v1 reading), and the package version is `0.7.2`.
 
 The camera frame uses a right-handed Z-up world in metres. Camera axes are
 right/down/forward; `world_from_camera` includes orientation and translation.

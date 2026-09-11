@@ -85,6 +85,10 @@ Open **{target}** as a Codex project and start a fresh task there. Paste PROMPT.
 If Codex asks whether to trust this folder, trust it to enable project-local MCP settings.
 Start Blender with Bonsai enabled and the existing Blender MCP server connected.
 The authoring agent should load the local bootstrap before it edits the scene.
+Check the actual task tool catalog once: calibrate_camera, place_features and
+compare_model must be visible as well as the other three tools. Server startup
+success alone does not prove schema exposure. If missing, inspect client errors
+and restart after correcting setup; do not repeatedly probe during reconstruction.
 
 The skill is in `.agents/skills/photo-to-ifc-building`; its symlink resolves entirely
 inside this folder. `.codex/config.toml` registers the bundled measurement server.
@@ -103,6 +107,11 @@ calibrate_camera, place_features and compare_model. Legacy score_render and
 solve_camera are not part of this runtime. Other unrelated global tools may still
 be present. If an older photo-to-bim marketplace plugin is globally installed,
 disable it for this project before comparing runs to avoid duplicate tool sets.
+
+For Claude Code, load this same frozen plugin for the session with:
+`claude --plugin-dir {package}`
+Configure Blender MCP in Claude Code separately; `.codex/config.toml` is Codex-only.
+The shared skill has optional early diagnostics and no fixed reconstruction pass count.
 ''')
     subprocess.run(['git','init','-q',str(target)],check=True)
     return {'project':str(target),'version':version,'skill':str(skill),'config':str(target / '.codex/config.toml')}

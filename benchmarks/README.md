@@ -1,8 +1,9 @@
 # Reconstruction benchmark protocol
 
 0.7.1 has automated regression coverage and a live synthetic Blender/Bonsai
-import/render check. Test 7 exercised 0.7.0; no agent reconstruction run has yet
-been performed with 0.7.1. Earlier desktop tests changed model, prompting,
+import/render check. Test 7 exercised 0.7.0. Test 8 used the 0.7.1 helpers but its
+client rejected three MCP tool schemas, so it did not exercise the full tool set.
+0.7.2 fixes those schemas; verify actual client exposure before a benchmark run. Earlier desktop tests changed model, prompting,
 scene state and plugin version; they motivate fixes but do not isolate causality.
 
 Compare three arms: (A) Blender/Bonsai with the concise task only, (B) the same
