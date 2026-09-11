@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
-    "version": "0.7.0"
+    "version": "0.7.1"
   },
   "plugins": [
     {

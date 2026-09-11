@@ -72,13 +72,13 @@ startup_timeout_sec = 60
     (target / 'runtime-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if reference:
         shutil.copy2(reference,target / ('house'+reference.suffix.lower()))
-    prompt = '''Use $photo-to-bim:photo-to-ifc-building to reconstruct house.jpg as real IFC with Blender MCP and Bonsai.
+    prompt = f'''Use $photo-to-bim:photo-to-ifc-building to reconstruct house.jpg as real IFC with Blender MCP and Bonsai.
 Match the visible proportions, roof and openings, using estimated dimensions in metres.
-Deliver house.ifc and comparison.png in this folder, with separate IFC and photographic validation.
-Use the local 0.7.0 bootstrap and keep every input/output file inside this folder.
+Deliver house.ifc and comparison.png in this folder, with separate IFC, photographic, appearance and visual-review evidence.
+Use the local {version} bootstrap and keep every input/output file inside this folder.
 Model visible architectural detail; record scale and hidden-geometry assumptions.
 '''
-    (target / 'PROMPT.txt').write_text(prompt.replace('0.7.0',version).replace('house.jpg', 'house'+reference.suffix.lower() if reference else 'house.jpg'))
+    (target / 'PROMPT.txt').write_text(prompt.replace('house.jpg', 'house'+reference.suffix.lower() if reference else 'house.jpg'))
     (target / 'SETUP.md').write_text(f'''# Photo to BIM test — {version}
 
 Open **{target}** as a Codex project and start a fresh task there. Paste PROMPT.txt.

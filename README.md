@@ -1,7 +1,7 @@
 # photo-to-bim
 
 Photo-guided building reconstruction as semantic IFC, using a small agent skill,
-measurement tools, and Blender with Bonsai. Version **0.7.0** focuses on repeatable
+measurement tools, and Blender with Bonsai. Version **0.7.1** focuses on repeatable
 execution and honest validation. It does not claim survey accuracy from one image
 or a demonstrated speed advantage over a capable agent with Blender alone.
 
@@ -10,6 +10,33 @@ hierarchy, SI metre units, and typed walls, roofs, slabs, windows and doors.
 Dimensions derived from pixels remain conditional on camera, scale and assumed
 planes. Hidden geometry is an explicit assumption. Downstream application
 interoperability must be tested; schema validation alone does not establish it.
+
+## What changed in 0.7.1
+
+Test 7 produced a useful model, but exposed repeated custom work around mixed
+materials, camera fitting and validation. This release keeps the six-tool surface
+and adds reusable implementations for those gaps:
+
+- Frame and glass keep separate IFC representation-item styles. `framed_fill`
+  creates a semantic window or door without ragged mesh arrays or padding.
+  `scene.import_ifc` links exported entities to Bonsai and preserves per-face styles.
+- Camera calibration can refine an initial camera against fixed 3D landmarks,
+  with optional focal length and optical shift. Geometry and metric scale stay
+  fixed. Underconstrained or unfinished solves return `INCOMPLETE`.
+- Exported-geometry landmark snapshots carry GlobalIds and an IFC hash. An older
+  export cannot silently supply points for a newer model. Direct `model_points`
+  remain supported but are explicitly reported as unbound.
+- A check point counts as independent only when explicitly declared unused for
+  **both camera and geometry fitting**. Consumed and undeclared checks have their
+  own counts. Visual acceptance never rewrites an automated failure.
+- Studio setup and rendering preserve material assignments and custom shaders.
+  Read-only appearance checks report missing links, stale geometry, lost styles
+  and overrides; restoring IFC materials is an explicit operation.
+- Crop output rejects directories with a clear PNG filename error.
+
+The live synthetic Blender/Bonsai import/render test passed for this release.
+It verifies the adapter, not reconstruction accuracy or a speed gain. Test 8 is
+prepared for a fresh agent run; it is not included as a completed benchmark.
 
 ## What changed in 0.7
 
@@ -44,7 +71,7 @@ MCP; the measurement server does not launch Blender.
 From this repository:
 
 ```bash
-python3 scripts/setup_codex_project.py ~/Desktop/blender-test-7 \
+python3 scripts/setup_codex_project.py ~/Desktop/blender-test-8 \
   --reference /absolute/path/to/house.jpg \
   --blender-command /absolute/path/to/uvx
 ```
@@ -81,14 +108,14 @@ variable; the scoped installer writes resolved paths instead.
 | `classify_reference` | Optional image-shape hints, never authoritative evidence |
 | `view_crop` | Up to six magnified, coordinate-labelled crops per call |
 | `trace_edges` | Batch named line observations, returned in original pixels |
-| `calibrate_camera` | Line-family fit, complete camera frame and explicit scale anchor |
+| `calibrate_camera` | Line-family or camera-only landmark fit, full frame and explicit scale assumptions |
 | `place_features` | Conditional metric estimates on any plane in that world frame |
 | `compare_model` | Fixed landmark/mask evaluation, overlays and comparable history |
 
 The [skill](skills/photo-to-ifc-building/SKILL.md) describes the working method.
 Its [runtime reference](skills/photo-to-ifc-building/references/runtime.md)
-contains bootstrap, IFC, camera and observation examples. The input/output
-schema version is `1`; the package version is `0.7.0`.
+contains bootstrap, IFC, camera and observation examples. The camera/observation schema version is `1`; the IFC style registry is `2`
+(with legacy v1 reading), and the package version is `0.7.1`.
 
 The camera frame uses a right-handed Z-up world in metres. Camera axes are
 right/down/forward; `world_from_camera` includes orientation and translation.
@@ -115,9 +142,19 @@ and/or an explicit binary subject mask. By default, landmark maximum error must
 be ≤5 pixels and mask IoU ≥0.95. Choose thresholds before fitting; mask occlusions
 and subject spans apply to both images. A pass refers only to the supplied
 evidence, so inspect the final render as well. Fixed check landmarks should be
-withheld from fitting when possible. Missing evidence returns `INCOMPLETE`.
+withheld from fitting when possible. Mark `used_for_fitting: true` if a check
+point later guides either camera or geometry edits; omit the flag only when its
+usage is unknown. Missing evidence returns `INCOMPLETE`.
 Rendered masks must come from the same model/camera state as the beauty render;
 the current adapter accepts them explicitly, without automatic segmentation.
+
+Appearance validation checks the imported geometry, IFC links, per-face material
+indices and shader overrides. A custom shader is retained and reported for visual
+review; these checks do not establish colour accuracy. `runtime['validation'].combine`
+keeps IFC, photographic, appearance and visual-review evidence separate. Only an
+explicit user review can produce `accepted` or `accepted_with_deviations`; an agent's
+review leaves user acceptance pending. An IFC failure blocks acceptance. The agent
+can deliver a result with pending visual review without an extra approval round.
 
 ## Development and release checks
 
@@ -132,10 +169,17 @@ npm test --prefix mcp
 Set `IFC_PYTHON` if your test interpreter lives elsewhere. Missing IFC dependencies
 fail the release suite. Tests build both bundles, check numerical camera/plane
 behaviour, synthetic cloud/occlusion regressions, canonical scorer parity and a
-real stdio MCP handshake. Python tests use IfcOpenShell to reopen generated IFCs
+real stdio MCP handshake, camera-only fitting (including fixed test-7
+correspondences), consumed-check accounting and stale IFC landmark rejection. Python tests use IfcOpenShell to reopen generated IFCs
 and exercise structural failures, geometry reuse and stale-loader/style lookup
 regressions. Adapter boundary tests use stubs; they do **not** replace a live
-Blender/Bonsai import/render test. The scoped installer also has a portable test. GitHub Actions runs the release
+Blender/Bonsai import/render test. Run the reproducible live test through Blender
+MCP after building the bundle, using `mcp/test/blender_integration.py` and its
+`run(repo, output_directory, node)` function. It creates a synthetic fixture in a
+temporary scene, saves test outputs only under the supplied directory, and restores
+the existing scene and active IFC context. It checks material preservation during
+rendering and failure detection after deliberately changing the fixture.
+The scoped installer also has a portable test. GitHub Actions runs the release
 suite and verifies that shipped bundles match their source.
 
 Both server bundles are checked in. After changing source run:

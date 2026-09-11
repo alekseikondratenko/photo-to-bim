@@ -19,6 +19,7 @@ export interface Observations {
     pixel: [number, number];
     visible?: boolean;
     role?: "fit" | "check";
+    used_for_fitting?: boolean;
   }[];
   subject_mask?: string;
   occlusion_mask?: string;
@@ -30,6 +31,8 @@ export interface EvaluationRequest {
   observations?: string;
   camera?: CameraFrame;
   model_points?: Record<string, V3>;
+  landmark_pack?: string;
+  ifc?: string;
   render_mask?: string;
   out_dir?: string;
   history_path?: string;
@@ -82,6 +85,32 @@ function writeOverlay(
 }
 export function evaluate(req: EvaluationRequest) {
   if (req.camera) validateFrame(req.camera);
+  let modelPoints = req.model_points;
+  let bindingHash: string | undefined;
+  if (req.landmark_pack) {
+    if (req.model_points || !req.ifc)
+      throw Error(
+        "A landmark_pack requires the final IFC path and replaces model_points",
+      );
+    const pack = JSON.parse(fs.readFileSync(req.landmark_pack, "utf8"));
+    bindingHash = hashFile(req.ifc);
+    if (pack.schema_version !== 1 || pack.ifc_sha256 !== bindingHash)
+      throw Error(
+        "Stale landmark snapshot: recapture from the final exported IFC",
+      );
+    modelPoints = pack.model_points;
+    if (!modelPoints || !pack.bindings)
+      throw Error("Invalid landmark snapshot");
+    for (const [id, point] of Object.entries(modelPoints)) {
+      const binding = pack.bindings[id];
+      if (
+        !binding?.global_id ||
+        !binding.geometry_sha256 ||
+        JSON.stringify(point) !== JSON.stringify(binding.world)
+      )
+        throw Error("Invalid landmark binding " + id);
+    }
+  }
   const ref = decodeImage(req.reference),
     ren = decodeImage(req.render);
   if (ref.w !== ren.w || ref.h !== ren.h)
@@ -132,6 +161,12 @@ export function evaluate(req: EvaluationRequest) {
       )
     )
       throw Error("Landmarks need unique IDs and valid original-image pixels");
+    if (
+      (l.role !== undefined && !["fit", "check"].includes(l.role)) ||
+      (l.used_for_fitting !== undefined &&
+        typeof l.used_for_fitting !== "boolean")
+    )
+      throw Error("Invalid landmark role or used_for_fitting declaration");
     ids.add(l.id);
   }
   const visible = (obs?.landmarks ?? []).filter(
@@ -140,7 +175,7 @@ export function evaluate(req: EvaluationRequest) {
       (!obs?.span || (l.pixel[0] >= obs.span[0] && l.pixel[0] < obs.span[1])),
   );
   const points = visible.map((l) => {
-    const world = req.model_points?.[l.id];
+    const world = modelPoints?.[l.id];
     if (world && (world.length !== 3 || world.some((v) => !Number.isFinite(v))))
       throw Error("Invalid model point " + l.id);
     const projected =
@@ -148,6 +183,15 @@ export function evaluate(req: EvaluationRequest) {
     return {
       id: l.id,
       role: l.role ?? "fit",
+      independence:
+        l.role === "check"
+          ? l.used_for_fitting === false
+            ? "declared_independent"
+            : l.used_for_fitting === true
+              ? "used"
+              : "undeclared"
+          : "used",
+
       reference: l.pixel,
       projected,
       error_px: projected
@@ -184,7 +228,9 @@ export function evaluate(req: EvaluationRequest) {
           errors.reduce((s, v) => s + v * v, 0) / errors.length,
         ),
         max = Math.max(...errors);
-      const checks = complete.filter((p) => p.role === "check");
+      const checks = complete.filter(
+        (p) => p.independence === "declared_independent",
+      );
       landmarks = {
         status: max <= tolerance ? "PASS" : "FAIL",
         rms_px: rms,
@@ -192,6 +238,15 @@ export function evaluate(req: EvaluationRequest) {
         tolerance_px: tolerance,
         coverage: complete.length,
         held_out_count: checks.length,
+        consumed_check_count: complete.filter(
+          (p) => p.role === "check" && p.independence === "used",
+        ).length,
+        undeclared_check_count: complete.filter(
+          (p) => p.role === "check" && p.independence === "undeclared",
+        ).length,
+        independence_status: checks.length
+          ? "DECLARED_INDEPENDENT"
+          : "NO_INDEPENDENT_CHECKS",
         held_out_rms_px: checks.length
           ? Math.sqrt(
               checks.reduce((s, p) => s + p.error_px! ** 2, 0) / checks.length,
@@ -313,7 +368,7 @@ export function evaluate(req: EvaluationRequest) {
           : "needs_refinement";
   const report = {
     schema_version: 1,
-    version: "0.7.0",
+    version: "0.7.1",
     status,
     verdict,
     loss,
@@ -321,6 +376,10 @@ export function evaluate(req: EvaluationRequest) {
     landmarks,
     silhouette,
     problems,
+    model_binding: {
+      status: bindingHash ? "IFC_SNAPSHOT" : "UNBOUND",
+      ifc_sha256: bindingHash ?? null,
+    },
     camera_check: {
       status: "UNDETERMINED",
       note: "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either.",
