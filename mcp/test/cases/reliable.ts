@@ -121,6 +121,7 @@ try {
     id: "p" + i,
     pixel,
     role: i > 1 ? "check" : "fit",
+    used_for_fitting: i <= 1,
   }));
   const model_points = Object.fromEntries(
     points.map((p, i) => ["p" + i, p.world!]),
@@ -151,6 +152,49 @@ try {
     assert.equal(r.status, "PASS");
     assert.equal(r.landmarks.held_out_count, 2);
     assert.equal(r.silhouette.iou, 1);
+  });
+  test("consumed or undeclared check points are not independent", () => {
+    observe({
+      landmarks: landmarks.map((l) => ({ ...l, used_for_fitting: true })),
+    });
+    const consumed = evaluate(req);
+    assert.equal(consumed.landmarks.held_out_count, 0);
+    assert.equal(consumed.landmarks.consumed_check_count, 2);
+    observe({ landmarks: landmarks.map(({ used_for_fitting, ...l }) => l) });
+    assert.equal(evaluate(req).landmarks.undeclared_check_count, 2);
+    assert.equal(evaluate(req).landmarks.held_out_count, 0);
+    observe({ landmarks, subject_mask: "subject.png" });
+  });
+  test("IFC landmark packs reject stale exports and edited coordinates", () => {
+    const ifc = path.join(dir, "snapshot.ifc"),
+      pack = path.join(dir, "landmarks.json");
+    fs.writeFileSync(ifc, "fixture IFC bytes");
+    const snapshot = {
+      schema_version: 1,
+      ifc_sha256: createHash("sha256")
+        .update(fs.readFileSync(ifc))
+        .digest("hex"),
+      model_points,
+      bindings: Object.fromEntries(
+        Object.entries(model_points).map(([id, world]) => [
+          id,
+          {
+            global_id: "fixture-guid",
+            geometry_sha256: "fixture-geometry",
+            world,
+          },
+        ]),
+      ),
+    };
+    fs.writeFileSync(pack, JSON.stringify(snapshot));
+    const bound = { ...req, model_points: undefined, landmark_pack: pack, ifc };
+    assert.equal(evaluate(bound).model_binding.status, "IFC_SNAPSHOT");
+    fs.writeFileSync(ifc, "changed");
+    assert.throws(() => evaluate(bound), /[Ss]tale|hash/);
+    fs.writeFileSync(ifc, "fixture IFC bytes");
+    snapshot.model_points = { ...model_points, p0: [999, 0, 0] };
+    fs.writeFileSync(pack, JSON.stringify(snapshot));
+    assert.throws(() => evaluate(bound), /binding|snapshot|[Ll]andmark/);
   });
   test("missing mask or a missing point is incomplete", () => {
     assert.equal(
@@ -253,6 +297,16 @@ try {
       "trace_edges",
       "view_crop",
     ]);
+    const cropError = await client.callTool({
+      name: "view_crop",
+      arguments: {
+        image: reference,
+        regions: [{ x0: 0, y0: 0, x1: 100, y1: 100 }],
+        out: dir,
+      },
+    });
+    assert.equal(cropError.isError, true);
+    assert.match(JSON.stringify(cropError), /[Pp][Nn][Gg]|filename/);
     const response = await client.callTool({
       name: "compare_model",
       arguments: req,
@@ -307,6 +361,48 @@ try {
       Math.hypot(
         ...projectWorld(cc.camera, [0, 0, 14])!.map((v, i) => v - top[i]),
       ) < 0.2,
+    );
+    const fitWorlds: V3[] = [
+      [-8, 0, 0],
+      [8, 0, 0],
+      [-8, 0, 14],
+      [8, 0, 14],
+      [-8, 12, 0],
+      [8, 12, 0],
+      [-8, 12, 14],
+      [8, 12, 14],
+    ];
+    const landmarkArgs = {
+      image: reference,
+      method: "landmarks",
+      initial_camera: synthCamera,
+      landmarks: fitWorlds.map((world, i) => ({
+        id: "landmark-" + i,
+        world,
+        pixel: projectWorld(synthCamera, world)!,
+        role: "fit",
+      })),
+      scale_source: {
+        status: "measured",
+        source: "Synthetic fixture dimensions",
+      },
+    };
+    const landmarkFit = await client.callTool({
+      name: "calibrate_camera",
+      arguments: landmarkArgs,
+    });
+    assert.equal(landmarkFit.isError, undefined, JSON.stringify(landmarkFit));
+    assert.equal((landmarkFit.structuredContent as any).status, "SOLVED");
+    assert.ok((landmarkFit.structuredContent as any).fit_max_px < 0.001);
+    const { scale_source, ...withoutScale } = landmarkArgs;
+    assert.equal(
+      (
+        await client.callTool({
+          name: "calibrate_camera",
+          arguments: withoutScale,
+        })
+      ).isError,
+      true,
     );
     const placed = await client.callTool({
       name: "place_features",

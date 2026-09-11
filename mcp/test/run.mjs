@@ -52,6 +52,12 @@ try {
       "test/cases/reliable.ts",
     ]),
   );
+  console.log(
+    run(process.execPath, [
+      "node_modules/tsx/dist/cli.mjs",
+      "test/cases/landmark-camera.ts",
+    ]),
+  );
   console.log(run(python, [path.join(here, "cases/ifc_helpers.py")]));
   console.log(
     run(python, [

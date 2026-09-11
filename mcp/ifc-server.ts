@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { createHash } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { fitLandmarkCamera } from "./src/landmark-camera.ts";
 import { solveCamera } from "./src/camera.ts";
 import { classifyReference, decodeImage } from "./src/scan.ts";
 import { viewCropSheet, traceEdge } from "./src/instruments.ts";
@@ -48,7 +49,7 @@ const unique = (ids: string[]) => {
     throw Error("Observation IDs must be unique");
 };
 export function createIfcServer() {
-  const s = new McpServer({ name: "photo-to-bim", version: "0.7.0" });
+  const s = new McpServer({ name: "photo-to-bim", version: "0.7.1" });
   s.registerTool(
     "classify_reference",
     {
@@ -73,8 +74,16 @@ export function createIfcServer() {
         scale: z.number().positive().optional(),
       },
     },
-    async ({ image, regions, out, scale }) =>
-      result(viewCropSheet(image, regions, out, { scale })),
+    async ({ image, regions, out, scale }) => {
+      if (
+        (fs.existsSync(out) && fs.statSync(out).isDirectory()) ||
+        !out.toLowerCase().endsWith(".png")
+      )
+        throw Error(
+          "view_crop out must be a PNG file path, for example work/crop.png, not a directory",
+        );
+      return result(viewCropSheet(image, regions, out, { scale }));
+    },
   );
   s.registerTool(
     "trace_edges",
@@ -119,9 +128,36 @@ export function createIfcServer() {
     "calibrate_camera",
     {
       description:
-        "Fit line families; return a complete Z-up camera frame and conditional scale assumptions. Shared labels identify world-parallel edges. Scale anchor pixel endpoints must span the stated vertical height.",
+        "Fit line families (default) or fit a camera to fixed 3D landmarks with method=landmarks. Landmark mode keeps geometry and scale fixed, supports optical shift, and excludes unconsumed check points. Both return a complete Z-up frame.",
       inputSchema: {
         image: z.string(),
+        method: z.enum(["lines", "landmarks"]).optional(),
+        initial_camera: frame.optional(),
+        landmarks: z
+          .array(
+            z.object({
+              id: z.string().min(1),
+              pixel,
+              world: v3,
+              role: z.enum(["fit", "check"]).optional(),
+              used_for_fitting: z.boolean().optional(),
+            }),
+          )
+          .min(6)
+          .optional(),
+        fit_options: z
+          .object({
+            fit_focal: z.boolean().optional(),
+            fit_principal_point: z.boolean().optional(),
+            max_iterations: z.number().int().min(1).max(300).optional(),
+          })
+          .optional(),
+        scale_source: z
+          .object({
+            status: z.enum(["assumed", "measured"]),
+            source: z.string().min(1),
+          })
+          .optional(),
         lines: z
           .array(
             z.object({
@@ -133,7 +169,8 @@ export function createIfcServer() {
               y1: z.number(),
             }),
           )
-          .min(4),
+          .min(4)
+          .optional(),
         principal_point: z.enum(["centre", "solve"]).optional(),
         scale_anchor: z
           .object({
@@ -154,7 +191,44 @@ export function createIfcServer() {
           .optional(),
       },
     },
-    async ({ image, lines, principal_point, scale_anchor, placement }) => {
+    async ({
+      image,
+      lines,
+      principal_point,
+      scale_anchor,
+      placement,
+      method,
+      initial_camera,
+      landmarks,
+      fit_options,
+      scale_source,
+    }) => {
+      if (method === "landmarks") {
+        if (!initial_camera || !landmarks || !scale_source)
+          throw Error(
+            "Landmark mode requires initial_camera, landmarks and scale_source for the supplied metric geometry",
+          );
+        if (lines || scale_anchor || placement || principal_point)
+          throw Error("Line-mode arguments cannot be mixed with landmark mode");
+        const im = decodeImage(image);
+        if (
+          initial_camera.image_size[0] !== im.w ||
+          initial_camera.image_size[1] !== im.h
+        )
+          throw Error("Initial camera dimensions must match the image");
+        return result({
+          ...fitLandmarkCamera(
+            initial_camera as CameraFrame,
+            landmarks,
+            fit_options,
+          ),
+          reference_sha256: hash(image),
+          scale: scale_source,
+        });
+      }
+      if (!lines) throw Error("Line mode requires lines");
+      if (landmarks || initial_camera || fit_options || scale_source)
+        throw Error("Landmark arguments require method=landmarks");
       unique(lines.map((l) => l.id));
       const im = decodeImage(image);
       const solve = solveCamera([im.w, im.h], lines, { principal_point });
@@ -269,6 +343,8 @@ export function createIfcServer() {
         observations: z.string().optional(),
         camera: frame.optional(),
         model_points: z.record(z.string(), v3).optional(),
+        landmark_pack: z.string().optional(),
+        ifc: z.string().optional(),
         render_mask: z.string().optional(),
         out_dir: z.string().optional(),
         history_path: z.string().optional(),

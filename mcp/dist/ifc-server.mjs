@@ -35535,15 +35535,370 @@ var EMPTY_COMPLETION_RESULT = {
   }
 };
 
-// src/camera.ts
-var dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+// src/frame.ts
+var dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
 var cross = (a, b) => [
   a[1] * b[2] - a[2] * b[1],
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0]
 ];
+var unit = (v) => {
+  const n = Math.hypot(...v);
+  if (!Number.isFinite(n) || n < 1e-10) throw Error("Degenerate frame vector");
+  return v.map((x) => x / n);
+};
+function makeFrame(size, focal, pp, position, target, roll = 0) {
+  const forward = unit(target.map((v, i) => v - position[i]));
+  const right = unit(cross(forward, [0, 0, 1]));
+  const down = cross(forward, right);
+  const c = Math.cos(roll * Math.PI / 180), s = Math.sin(roll * Math.PI / 180);
+  const r = right.map((v, i) => c * v + s * down[i]), d = down.map((v, i) => c * v - s * right[i]);
+  const frame2 = {
+    schema_version: 1,
+    convention: "Z_UP_RIGHT_HANDED",
+    image_size: size,
+    focal_px: focal,
+    principal_point: pp,
+    world_from_camera: [
+      ...position.map((p, i) => [r[i], d[i], forward[i], p]),
+      [0, 0, 0, 1]
+    ]
+  };
+  validateFrame(frame2);
+  return frame2;
+}
+function validateFrame(c) {
+  const m = c.world_from_camera;
+  if (c.schema_version !== 1 || c.convention !== "Z_UP_RIGHT_HANDED" || !(c.focal_px > 0) || !Number.isFinite(c.focal_px) || c.image_size.length !== 2 || c.principal_point.length !== 2 || c.image_size.some((v) => !Number.isInteger(v) || v <= 0) || c.principal_point.some((v) => !Number.isFinite(v)) || m.length !== 4 || m.some((r) => r.length !== 4 || r.some((v) => !Number.isFinite(v))))
+    throw Error("Invalid camera frame");
+  if (m[3].some((v, i) => Math.abs(v - (i === 3 ? 1 : 0)) > 1e-8))
+    throw Error("Expected affine transform");
+  const cols = [0, 1, 2].map((j) => [m[0][j], m[1][j], m[2][j]]);
+  for (let i = 0; i < 3; i++)
+    for (let j = 0; j < 3; j++)
+      if (Math.abs(dot(cols[i], cols[j]) - (i === j ? 1 : 0)) > 1e-5)
+        throw Error("Camera rotation must be orthonormal");
+  if (dot(cross(cols[0], cols[1]), cols[2]) < 0.99999)
+    throw Error("Camera transform must be right-handed");
+}
+function projectWorld(c, p) {
+  validateFrame(c);
+  const m = c.world_from_camera, v = p.map((x, i) => x - m[i][3]);
+  const q = [0, 1, 2].map((j) => dot(v, [m[0][j], m[1][j], m[2][j]]));
+  if (q[2] <= 1e-9) return null;
+  return [
+    c.principal_point[0] + c.focal_px * q[0] / q[2],
+    c.principal_point[1] + c.focal_px * q[1] / q[2]
+  ];
+}
+function intersectPlane(c, plane, pixels, pick_uncertainty_px = 1) {
+  validateFrame(c);
+  if ([...plane.origin, ...plane.normal, ...pixels.flat()].some(
+    (v) => !Number.isFinite(v)
+  ))
+    throw Error("Non-finite plane or pixel");
+  if (!Number.isFinite(pick_uncertainty_px) || pick_uncertainty_px < 0)
+    throw Error("Invalid pick uncertainty");
+  const n = unit(plane.normal), m = c.world_from_camera, eye = m.slice(0, 3).map((r) => r[3]);
+  const hit = (px2, py) => {
+    const q = [
+      (px2 - c.principal_point[0]) / c.focal_px,
+      (py - c.principal_point[1]) / c.focal_px,
+      1
+    ];
+    const ray = m.slice(0, 3).map((row) => dot(row.slice(0, 3), q));
+    const denom = dot(n, ray);
+    if (Math.abs(denom) / Math.hypot(...ray) < 1e-6) return null;
+    const t = dot(
+      n,
+      plane.origin.map((v, i) => v - eye[i])
+    ) / denom;
+    return t > 0 ? eye.map((v, i) => v + t * ray[i]) : null;
+  };
+  return {
+    schema_version: 1,
+    frame: c.convention,
+    dimension_status: "derived",
+    note: "Conditional on camera, scale and plane. Round-trip error tests arithmetic, not plane correctness. Pick sensitivity excludes calibration and scale uncertainty.",
+    points: pixels.map((pixel2) => {
+      const p = hit(...pixel2);
+      if (!p) return { pixel: pixel2, world: null, status: "no_forward_intersection" };
+      const back = projectWorld(c, p);
+      const near = [
+        [pick_uncertainty_px, 0],
+        [-pick_uncertainty_px, 0],
+        [0, pick_uncertainty_px],
+        [0, -pick_uncertainty_px]
+      ].map(([dx, dy]) => hit(pixel2[0] + dx, pixel2[1] + dy));
+      return {
+        pixel: pixel2,
+        world: p,
+        round_trip_error_px: Math.hypot(back[0] - pixel2[0], back[1] - pixel2[1]),
+        pick_sensitivity_m: near.some((v) => !v) ? null : Math.max(
+          ...near.map((v) => Math.hypot(...v.map((x, i) => x - p[i])))
+        ),
+        status: "derived"
+      };
+    })
+  };
+}
+function anchorFrame(size, focal, pp, tilt, roll, bottom, top, height) {
+  const th = tilt * Math.PI / 180;
+  const neutral = makeFrame(
+    size,
+    focal,
+    pp,
+    [0, 0, 0],
+    [0, Math.cos(th), Math.sin(th)],
+    roll
+  );
+  const ray = (p) => neutral.world_from_camera.slice(0, 3).map(
+    (row) => dot(row.slice(0, 3), [
+      (p[0] - pp[0]) / focal,
+      (p[1] - pp[1]) / focal,
+      1
+    ])
+  );
+  const a = ray(top), b = ray(bottom).map((v) => -v), aa = dot(a, a), bb = dot(b, b), ab = dot(a, b), det = aa * bb - ab * ab;
+  if (det < 1e-12) throw Error("Degenerate scale anchor");
+  const at = a[2] * height, bt = b[2] * height, lt = (at * bb - bt * ab) / det, lb = (bt * aa - at * ab) / det;
+  if (lt <= 0 || lb <= 0)
+    throw Error("Scale anchor intersects behind the camera");
+  const residual2 = Math.hypot(
+    ...a.map((v, i) => lt * v + lb * b[i] - (i === 2 ? height : 0))
+  );
+  const pos = b.map((v) => lb * v);
+  const camera = {
+    ...neutral,
+    world_from_camera: neutral.world_from_camera.map(
+      (r, i) => i < 3 ? [...r.slice(0, 3), pos[i]] : r
+    )
+  };
+  return { camera, residual_m: residual2 };
+}
+
+// src/landmark-camera.ts
+var mul = (a, b) => a.map(
+  (row) => b[0].map((_, j) => row.reduce((s, v, k) => s + v * b[k][j], 0))
+);
+function rotation(v) {
+  const angle = Math.hypot(...v), k = angle < 1e-12 ? v : v.map((x2) => x2 / angle), [x, y, z2] = k;
+  if (angle < 1e-12)
+    return [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1]
+    ];
+  const c = Math.cos(angle), s = Math.sin(angle), t = 1 - c;
+  return [
+    [c + x * x * t, x * y * t - z2 * s, x * z2 * t + y * s],
+    [y * x * t + z2 * s, c + y * y * t, y * z2 * t - x * s],
+    [z2 * x * t - y * s, z2 * y * t + x * s, c + z2 * z2 * t]
+  ];
+}
+function solve(a, b) {
+  const m = a.map((r, i) => [...r, b[i]]), n = b.length;
+  for (let i = 0; i < n; i++) {
+    let pivot = i;
+    for (let j = i + 1; j < n; j++)
+      if (Math.abs(m[j][i]) > Math.abs(m[pivot][i])) pivot = j;
+    if (Math.abs(m[pivot][i]) < 1e-14) return null;
+    [m[i], m[pivot]] = [m[pivot], m[i]];
+    const div = m[i][i];
+    for (let k = i; k <= n; k++) m[i][k] /= div;
+    for (let j = 0; j < n; j++)
+      if (j !== i) {
+        const f = m[j][i];
+        for (let k = i; k <= n; k++) m[j][k] -= f * m[i][k];
+      }
+  }
+  return m.map((r) => r[n]);
+}
+function rank(j) {
+  const n = j[0].length, scales = Array.from(
+    { length: n },
+    (_, i) => Math.hypot(...j.map((r3) => r3[i]))
+  );
+  const m = j.map((row) => row.map((v, i) => v / (scales[i] || 1)));
+  let r = 0;
+  for (let c = 0; c < n; c++) {
+    let p = r;
+    for (let k = r; k < m.length; k++)
+      if (Math.abs(m[k][c]) > Math.abs(m[p][c])) p = k;
+    if (Math.abs(m[p][c]) < 1e-6) continue;
+    [m[r], m[p]] = [m[p], m[r]];
+    const d = m[r][c];
+    for (let k = c; k < n; k++) m[r][k] /= d;
+    for (let k = r + 1; k < m.length; k++) {
+      const f = m[k][c];
+      for (let l = c; l < n; l++) m[k][l] -= f * m[r][l];
+    }
+    r++;
+  }
+  return r;
+}
+function fitLandmarkCamera(initial, landmarks, options = {}) {
+  validateFrame(initial);
+  const ids = /* @__PURE__ */ new Set();
+  for (const l of landmarks) {
+    if (!l.id || ids.has(l.id) || l.pixel.length !== 2 || l.world.length !== 3 || [...l.pixel, ...l.world].some((v) => !Number.isFinite(v)))
+      throw Error(
+        "Landmarks require unique IDs and finite pixels/world points"
+      );
+    if (l.pixel.some((v, i) => v < 0 || v >= initial.image_size[i]))
+      throw Error("Landmark pixels must lie inside the reference image");
+    ids.add(l.id);
+  }
+  const fitting = landmarks.filter(
+    (l) => l.role !== "check" || l.used_for_fitting === true
+  );
+  if (fitting.length < 6)
+    throw Error(
+      "Camera fitting needs at least six fit correspondences; check points are excluded unless explicitly consumed"
+    );
+  const active = [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    ...options.fit_focal === false ? [] : [6],
+    ...options.fit_principal_point ? [7, 8] : []
+  ];
+  const iterations = options.max_iterations ?? 150;
+  if (!Number.isInteger(iterations) || iterations < 1 || iterations > 300)
+    throw Error("max_iterations must be 1..300");
+  const lo = [0, 1, 2].map((i) => Math.min(...fitting.map((l) => l.world[i]))), hi = [0, 1, 2].map((i) => Math.max(...fitting.map((l) => l.world[i])));
+  const scale = Math.hypot(...hi.map((v, i) => v - lo[i]));
+  if (scale < 1e-7) throw Error("Degenerate model points");
+  const base = initial.world_from_camera.slice(0, 3).map((r3) => r3.slice(0, 3));
+  const camera = (p2) => {
+    const r3 = mul(base, rotation(p2.slice(3, 6)));
+    return {
+      ...initial,
+      focal_px: initial.focal_px * Math.exp(p2[6]),
+      principal_point: [
+        initial.principal_point[0] + p2[7] * initial.image_size[0],
+        initial.principal_point[1] + p2[8] * initial.image_size[1]
+      ],
+      world_from_camera: [
+        ...r3.map((row, i) => [
+          ...row,
+          initial.world_from_camera[i][3] + p2[i] * scale
+        ]),
+        [0, 0, 0, 1]
+      ]
+    };
+  };
+  const residual2 = (p2) => {
+    const c = camera(p2), maxSize = Math.max(...c.image_size);
+    if (!Number.isFinite(c.focal_px) || c.focal_px < maxSize * 0.05 || c.focal_px > maxSize * 10 || c.principal_point.some(
+      (v, i) => v < -c.image_size[i] || v > 2 * c.image_size[i]
+    ))
+      return null;
+    const out = [];
+    for (const l of fitting) {
+      const px2 = projectWorld(c, l.world);
+      if (!px2) return null;
+      out.push(px2[0] - l.pixel[0], px2[1] - l.pixel[1]);
+    }
+    return out;
+  };
+  const jacobian = (p2, r3) => {
+    const columns = active.map((k) => {
+      const q = [...p2];
+      q[k] += 1e-6;
+      const next = residual2(q);
+      return next?.map((v, i) => (v - r3[i]) / 1e-6) ?? r3.map(() => 0);
+    });
+    return r3.map((_, i) => columns.map((col) => col[i]));
+  };
+  let p = Array(9).fill(0), r = residual2(p);
+  if (!r)
+    throw Error(
+      "Initial camera must see all fit points and use plausible intrinsics"
+    );
+  const cost = (r3) => r3.reduce((s, v) => s + v * v, 0);
+  let lambda = 1e-3, steps = 0, termination = "iteration_limit";
+  for (; steps < iterations; steps++) {
+    const j = jacobian(p, r), a = active.map(
+      (_, i) => active.map((_2, k) => j.reduce((s, row) => s + row[i] * row[k], 0))
+    ), g = active.map((_, i) => j.reduce((s, row, k) => s + row[i] * r[k], 0));
+    if (Math.max(...g.map(Math.abs)) < 1e-7 || cost(r) < 1e-12) {
+      termination = "converged";
+      break;
+    }
+    const damped = a.map(
+      (row, i) => row.map((v, k) => v + (i === k ? lambda * Math.max(a[i][i], 1e-8) : 0))
+    );
+    const dp = solve(damped, g);
+    if (!dp) {
+      termination = "singular";
+      break;
+    }
+    const q = [...p];
+    active.forEach((k, i) => q[k] -= dp[i]);
+    const trial = residual2(q);
+    if (trial && cost(trial) < cost(r)) {
+      const gain = cost(r) - cost(trial);
+      p = q;
+      r = trial;
+      lambda = Math.max(1e-10, lambda / 3);
+      if (Math.hypot(...dp) < 1e-9 || gain < 1e-12 * Math.max(1, cost(r))) {
+        termination = "converged";
+        steps++;
+        break;
+      }
+    } else {
+      lambda *= 8;
+      if (lambda > 1e14) {
+        termination = "stalled";
+        break;
+      }
+    }
+  }
+  const result2 = camera(p), jacobianRank = rank(jacobian(p, r));
+  const errors = landmarks.map((l) => {
+    const pixel2 = projectWorld(result2, l.world);
+    return {
+      id: l.id,
+      role: l.role ?? "fit",
+      used_for_fitting: l.role !== "check" || l.used_for_fitting === true,
+      independence: l.role === "check" && l.used_for_fitting === false ? "declared_independent" : l.role === "check" && l.used_for_fitting === void 0 ? "undeclared" : "used",
+      error_px: pixel2 ? Math.hypot(pixel2[0] - l.pixel[0], pixel2[1] - l.pixel[1]) : null
+    };
+  });
+  const fitErrors = errors.filter((e) => e.used_for_fitting).map((e) => e.error_px);
+  return {
+    schema_version: 1,
+    method: "landmarks",
+    status: jacobianRank < active.length ? "INCOMPLETE" : termination === "converged" ? "SOLVED" : "INCOMPLETE",
+    camera: result2,
+    iterations: steps,
+    termination,
+    identifiability: { rank: jacobianRank, parameters: active.length },
+    fit_rms_px: Math.sqrt(
+      fitErrors.reduce((s, v) => s + v * v, 0) / fitErrors.length
+    ),
+    fit_max_px: Math.max(...fitErrors),
+    independent_check_count: errors.filter(
+      (e) => e.independence === "declared_independent"
+    ).length,
+    landmarks: errors,
+    note: jacobianRank < active.length ? "Camera parameters are underconstrained; fix focal length/principal point or add independent 3D directions." : "Camera-only local fit from the supplied initial frame. Geometry and its assumed/measured metric scale remain fixed; low reprojection error does not prove physical accuracy."
+  };
+}
+
+// src/camera.ts
+var dot2 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+var cross2 = (a, b) => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0]
+];
 var norm = (a) => Math.hypot(a[0], a[1], a[2]);
-var unit = (a) => {
+var unit2 = (a) => {
   const n = norm(a) || 1;
   return [a[0] / n, a[1] / n, a[2] / n];
 };
@@ -35589,7 +35944,7 @@ function jacobiEigen(m) {
   return { values: [a[0][0], a[1][1], a[2][2]], vectors: v };
 }
 function lineOf(s) {
-  const l = cross([s.x0, s.y0, 1], [s.x1, s.y1, 1]);
+  const l = cross2([s.x0, s.y0, 1], [s.x1, s.y1, 1]);
   const n = Math.hypot(l[0], l[1]) || 1;
   return [l[0] / n, l[1] / n, l[2] / n];
 }
@@ -35605,11 +35960,11 @@ function fitVp(lines) {
   const { values, vectors } = jacobiEigen(m);
   let k = 0;
   for (let i = 1; i < 3; i++) if (values[i] < values[k]) k = i;
-  return unit([vectors[0][k], vectors[1][k], vectors[2][k]]);
+  return unit2([vectors[0][k], vectors[1][k], vectors[2][k]]);
 }
 function residual(l, v) {
   if (Math.abs(v[2]) < 1e-9) return null;
-  return Math.abs(dot(l, v) / v[2]);
+  return Math.abs(dot2(l, v) / v[2]);
 }
 var med = (xs) => {
   if (!xs.length) return null;
@@ -35723,7 +36078,7 @@ function solveCamera(size, segments, known) {
   }
   let horizon = null;
   if (horizontals.length >= 2) {
-    horizon = cross(horizontals[0].vp, horizontals[1].vp);
+    horizon = cross2(horizontals[0].vp, horizontals[1].vp);
     const n = Math.hypot(horizon[0], horizon[1]) || 1;
     horizon = [horizon[0] / n, horizon[1] / n, horizon[2] / n];
   }
@@ -35780,7 +36135,7 @@ function solveCamera(size, segments, known) {
   }
   const dirOf = (f) => {
     if (!f || !focal) return null;
-    return unit([(f.vp[0] - pp[0] * f.vp[2]) / focal, (f.vp[1] - pp[1] * f.vp[2]) / focal, f.vp[2]]);
+    return unit2([(f.vp[0] - pp[0] * f.vp[2]) / focal, (f.vp[1] - pp[1] * f.vp[2]) / focal, f.vp[2]]);
   };
   let tilt = null;
   let roll = null;
@@ -35790,14 +36145,14 @@ function solveCamera(size, segments, known) {
   if (dV) {
     up = dV[1] > 0 ? [-dV[0], -dV[1], -dV[2]] : dV;
     const fwd = [0, 0, 1];
-    tilt = deg(Math.asin(Math.max(-1, Math.min(1, dot(fwd, up)))));
+    tilt = deg(Math.asin(Math.max(-1, Math.min(1, dot2(fwd, up)))));
     roll = deg(Math.atan2(up[0], -up[1]));
-    const fh = unit([fwd[0] - dot(fwd, up) * up[0], fwd[1] - dot(fwd, up) * up[1], fwd[2] - dot(fwd, up) * up[2]]);
+    const fh = unit2([fwd[0] - dot2(fwd, up) * up[0], fwd[1] - dot2(fwd, up) * up[1], fwd[2] - dot2(fwd, up) * up[2]]);
     for (const f of horizontals) {
       const d = dirOf(f);
       if (!d) continue;
-      const dh = unit([d[0] - dot(d, up) * up[0], d[1] - dot(d, up) * up[1], d[2] - dot(d, up) * up[2]]);
-      yawTo[f.label] = r2(deg(Math.atan2(dot(cross(fh, dh), up), dot(fh, dh))));
+      const dh = unit2([d[0] - dot2(d, up) * up[0], d[1] - dot2(d, up) * up[1], d[2] - dot2(d, up) * up[2]]);
+      yawTo[f.label] = r2(deg(Math.atan2(dot2(cross2(fh, dh), up), dot2(fh, dh))));
     }
   } else {
     warnings.push(
@@ -35809,7 +36164,7 @@ function solveCamera(size, segments, known) {
     const withDir = families.map((f) => ({ f, d: dirOf(f) })).filter((x) => x.d !== null);
     for (let i = 0; i < withDir.length; i++) {
       for (let j = i + 1; j < withDir.length; j++) {
-        const a = deg(Math.acos(Math.max(-1, Math.min(1, Math.abs(dot(withDir[i].d, withDir[j].d))))));
+        const a = deg(Math.acos(Math.max(-1, Math.min(1, Math.abs(dot2(withDir[i].d, withDir[j].d))))));
         orthoError.push({ pair: `${withDir[i].f.label} \u27C2 ${withDir[j].f.label}`, deg_from_90: r2(90 - a) });
       }
     }
@@ -35839,14 +36194,14 @@ function solveCamera(size, segments, known) {
         eye.height_m = known.height_m;
         eye.eye_height_m = r2(fraction * known.height_m);
         if (focal && up && bases.length) {
-          const ray = (p) => unit([(p[0] - pp[0]) / focal, (p[1] - pp[1]) / focal, 1]);
+          const ray = (p) => unit2([(p[0] - pp[0]) / focal, (p[1] - pp[1]) / focal, 1]);
           const dists = [];
           const heights = [];
           for (let i = 0; i < bases.length; i++) {
             const rB = ray(bases[i]), rT = ray(tops[i]);
             const target = [known.height_m * up[0], known.height_m * up[1], known.height_m * up[2]];
-            const a11 = dot(rT, rT), a12 = -dot(rT, rB), a22 = dot(rB, rB);
-            const b1 = dot(rT, target), b2 = -dot(rB, target);
+            const a11 = dot2(rT, rT), a12 = -dot2(rT, rB), a22 = dot2(rB, rB);
+            const b1 = dot2(rT, target), b2 = -dot2(rB, target);
             const det = a11 * a22 - a12 * a12;
             if (Math.abs(det) < 1e-9) continue;
             const lT = (b1 * a22 - a12 * b2) / det;
@@ -35854,7 +36209,7 @@ function solveCamera(size, segments, known) {
             if (!(lB > 0) || !(lT > 0)) continue;
             const P = [lB * rB[0], lB * rB[1], lB * rB[2]];
             const toCam = [-P[0], -P[1], -P[2]];
-            const hgt = dot(toCam, up);
+            const hgt = dot2(toCam, up);
             const horiz = Math.hypot(toCam[0] - hgt * up[0], toCam[1] - hgt * up[1], toCam[2] - hgt * up[2]);
             heights.push(hgt);
             dists.push(horiz);
@@ -36602,148 +36957,6 @@ function traceEdge(image, crop2, direction, opts = {}) {
   };
 }
 
-// src/frame.ts
-var dot2 = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
-var cross2 = (a, b) => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0]
-];
-var unit2 = (v) => {
-  const n = Math.hypot(...v);
-  if (!Number.isFinite(n) || n < 1e-10) throw Error("Degenerate frame vector");
-  return v.map((x) => x / n);
-};
-function makeFrame(size, focal, pp, position, target, roll = 0) {
-  const forward = unit2(target.map((v, i) => v - position[i]));
-  const right = unit2(cross2(forward, [0, 0, 1]));
-  const down = cross2(forward, right);
-  const c = Math.cos(roll * Math.PI / 180), s = Math.sin(roll * Math.PI / 180);
-  const r = right.map((v, i) => c * v + s * down[i]), d = down.map((v, i) => c * v - s * right[i]);
-  const frame2 = {
-    schema_version: 1,
-    convention: "Z_UP_RIGHT_HANDED",
-    image_size: size,
-    focal_px: focal,
-    principal_point: pp,
-    world_from_camera: [
-      ...position.map((p, i) => [r[i], d[i], forward[i], p]),
-      [0, 0, 0, 1]
-    ]
-  };
-  validateFrame(frame2);
-  return frame2;
-}
-function validateFrame(c) {
-  const m = c.world_from_camera;
-  if (c.schema_version !== 1 || c.convention !== "Z_UP_RIGHT_HANDED" || !(c.focal_px > 0) || !Number.isFinite(c.focal_px) || c.image_size.length !== 2 || c.principal_point.length !== 2 || c.image_size.some((v) => !Number.isInteger(v) || v <= 0) || c.principal_point.some((v) => !Number.isFinite(v)) || m.length !== 4 || m.some((r) => r.length !== 4 || r.some((v) => !Number.isFinite(v))))
-    throw Error("Invalid camera frame");
-  if (m[3].some((v, i) => Math.abs(v - (i === 3 ? 1 : 0)) > 1e-8))
-    throw Error("Expected affine transform");
-  const cols = [0, 1, 2].map((j) => [m[0][j], m[1][j], m[2][j]]);
-  for (let i = 0; i < 3; i++)
-    for (let j = 0; j < 3; j++)
-      if (Math.abs(dot2(cols[i], cols[j]) - (i === j ? 1 : 0)) > 1e-5)
-        throw Error("Camera rotation must be orthonormal");
-  if (dot2(cross2(cols[0], cols[1]), cols[2]) < 0.99999)
-    throw Error("Camera transform must be right-handed");
-}
-function projectWorld(c, p) {
-  validateFrame(c);
-  const m = c.world_from_camera, v = p.map((x, i) => x - m[i][3]);
-  const q = [0, 1, 2].map((j) => dot2(v, [m[0][j], m[1][j], m[2][j]]));
-  if (q[2] <= 1e-9) return null;
-  return [
-    c.principal_point[0] + c.focal_px * q[0] / q[2],
-    c.principal_point[1] + c.focal_px * q[1] / q[2]
-  ];
-}
-function intersectPlane(c, plane, pixels, pick_uncertainty_px = 1) {
-  validateFrame(c);
-  if ([...plane.origin, ...plane.normal, ...pixels.flat()].some(
-    (v) => !Number.isFinite(v)
-  ))
-    throw Error("Non-finite plane or pixel");
-  if (!Number.isFinite(pick_uncertainty_px) || pick_uncertainty_px < 0)
-    throw Error("Invalid pick uncertainty");
-  const n = unit2(plane.normal), m = c.world_from_camera, eye = m.slice(0, 3).map((r) => r[3]);
-  const hit = (px2, py) => {
-    const q = [
-      (px2 - c.principal_point[0]) / c.focal_px,
-      (py - c.principal_point[1]) / c.focal_px,
-      1
-    ];
-    const ray = m.slice(0, 3).map((row) => dot2(row.slice(0, 3), q));
-    const denom = dot2(n, ray);
-    if (Math.abs(denom) / Math.hypot(...ray) < 1e-6) return null;
-    const t = dot2(
-      n,
-      plane.origin.map((v, i) => v - eye[i])
-    ) / denom;
-    return t > 0 ? eye.map((v, i) => v + t * ray[i]) : null;
-  };
-  return {
-    schema_version: 1,
-    frame: c.convention,
-    dimension_status: "derived",
-    note: "Conditional on camera, scale and plane. Round-trip error tests arithmetic, not plane correctness. Pick sensitivity excludes calibration and scale uncertainty.",
-    points: pixels.map((pixel2) => {
-      const p = hit(...pixel2);
-      if (!p) return { pixel: pixel2, world: null, status: "no_forward_intersection" };
-      const back = projectWorld(c, p);
-      const near = [
-        [pick_uncertainty_px, 0],
-        [-pick_uncertainty_px, 0],
-        [0, pick_uncertainty_px],
-        [0, -pick_uncertainty_px]
-      ].map(([dx, dy]) => hit(pixel2[0] + dx, pixel2[1] + dy));
-      return {
-        pixel: pixel2,
-        world: p,
-        round_trip_error_px: Math.hypot(back[0] - pixel2[0], back[1] - pixel2[1]),
-        pick_sensitivity_m: near.some((v) => !v) ? null : Math.max(
-          ...near.map((v) => Math.hypot(...v.map((x, i) => x - p[i])))
-        ),
-        status: "derived"
-      };
-    })
-  };
-}
-function anchorFrame(size, focal, pp, tilt, roll, bottom, top, height) {
-  const th = tilt * Math.PI / 180;
-  const neutral = makeFrame(
-    size,
-    focal,
-    pp,
-    [0, 0, 0],
-    [0, Math.cos(th), Math.sin(th)],
-    roll
-  );
-  const ray = (p) => neutral.world_from_camera.slice(0, 3).map(
-    (row) => dot2(row.slice(0, 3), [
-      (p[0] - pp[0]) / focal,
-      (p[1] - pp[1]) / focal,
-      1
-    ])
-  );
-  const a = ray(top), b = ray(bottom).map((v) => -v), aa = dot2(a, a), bb = dot2(b, b), ab = dot2(a, b), det = aa * bb - ab * ab;
-  if (det < 1e-12) throw Error("Degenerate scale anchor");
-  const at = a[2] * height, bt = b[2] * height, lt = (at * bb - bt * ab) / det, lb = (bt * aa - at * ab) / det;
-  if (lt <= 0 || lb <= 0)
-    throw Error("Scale anchor intersects behind the camera");
-  const residual2 = Math.hypot(
-    ...a.map((v, i) => lt * v + lb * b[i] - (i === 2 ? height : 0))
-  );
-  const pos = b.map((v) => lb * v);
-  const camera = {
-    ...neutral,
-    world_from_camera: neutral.world_from_camera.map(
-      (r, i) => i < 3 ? [...r.slice(0, 3), pos[i]] : r
-    )
-  };
-  return { camera, residual_m: residual2 };
-}
-
 // src/evaluate.ts
 var import_pngjs3 = __toESM(require_png(), 1);
 import fs3 from "node:fs";
@@ -36788,6 +37001,28 @@ function writeOverlay(a, b, p, points) {
 }
 function evaluate(req) {
   if (req.camera) validateFrame(req.camera);
+  let modelPoints = req.model_points;
+  let bindingHash;
+  if (req.landmark_pack) {
+    if (req.model_points || !req.ifc)
+      throw Error(
+        "A landmark_pack requires the final IFC path and replaces model_points"
+      );
+    const pack = JSON.parse(fs3.readFileSync(req.landmark_pack, "utf8"));
+    bindingHash = hashFile(req.ifc);
+    if (pack.schema_version !== 1 || pack.ifc_sha256 !== bindingHash)
+      throw Error(
+        "Stale landmark snapshot: recapture from the final exported IFC"
+      );
+    modelPoints = pack.model_points;
+    if (!modelPoints || !pack.bindings)
+      throw Error("Invalid landmark snapshot");
+    for (const [id, point] of Object.entries(modelPoints)) {
+      const binding = pack.bindings[id];
+      if (!binding?.global_id || !binding.geometry_sha256 || JSON.stringify(point) !== JSON.stringify(binding.world))
+        throw Error("Invalid landmark binding " + id);
+    }
+  }
   const ref = decodeImage(req.reference), ren = decodeImage(req.render);
   if (ref.w !== ren.w || ref.h !== ren.h)
     throw Error(
@@ -36815,19 +37050,22 @@ function evaluate(req) {
       (v, i) => !Number.isFinite(v) || v < 0 || v >= [ref.w, ref.h][i]
     ))
       throw Error("Landmarks need unique IDs and valid original-image pixels");
+    if (l.role !== void 0 && !["fit", "check"].includes(l.role) || l.used_for_fitting !== void 0 && typeof l.used_for_fitting !== "boolean")
+      throw Error("Invalid landmark role or used_for_fitting declaration");
     ids.add(l.id);
   }
   const visible = (obs?.landmarks ?? []).filter(
     (l) => l.visible !== false && (!obs?.span || l.pixel[0] >= obs.span[0] && l.pixel[0] < obs.span[1])
   );
   const points = visible.map((l) => {
-    const world = req.model_points?.[l.id];
+    const world = modelPoints?.[l.id];
     if (world && (world.length !== 3 || world.some((v) => !Number.isFinite(v))))
       throw Error("Invalid model point " + l.id);
     const projected = req.camera && world ? projectWorld(req.camera, world) : null;
     return {
       id: l.id,
       role: l.role ?? "fit",
+      independence: l.role === "check" ? l.used_for_fitting === false ? "declared_independent" : l.used_for_fitting === true ? "used" : "undeclared" : "used",
       reference: l.pixel,
       projected,
       error_px: projected ? Math.hypot(projected[0] - l.pixel[0], projected[1] - l.pixel[1]) : null
@@ -36850,7 +37088,9 @@ function evaluate(req) {
       const rms = Math.sqrt(
         errors.reduce((s, v) => s + v * v, 0) / errors.length
       ), max = Math.max(...errors);
-      const checks = complete.filter((p) => p.role === "check");
+      const checks = complete.filter(
+        (p) => p.independence === "declared_independent"
+      );
       landmarks = {
         status: max <= tolerance ? "PASS" : "FAIL",
         rms_px: rms,
@@ -36858,6 +37098,13 @@ function evaluate(req) {
         tolerance_px: tolerance,
         coverage: complete.length,
         held_out_count: checks.length,
+        consumed_check_count: complete.filter(
+          (p) => p.role === "check" && p.independence === "used"
+        ).length,
+        undeclared_check_count: complete.filter(
+          (p) => p.role === "check" && p.independence === "undeclared"
+        ).length,
+        independence_status: checks.length ? "DECLARED_INDEPENDENT" : "NO_INDEPENDENT_CHECKS",
         held_out_rms_px: checks.length ? Math.sqrt(
           checks.reduce((s, p) => s + p.error_px ** 2, 0) / checks.length
         ) : null,
@@ -36944,7 +37191,7 @@ function evaluate(req) {
   const verdict = status === "INCOMPLETE" ? "unavailable" : status === "PASS" ? "satisfied" : stable ? "stalled" : "needs_refinement";
   const report = {
     schema_version: 1,
-    version: "0.7.0",
+    version: "0.7.1",
     status,
     verdict,
     loss,
@@ -36952,6 +37199,10 @@ function evaluate(req) {
     landmarks,
     silhouette: silhouette2,
     problems,
+    model_binding: {
+      status: bindingHash ? "IFC_SNAPSHOT" : "UNBOUND",
+      ifc_sha256: bindingHash ?? null
+    },
     camera_check: {
       status: "UNDETERMINED",
       note: "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either."
@@ -37016,7 +37267,7 @@ var unique = (ids) => {
     throw Error("Observation IDs must be unique");
 };
 function createIfcServer() {
-  const s = new McpServer({ name: "photo-to-bim", version: "0.7.0" });
+  const s = new McpServer({ name: "photo-to-bim", version: "0.7.1" });
   s.registerTool(
     "classify_reference",
     {
@@ -37039,7 +37290,13 @@ function createIfcServer() {
         scale: external_exports.number().positive().optional()
       }
     },
-    async ({ image, regions, out, scale }) => result(viewCropSheet(image, regions, out, { scale }))
+    async ({ image, regions, out, scale }) => {
+      if (fs4.existsSync(out) && fs4.statSync(out).isDirectory() || !out.toLowerCase().endsWith(".png"))
+        throw Error(
+          "view_crop out must be a PNG file path, for example work/crop.png, not a directory"
+        );
+      return result(viewCropSheet(image, regions, out, { scale }));
+    }
   );
   s.registerTool(
     "trace_edges",
@@ -37079,9 +37336,29 @@ function createIfcServer() {
   s.registerTool(
     "calibrate_camera",
     {
-      description: "Fit line families; return a complete Z-up camera frame and conditional scale assumptions. Shared labels identify world-parallel edges. Scale anchor pixel endpoints must span the stated vertical height.",
+      description: "Fit line families (default) or fit a camera to fixed 3D landmarks with method=landmarks. Landmark mode keeps geometry and scale fixed, supports optical shift, and excludes unconsumed check points. Both return a complete Z-up frame.",
       inputSchema: {
         image: external_exports.string(),
+        method: external_exports.enum(["lines", "landmarks"]).optional(),
+        initial_camera: frame.optional(),
+        landmarks: external_exports.array(
+          external_exports.object({
+            id: external_exports.string().min(1),
+            pixel,
+            world: v3,
+            role: external_exports.enum(["fit", "check"]).optional(),
+            used_for_fitting: external_exports.boolean().optional()
+          })
+        ).min(6).optional(),
+        fit_options: external_exports.object({
+          fit_focal: external_exports.boolean().optional(),
+          fit_principal_point: external_exports.boolean().optional(),
+          max_iterations: external_exports.number().int().min(1).max(300).optional()
+        }).optional(),
+        scale_source: external_exports.object({
+          status: external_exports.enum(["assumed", "measured"]),
+          source: external_exports.string().min(1)
+        }).optional(),
         lines: external_exports.array(
           external_exports.object({
             id: external_exports.string(),
@@ -37091,7 +37368,7 @@ function createIfcServer() {
             x1: external_exports.number(),
             y1: external_exports.number()
           })
-        ).min(4),
+        ).min(4).optional(),
         principal_point: external_exports.enum(["centre", "solve"]).optional(),
         scale_anchor: external_exports.object({
           height_m: external_exports.number().positive(),
@@ -37108,15 +37385,49 @@ function createIfcServer() {
         }).optional()
       }
     },
-    async ({ image, lines, principal_point, scale_anchor, placement }) => {
+    async ({
+      image,
+      lines,
+      principal_point,
+      scale_anchor,
+      placement,
+      method,
+      initial_camera,
+      landmarks,
+      fit_options,
+      scale_source
+    }) => {
+      if (method === "landmarks") {
+        if (!initial_camera || !landmarks || !scale_source)
+          throw Error(
+            "Landmark mode requires initial_camera, landmarks and scale_source for the supplied metric geometry"
+          );
+        if (lines || scale_anchor || placement || principal_point)
+          throw Error("Line-mode arguments cannot be mixed with landmark mode");
+        const im2 = decodeImage(image);
+        if (initial_camera.image_size[0] !== im2.w || initial_camera.image_size[1] !== im2.h)
+          throw Error("Initial camera dimensions must match the image");
+        return result({
+          ...fitLandmarkCamera(
+            initial_camera,
+            landmarks,
+            fit_options
+          ),
+          reference_sha256: hash2(image),
+          scale: scale_source
+        });
+      }
+      if (!lines) throw Error("Line mode requires lines");
+      if (landmarks || initial_camera || fit_options || scale_source)
+        throw Error("Landmark arguments require method=landmarks");
       unique(lines.map((l) => l.id));
       const im = decodeImage(image);
-      const solve = solveCamera([im.w, im.h], lines, { principal_point });
+      const solve2 = solveCamera([im.w, im.h], lines, { principal_point });
       let camera = null;
-      const intrinsics = solve.intrinsics, tilt = solve.pose.tilt_above_horizontal_deg ?? 0;
-      const roll = solve.pose.roll_deg === null ? null : -solve.pose.roll_deg;
+      const intrinsics = solve2.intrinsics, tilt = solve2.pose.tilt_above_horizontal_deg ?? 0;
+      const roll = solve2.pose.roll_deg === null ? null : -solve2.pose.roll_deg;
       let anchor_residual_m = null;
-      if (intrinsics && !solve.inconsistent && (placement || solve.camera_for_unproject)) {
+      if (intrinsics && !solve2.inconsistent && (placement || solve2.camera_for_unproject)) {
         if (placement)
           camera = makeFrame(
             [im.w, im.h],
@@ -37156,12 +37467,12 @@ function createIfcServer() {
             principal_point: intrinsics.principal_point,
             principal_point_source: intrinsics.principal_point_source
           } : null,
-          families: solve.families,
-          horizon: solve.horizon,
-          pose: { ...solve.pose, roll_deg: roll },
-          cross_check: solve.cross_check,
-          next: solve.next,
-          inconsistent: solve.inconsistent
+          families: solve2.families,
+          horizon: solve2.horizon,
+          pose: { ...solve2.pose, roll_deg: roll },
+          cross_check: solve2.cross_check,
+          next: solve2.next,
+          inconsistent: solve2.inconsistent
         },
         scale: scale_anchor ?? { status: "unknown" },
         dimension_status: camera ? "derived" : scale_anchor ? "unresolved" : "unscaled",
@@ -37205,6 +37516,8 @@ function createIfcServer() {
         observations: external_exports.string().optional(),
         camera: frame.optional(),
         model_points: external_exports.record(external_exports.string(), v3).optional(),
+        landmark_pack: external_exports.string().optional(),
+        ifc: external_exports.string().optional(),
         render_mask: external_exports.string().optional(),
         out_dir: external_exports.string().optional(),
         history_path: external_exports.string().optional(),

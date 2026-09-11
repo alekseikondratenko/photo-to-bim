@@ -3,7 +3,7 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.7.0
+# Photo to IFC building — 0.7.1
 
 Produce an editable, dimensioned IFC reconstruction and a comparison render.
 For ambiguous scale or roof topology, consult [scale anchors](references/scale-anchors.md)
@@ -28,7 +28,8 @@ scene without checking whether it contains work that must be preserved.
    record its source and whether it is assumed or measured. Classification and
    automatic edge detection are optional hints to inspect, not ground truth.
 2. **Establish a frame.** Calibrate from clear parallel line families (at least
-   two edges per family). Preserve the full Z-up camera transform, focal length,
+   two edges per family), or refine an initial camera against fixed 3D landmarks
+   with `method: landmarks`. Keep metric scale explicit in either mode. Preserve the full Z-up camera transform, focal length,
    principal point and reference size. `place_features` intersects rays with
    any explicitly defined plane in that frame. Its round-trip check proves
    arithmetic consistency, not the correctness of the plane or scale.
@@ -38,7 +39,9 @@ scene without checking whether it contains work that must be preserved.
    camera instead of repeating poor measurements indefinitely.
 4. **Refine from fixed evidence.** Save stable landmark IDs in `observations.json`
    before fitting; spread them over the building. Prefer some withheld check
-   points. Add a subject mask only when the silhouette can be annotated
+   points; set `used_for_fitting: true` if a check later guides camera **or geometry**
+   edits. Bind final model landmarks to the exported IFC with `capture_landmarks`.
+   Add a subject mask only when the silhouette can be annotated
    reliably; exclude occluded pixels explicitly. Change camera or geometry
    when correspondences support that diagnosis. Do not alter annotations to
    make a score improve. Corrected annotations start a new evaluation series.
@@ -46,7 +49,8 @@ scene without checking whether it contains work that must be preserved.
    real IfcWall/IfcRoof/IfcSlab/IfcWindow/IfcDoor classes where applicable.
    Openings void their host walls; doors/windows fill them and carry width and
    height. Replace massing proxies. Use `profile_wall` for gables; model real
-   parts, rather than one wall entity per triangle.
+   parts, rather than one wall entity per triangle. `framed_fill` preserves separate
+   frame/glass items; `runtime["scene"].import_ifc` imports their styles into Bonsai.
 6. **Finish and verify.** Save and reopen the IFC. Run the structural gate with
    the classes required by the task. Render the final viewpoint at the exact
    reference dimensions and evaluate fixed landmarks and/or explicit masks.
@@ -75,7 +79,10 @@ version. Store the same key assumptions in an IFC property set. A property
 set is provenance, not proof that a dimension was surveyed.
 
 Deliver the user's filenames (normally `house.ifc`, `comparison.png`) and
-`validation.json` with separate IFC, photographic and appearance results.
+`validation.json` via `runtime["validation"].combine` with separate IFC, photographic,
+appearance and visual-review evidence. Rendering preserves materials; restoration
+is explicit. Never convert visual satisfaction into an automated PASS. Record user
+acceptance only when the user has expressed it; pending review need not delay delivery.
 Keep intermediate files in the permitted workspace. Include a `.blend` only
 if requested; when saving it, persist Bonsai's association with the final IFC.
 Explain scale assumptions and incomplete checks in the final response.

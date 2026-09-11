@@ -1,7 +1,8 @@
 # Reconstruction benchmark protocol
 
-0.7.0 has automated regression coverage, but no new agent reconstruction run has
-been performed for this release. Earlier desktop tests changed model, prompting,
+0.7.1 has automated regression coverage and a live synthetic Blender/Bonsai
+import/render check. Test 7 exercised 0.7.0; no agent reconstruction run has yet
+been performed with 0.7.1. Earlier desktop tests changed model, prompting,
 scene state and plugin version; they motivate fixes but do not isolate causality.
 
 Compare three arms: (A) Blender/Bonsai with the concise task only, (B) the same

@@ -1,7 +1,7 @@
 """IFC4 authoring in SI metres. Geometry and evidence remain separate.
 Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
-VERSION = "0.7.0"
+VERSION = "0.7.1"
 import math
 
 import ifcopenshell
@@ -300,6 +300,8 @@ def fill(ctx, opening_el, kind="window", storey=None, name=None, style_name=None
     plank floating inside every void — a field run's facade grew "alien" slats
     between its windows. The pane is the size of the hole, by construction.)
     """
+    if kind not in ("window", "door"):
+        raise ValueError("Fill kind must be window or door")
     A, B, (nx, ny), z0, h = _OPENING_GEO[opening_el.id()]
     footprint = [
         (A[0] + nx * pane_t / 2, A[1] + ny * pane_t / 2),
@@ -368,17 +370,139 @@ def opening_grid(ctx, wall_el, rows, cols, width, height, sill0, storey_h, x0, g
     return out
 
 
+def _item_style_records(item, path):
+    if item.is_a("IfcMappedItem"):
+        for i, child in enumerate(item.MappingSource.MappedRepresentation.Items):
+            yield from _item_style_records(child, path + [i])
+        return
+    ids = []
+    for assigned in getattr(item, "StyledByItem", ()):
+        for style in assigned.Styles:
+            if style.is_a("IfcSurfaceStyle"):
+                ids.append(style.id())
+            elif style.is_a("IfcPresentationStyleAssignment"):
+                ids.extend(s.id() for s in style.Styles if s.is_a("IfcSurfaceStyle"))
+    yield {"item_path": path, "item_id": item.id(), "surface_style_ids": ids}
+
+
 def save(ctx, path):
+    """Export IFC and a v2 item-level style registry, including mapped geometry."""
     import json, hashlib
+    from pathlib import Path
     if ctx["f"] is not _CTX.get("f"):
         raise ValueError("Inactive model context")
-    ctx["f"].write(str(path))
-    registry = {"schema_version": 1, "version": VERSION, "ifc_sha256": hashlib.sha256(open(path, "rb").read()).hexdigest(),
-                "styles": dict(_STYLE_RGB), "elements": dict(_ELEMENT_STYLES)}
-    # Explicitly bound to this IFC, not newest-file discovery in a render directory.
-    with open(str(path) + ".styles.json", "w") as fh:
-        json.dump(registry, fh, indent=2)
+    f = ctx["f"]
+    f.write(str(path))
+    catalog = {}
+    for st in f.by_type("IfcSurfaceStyle"):
+        for shading in st.Styles:
+            if shading.is_a("IfcSurfaceStyleShading"):
+                color = shading.SurfaceColour
+                catalog[str(st.id())] = {"name": st.Name, "rgb": [color.Red, color.Green, color.Blue],
+                    "transparency": getattr(shading, "Transparency", None) or 0.0}
+    item_styles = {}
+    for el in f.by_type("IfcElement"):
+        if el.Representation:
+            item_styles[el.GlobalId] = [record for ri, rep in enumerate(el.Representation.Representations)
+                for ii, item in enumerate(rep.Items) for record in _item_style_records(item, [ri, ii])]
+    registry = {"schema_version": 2, "version": VERSION, "ifc_sha256": hashlib.sha256(Path(path).read_bytes()).hexdigest(),
+                "styles": dict(_STYLE_RGB), "elements": dict(_ELEMENT_STYLES),
+                "surface_styles": catalog, "item_styles": item_styles}
+    Path(str(path) + ".styles.json").write_text(json.dumps(registry, indent=2))
     return path
+
+
+def framed_fill(ctx, opening_el, kind="window", storey=None, name=None,
+                frame_style="frame", glass_style="glass", frame_width=.065,
+                frame_depth=.14, glass_thickness=.025, crossbar_at=None):
+    """One semantic filling with separately styled frame and glass items.
+    crossbar_at is a fraction of opening height. All parts follow the host axis.
+    """
+    import numpy as np
+    A, B, normal, z0, h = _OPENING_GEO[opening_el.id()]
+    width = math.dist(A, B)
+    if not 0 < frame_width < min(width, h)/2 or min(frame_depth, glass_thickness) <= 0:
+        raise ValueError("Frame and glazing dimensions do not fit the opening")
+    if crossbar_at is not None and not frame_width < h*crossbar_at < h-frame_width:
+        raise ValueError("Crossbar must lie inside the frame")
+    if frame_style not in _STYLES or glass_style not in _STYLES:
+        raise ValueError("Create frame and glass styles before framed_fill()")
+    el = fill(ctx, opening_el, kind, storey, name, frame_style)
+    old = el.Representation.Representations[0]
+    _run("geometry.unassign_representation", product=el, representation=old)
+    _run("geometry.remove_representation", representation=old)
+    u = (np.array(B)-A)/width; n = np.array(normal)
+    def box(x0, x1, low, high, depth):
+        footprint = [tuple(np.array(A)+u*x+n*y) for x,y in
+                     ((x0,-depth/2),(x1,-depth/2),(x1,depth/2),(x0,depth/2))]
+        return prism_mesh(footprint, z0+low, z0+high)
+    bars = [(0,frame_width,0,h),(width-frame_width,width,0,h),
+            (frame_width,width-frame_width,0,frame_width),
+            (frame_width,width-frame_width,h-frame_width,h)]
+    if crossbar_at is not None:
+        bars.append((frame_width,width-frame_width,h*crossbar_at-frame_width/2,h*crossbar_at+frame_width/2))
+    verts, faces = [], []
+    for x0,x1,low,high in bars:
+        vv,ff = box(x0,x1,low,high,frame_depth)
+        faces.extend([[i+len(verts) for i in face] for face in ff]); verts.extend(vv)
+    # Create each item separately: no ragged NumPy arrays or padding vertices.
+    rep = _run("geometry.add_mesh_representation", context=ctx["body"], vertices=[verts], faces=[faces])
+    vv,ff = box(frame_width,width-frame_width,frame_width,h-frame_width,glass_thickness)
+    glass_rep = _run("geometry.add_mesh_representation", context=ctx["body"], vertices=[vv], faces=[ff])
+    glass_item = glass_rep.Items[0]
+    rep.Items = tuple(rep.Items)+(glass_item,)
+    ctx["f"].remove(glass_rep)
+    _run("geometry.assign_representation", product=el, representation=rep)
+    _run("style.assign_item_style", item=rep.Items[0], style=_STYLES[frame_style])
+    _run("style.assign_item_style", item=glass_item, style=_STYLES[glass_style])
+    return el
+
+
+def capture_landmarks(ifc_path, picks, max_distance_m=.05):
+    """Snap named world-space picks to actual exported IFC mesh vertices.
+    Returns an immutable snapshot bound to the IFC bytes and per-element geometry.
+    """
+    import hashlib, json
+    import numpy as np
+    import ifcopenshell.geom as geom
+    from pathlib import Path
+    if max_distance_m < 0 or not math.isfinite(max_distance_m):
+        raise ValueError("Invalid landmark snap tolerance")
+    f = ifcopenshell.open(str(ifc_path)); settings = geom.settings()
+    settings.set(settings.USE_WORLD_COORDS, True)
+    cache, bindings = {}, {}
+    for name, pick in picks.items():
+        if not name: raise ValueError("Landmarks need nonempty IDs")
+        guid = pick["global_id"]
+        if guid not in cache:
+            el = f.by_guid(guid); sh = geom.create_shape(settings, el)
+            vertices = np.asarray(sh.geometry.verts).reshape(-1,3)
+            digest = hashlib.sha256(json.dumps([list(sh.geometry.verts),list(sh.geometry.faces)]).encode()).hexdigest()
+            cache[guid] = vertices, digest
+        vertices, digest = cache[guid]
+        target = np.asarray(pick["world"], dtype=float)
+        if target.shape != (3,) or not np.isfinite(target).all(): raise ValueError("Invalid world pick")
+        distances = np.linalg.norm(vertices-target, axis=1); index = int(np.argmin(distances))
+        if distances[index] > max_distance_m: raise ValueError(f"{name}: no exported vertex within snap tolerance")
+        bindings[name] = {"global_id": guid, "vertex_index": index, "geometry_sha256": digest,
+                          "world": vertices[index].tolist(), "snap_distance_m": float(distances[index])}
+    return {"schema_version": 1, "ifc_sha256": hashlib.sha256(Path(ifc_path).read_bytes()).hexdigest(),
+            "bindings": bindings, "model_points": {name:b["world"] for name,b in bindings.items()}}
+
+
+def resolve_landmarks(ifc_path, snapshot):
+    """Reject stale exports, missing elements and altered geometry before scoring."""
+    import hashlib
+    from pathlib import Path
+    if snapshot.get("schema_version") != 1 or snapshot.get("ifc_sha256") != hashlib.sha256(Path(ifc_path).read_bytes()).hexdigest():
+        raise ValueError("Stale landmark snapshot: recapture from the final exported IFC")
+    picks = {name:{"global_id":b["global_id"],"world":b["world"]} for name,b in snapshot["bindings"].items()}
+    current = capture_landmarks(ifc_path, picks, max_distance_m=1e-7)
+    for name,b in current["bindings"].items():
+        old = snapshot["bindings"][name]
+        if b["geometry_sha256"] != old["geometry_sha256"] or b["world"] != snapshot["model_points"][name]:
+            raise ValueError(f"Stale landmark geometry: {name}")
+    return current["model_points"]
 
 
 def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab"), proxy_exceptions=None):

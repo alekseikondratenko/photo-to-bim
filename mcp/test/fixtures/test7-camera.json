@@ -1,0 +1,241 @@
+{
+  "note": "Test 7 noisy correspondences on fixed assumed geometry. All points marked consumed; this is a numerical regression, not a physical-accuracy benchmark.",
+  "camera": {
+    "schema_version": 1,
+    "convention": "Z_UP_RIGHT_HANDED",
+    "image_size": [
+      2000,
+      890
+    ],
+    "focal_px": 1159.7354450152125,
+    "principal_point": [
+      1000,
+      656.2203611392284
+    ],
+    "world_from_camera": [
+      [
+        0.720149318174967,
+        -0.000187119488273281,
+        0.6938190863030703,
+        -9.127816954492738
+      ],
+      [
+        -0.6938191115356582,
+        -0.00019422061118927028,
+        0.7201492919848106,
+        -11.24025251361646
+      ],
+      [
+        0.0,
+        -0.9999999636323249,
+        -0.0002696949178282532,
+        0.8396431138392663
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "landmarks": [
+    {
+      "id": "gable-ridge",
+      "pixel": [
+        713,
+        198
+      ],
+      "world": [
+        -0.32,
+        3.8506127838965556,
+        7.542772281211016
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "gable-back-eave",
+      "pixel": [
+        587,
+        537
+      ],
+      "world": [
+        -0.32,
+        8.101225567793112,
+        2.85639485146115
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "gable-front-eave",
+      "pixel": [
+        902,
+        487
+      ],
+      "world": [
+        -0.32,
+        -0.4,
+        2.85639485146115
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "far-front-eave",
+      "pixel": [
+        1383,
+        553
+      ],
+      "world": [
+        11.231751758839739,
+        -0.4,
+        2.85639485146115
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "back-base",
+      "pixel": [
+        625,
+        704
+      ],
+      "world": [
+        0,
+        7.701225567793111,
+        0
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "front-corner-base",
+      "pixel": [
+        904,
+        725
+      ],
+      "world": [
+        0,
+        0,
+        0
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "far-front-base",
+      "pixel": [
+        1344,
+        701
+      ],
+      "world": [
+        10.911751758839738,
+        0,
+        0
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cross-ridge",
+      "pixel": [
+        1187,
+        248
+      ],
+      "world": [
+        4.978368441808113,
+        -0.6458951967359475,
+        6.964930999474541
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cross-left-eave",
+      "pixel": [
+        1093,
+        331
+      ],
+      "world": [
+        2.871905685695719,
+        -0.6458951967359475,
+        5.348664482387475
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cross-right-eave",
+      "pixel": [
+        1265,
+        375
+      ],
+      "world": [
+        7.035392539329553,
+        -0.6458951967359475,
+        5.348664482387475
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "door-left-bottom",
+      "pixel": [
+        1126,
+        706
+      ],
+      "world": [
+        3.8740636514943323,
+        -0.3858951967359475,
+        0.05
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "door-left-top",
+      "pixel": [
+        1126,
+        568
+      ],
+      "world": [
+        3.8740636514943323,
+        -0.3858951967359475,
+        2.15
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cross-left-base",
+      "pixel": [
+        1075,
+        713
+      ],
+      "world": [
+        3.111905685695719,
+        0,
+        0
+      ],
+      "role": "check",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cross-right-base",
+      "pixel": [
+        1241,
+        704
+      ],
+      "world": [
+        6.795392539329553,
+        -0.34589519673594754,
+        0
+      ],
+      "role": "check",
+      "used_for_fitting": true
+    }
+  ],
+  "baseline_rms_px": 4.192
+}

@@ -1,6 +1,6 @@
 {
   "name": "photo-to-bim",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
   "author": {
     "name": "Aleksei Kondratenko"
