@@ -4,13 +4,13 @@
     "name": "Aleksei Kondratenko"
   },
   "metadata": {
-    "description": "Rebuild a building from one photograph as a measured IFC/BIM model, authored in Blender through Bonsai",
-    "version": "0.6.2"
+    "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
+    "version": "0.7.0"
   },
   "plugins": [
     {
       "name": "photo-to-ifc-building",
-      "description": "Measurement-first single-photo building reconstruction with an IFC deliverable: the method as a skill (measure, solve the camera, author real IfcWall/IfcRoof/IfcWindow entities via Bonsai/ifcopenshell, score renders against the photograph's own pixels, pass the deterministic IFC gate) plus the photo-to-bim MCP server with its measurement instruments (view_crop, trace_edge, solve_camera, unproject, measure_pitch, compare_images, score_render). Requires Blender + Bonsai + a Blender MCP for the authoring side. The skill governs, the tools execute — installing this plugin wires BOTH.",
+      "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
       "source": "./",
       "strict": false,
       "skills": [
@@ -20,10 +20,7 @@
         "photo-to-bim": {
           "command": "node",
           "args": [
-            "${CLAUDE_PLUGIN_ROOT}/mcp/dist/server.mjs",
-            "--stdio",
-            "--profile",
-            "ifc"
+            "${CLAUDE_PLUGIN_ROOT}/mcp/dist/ifc-server.mjs"
           ]
         }
       }

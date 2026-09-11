@@ -8,13 +8,13 @@
  */
 import { build } from 'esbuild';
 
-await build({
-  entryPoints: ['main.ts'],
+for (const [entry, output] of [['main.ts', 'server.mjs'], ['ifc-main.ts', 'ifc-server.mjs']]) await build({
+  entryPoints: [entry],
   bundle: true,
   platform: 'node',
   format: 'esm',
-  outfile: 'dist/server.mjs',
+  outfile: `dist/${output}`,
   banner: { js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);" },
   logLevel: 'warning',
 });
-console.log('dist/server.mjs built');
+console.log('Legacy and IFC server bundles built');

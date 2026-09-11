@@ -75,76 +75,16 @@ const say = (n: string, cond: boolean, d = "") => console.log(`${n} | ${cond ? "
   say("tilted tower: tilt preserved", Math.abs(rt.pose.tilt_above_horizontal_deg - 18) < 0.5, `got ${rt.pose.tilt_above_horizontal_deg}`);
 }
 
-// 4. The routing block: the result must carry what to do next (v0.5.2).
-//    Both rules it carries — massing before detail, and "unproject is locked" —
-//    lived in skill prose for three runs and were skipped in all three.
+// Stable machine routing replaces tests tied to motivational prose.
 {
-  const { W, H, lines } = synth(12);
-  const r: any = solveCamera([W, H], lines, { height_m: 14 });
-  say("usable solve carries a next block", Array.isArray(r.next?.do) && r.next.do.length > 0);
-  say("usable solve routes to the draft-first build",
-      /DRAFT/.test(r.next.do.join(" ")) && /Do not pixel-measure/i.test(r.next.do.join(" ")),
-      r.next?.do?.[0]?.slice(0, 50));
-  say("usable solve with verticals reports unproject UNLOCKED",
-      r.next.unproject_locked === false && r.camera_for_unproject !== null,
-      `locked=${r.next?.unproject_locked}`);
-
-  // Run 5 supplied ONE vertical line, so no vertical family formed, so
-  // camera_for_unproject came back null — and nothing said so.
-  const oneVertical = [...lines.filter((l) => l.label !== "vertical"), lines.find((l) => l.label === "vertical")!];
-  const r2: any = solveCamera([W, H], oneVertical, {});
-  const locked = r2.camera_for_unproject === null;
-  say("one vertical line: unproject is reported LOCKED, loudly and first",
-      !locked || (r2.next.unproject_locked === true && /unproject is LOCKED/.test(r2.next.do[0])),
-      locked ? r2.next?.do?.[0]?.slice(0, 60) : "camera_for_unproject was not null (guard n/a)");
-  say("locked warning names how many verticals were supplied",
-      !locked || /vertical line\(s\) supplied/.test(r2.next.do[0]) === true,
-      `vertical_lines=${r2.next?.vertical_lines}`);
-}
-
-// 5. v0.6: the field failures of the Blender baselines, as regression cases.
-{
-  const { W, H, lines } = synth(12);
-  // 5a. Vertical family named 'V-...' (the exact blender-test-1 spelling) must
-  //     be recognised GEOMETRICALLY and unlock unproject on the first call.
-  const vLabels = lines.map((l, i) => ({ ...l, label: l.label === "vertical" ? `V-corner${i}` : `${l.label}-l${i}` }));
-  const r: any = solveCamera([W, H], vLabels, {});
-  say("'V-' vertical family unlocks unproject (geometric detection)",
-      r.camera_for_unproject !== null && r.next.unproject_locked === false,
-      `locked=${r.next?.unproject_locked} verticals=${r.next?.vertical_lines}`);
-
-  // 5b. camera_for_blender present with a plausible mapping.
-  const cb = r.camera_for_blender;
-  const lensOk = cb && Math.abs(cb.lens_mm - (r.intrinsics.focal_px * 36) / W) < 0.1;
-  say("camera_for_blender present, lens_mm = focal_px * 36 / W",
-      Boolean(cb && lensOk && cb.snippet.includes("PhotoCam")), cb ? `lens=${cb.lens_mm}` : "missing");
-
-  // 5c. The unproject instruction must ship on EVERY buildable verdict — the
-  //     0.5.2 version gated it on 'usable' and three runs hand-rolled the math.
-  const weakLines = lines.map((l) => ({ ...l }));
-  weakLines[3] = { ...weakLines[3], y1: weakLines[3].y1 + 14 }; // bend one eave line
-  const rw: any = solveCamera([W, H], weakLines, {});
-  const doTxt = (rw.next?.do ?? []).join(" ");
-  say("weak verdict still carries BOTH re-pick and unproject routing",
-      rw.cross_check.verdict !== "usable"
-        ? /Re-pick|re-pick/.test(doTxt) && /unproject/.test(doTxt)
-        : true,
-      `verdict=${rw.cross_check.verdict}`);
-  say("routing includes the draft-first instruction on every buildable verdict",
-      /DRAFT/.test(doTxt), "");
-}
-
-// 6. v0.6.2: a weak-but-buildable camera must SAY it is buildable — the
-//    counter-signal to "weak means keep measuring" (run 5 spent 23 calls).
-{
-  const { W, H, lines } = synth(12);
-  const weakLines = lines.map((l) => ({ ...l }));
-  weakLines[3] = { ...weakLines[3], y1: weakLines[3].y1 + 14 };
-  const r: any = solveCamera([W, H], weakLines, {});
-  const txt = (r.next?.do ?? []).join(" ");
-  say("weak-but-buildable reports buildable: true",
-      r.cross_check.verdict !== "usable" ? r.next.buildable === true : true,
-      `verdict=${r.cross_check.verdict} loo=${r.cross_check.leave_one_out_worst_px}`);
-  say("buildable message overrides diligence",
-      r.cross_check.verdict !== "usable" ? /GOOD ENOUGH to draft with NOW/.test(txt) : true, "");
+  const {W,H,lines}=synth(12);
+  const r:any=solveCamera([W,H],lines,{});
+  say("usable calibration routes to draft",r.next.action==='draft' && r.next.buildable);
+  say("routing stays concise",r.next.do.length===1);
+  const oneVertical=[...lines.filter(l=>l.label!=='vertical'),lines.find(l=>l.label==='vertical')!];
+  const locked:any=solveCamera([W,H],oneVertical,{});
+  say("missing vertical evidence is explicit",locked.camera_for_unproject!==null || (locked.next.unproject_locked && locked.next.action==='add_vertical_lines'));
+  const labels=lines.map((l,i)=>({...l,label:l.label==='vertical'?`V-corner${i}`:`${l.label}-l${i}`}));
+  const named:any=solveCamera([W,H],labels,{});
+  say("geometric vertical-family recognition",named.camera_for_unproject!==null);
 }

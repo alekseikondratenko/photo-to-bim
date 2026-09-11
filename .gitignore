@@ -8,3 +8,7 @@ dist/
 *.log
 handshake.log
 __pycache__/
+
+.venv/
+.pytest_cache/
+!mcp/dist/ifc-server.mjs

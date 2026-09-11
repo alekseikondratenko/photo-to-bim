@@ -1,448 +1,166 @@
-"""PhotoCam + the scoring gate, inside Blender.
-
-Load once via `execute_blender_code`. Then the loop is two calls per pass:
-edit the IFC / scene, and `render_and_score('p3')` — rendering and being
-graded are ONE action (a rule in instructions can be forgotten; a rule in the
-only door cannot).
-
-The scorer here is a port of the canonical one in the photo-to-bim MCP server
-(mcp/src/scan.ts): same column-wise skyline transpose, same worst-segment
-localisation, same stop verdicts. If you change one, change the other. The
-full evidence pack (luma detail, overlays) still comes from the server's
-`compare_images` / `score_render` — use those for anything this summary does
-not answer.
+"""Blender render adapter. All photo evaluation runs through the bundled JS evaluator.
+Drafts may be unscored. Scored renders use fixed evidence and exact reference pixels.
 """
+VERSION = "0.7.0"
+import hashlib
 import json
 import math
-import os
+from pathlib import Path
+import shutil
+import subprocess
 
 import bpy
-import numpy as np
+from mathutils import Matrix
 
-_STATE = {"ref": None, "span": None, "out_dir": None, "history": []}
+_STATE = {}
 
 
-# ---------------------------------------------------------------- setup
-
-def setup(camera_for_blender, reference_path, out_dir=None, span=None, position=None, target=None):
-    """Build PhotoCam from `solve_camera`'s camera_for_blender block (paste it
-    verbatim), point the render at the reference's exact size, neutral light.
-
-    `span` = (x0, x1) subject columns in the photograph. Set it as soon as you
-    have measured the subject's extent — the flanks of a real photograph
-    measure trees and weather, and two field runs hand-built their own scoped
-    scorer because the full-frame number could not be trusted.
+def setup(camera, reference_path, ifc_path, out_dir=None, observations=None, node=None, evaluator=None):
+    """Accept camera_frame_v1 (right/down/forward), not legacy camera_for_blender.
+    IFC path is explicit; style lookup never depends on the output directory.
     """
-    cb = camera_for_blender
+    if camera.get("schema_version") != 1 or camera.get("convention") != "Z_UP_RIGHT_HANDED":
+        raise ValueError("Expected Z-up camera_frame_v1; load the 0.7 bootstrap")
+    m = Matrix(camera["world_from_camera"])
+    if not all(math.isfinite(v) for row in m for v in row):
+        raise ValueError("Non-finite camera matrix")
+    r = m.to_3x3()
+    if abs(r.determinant() - 1) > 1e-5 or any(abs((r.transposed() @ r)[i][j] - (i == j)) > 1e-5 for i in range(3) for j in range(3)):
+        raise ValueError("Camera rotation must be orthonormal and right-handed")
+    w, h = camera["image_size"]
+    if w <= 0 or h <= 0 or camera["focal_px"] <= 0:
+        raise ValueError("Invalid image size or focal length")
     scene = bpy.context.scene
-    cam_data = bpy.data.cameras.get("PhotoCam") or bpy.data.cameras.new("PhotoCam")
-    ob = bpy.data.objects.get("PhotoCam") or bpy.data.objects.new("PhotoCam", cam_data)
-    if ob.name not in {o.name for o in scene.collection.all_objects}:
+    data = bpy.data.cameras.get("PhotoCam") or bpy.data.cameras.new("PhotoCam")
+    ob = bpy.data.objects.get("PhotoCam") or bpy.data.objects.new("PhotoCam", data)
+    if ob.name not in scene.objects:
         scene.collection.objects.link(ob)
-    cam_data.sensor_fit = "HORIZONTAL"
-    cam_data.sensor_width = cb["sensor_width_mm"]
-    cam_data.lens = cb["lens_mm"]
-    cam_data.shift_x = cb["shift_x"]
-    cam_data.shift_y = cb["shift_y"]
-    w, h = cb["render_resolution"]
+    # Blender camera is right/up/backward: flip the last two camera axes.
+    ob.matrix_world = m @ Matrix.Diagonal((1, -1, -1, 1))
+    data.type = "PERSP"
+    data.sensor_fit, data.sensor_width = "HORIZONTAL", 36
+    data.lens = camera["focal_px"] * 36 / w
+    cx, cy = camera["principal_point"]
+    data.shift_x, data.shift_y = (w / 2 - cx) / w, (cy - h / 2) / w
     scene.render.resolution_x, scene.render.resolution_y = int(w), int(h)
     scene.render.resolution_percentage = 100
+    scene.render.pixel_aspect_x = scene.render.pixel_aspect_y = 1
+    scene.render.use_border = False
     scene.render.image_settings.file_format = "PNG"
     scene.camera = ob
-    import mathutils
-    if position is not None and target is not None:
-        # The RECON frame knows where the camera stands — pass it in. The
-        # default below ignores the solved yaw and WILL frame a rotated model
-        # wrongly; the first score's camera_check names that mistake, but
-        # passing the frame here avoids spending a pass on it.
-        ob.location = tuple(position)
-        tv = mathutils.Vector(tuple(target))
-        ob.rotation_euler = (tv - ob.location).to_track_quat("-Z", "Y").to_euler()
-    elif cb.get("horizontal_distance_m") is not None and cb.get("eye_height_m") is not None:
-        d, e = cb["horizontal_distance_m"], cb["eye_height_m"]
-        t = cb.get("tilt_above_horizontal_deg") or 0.0
-        ob.location = (0.0, -d, e)
-        tv = mathutils.Vector((0.0, 0.0, e + d * math.tan(math.radians(t))))
-        ob.rotation_euler = (tv - ob.location).to_track_quat("-Z", "Y").to_euler()
-    # Neutral, deterministic light — match the photograph later, on evidence.
     if not bpy.data.objects.get("PhotoSun"):
         sun = bpy.data.lights.new("PhotoSun", type="SUN")
-        sun.energy = 3.0
-        sob = bpy.data.objects.new("PhotoSun", sun)
-        scene.collection.objects.link(sob)
-        sob.rotation_euler = (math.radians(50), 0, math.radians(35))
+        sun.energy = 3
+        light = bpy.data.objects.new("PhotoSun", sun)
+        scene.collection.objects.link(light)
+        light.rotation_euler = (math.radians(50), 0, math.radians(35))
     world = scene.world or bpy.data.worlds.new("PhotoWorld")
-    scene.world = world
-    world.use_nodes = True
+    scene.world, world.use_nodes = world, True
     bg = world.node_tree.nodes.get("Background")
     if bg:
-        bg.inputs["Color"].default_value = (0.62, 0.71, 0.82, 1)
-        bg.inputs["Strength"].default_value = 0.6
-    _STATE["ref"] = reference_path
-    _STATE["res"] = (int(w), int(h))
-    _STATE["out_dir"] = out_dir or os.path.dirname(os.path.abspath(reference_path))
-    _STATE["span"] = tuple(span) if span else None
-    return f"PhotoCam ready: lens {cb['lens_mm']} mm, shift ({cb['shift_x']}, {cb['shift_y']}), {w}x{h}"
+        bg.inputs["Color"].default_value = (.62, .71, .82, 1)
+        bg.inputs["Strength"].default_value = .6
+    package = Path(__file__).resolve().parents[4]
+    runtime_path = package / "runtime.json"
+    runtime = json.loads(runtime_path.read_text()) if runtime_path.exists() else {}
+    _STATE.clear()
+    _STATE.update(reference=str(Path(reference_path).resolve()), ifc=str(Path(ifc_path).resolve()),
+                  out_dir=str(Path(out_dir or Path(reference_path).parent).resolve()),
+                  observations=str(Path(observations).resolve()) if observations else None,
+                  node=node or runtime.get("node") or shutil.which("node"),
+                  evaluator=evaluator or str(package / "mcp/dist/ifc-server.mjs"), res=(w, h))
+    return {"version": VERSION, "camera": camera_frame(), "appearance": ensure_materials()}
 
 
-def ensure_materials(styles_json=None):
-    """Build real Blender materials from the IFC's style registry
-    (<file>.ifc.styles.json, written by ifc_helpers.save). Called automatically
-    by render_and_score, so a scored render can never be accidentally white —
-    a field run authored six IfcSurfaceStyles and still rendered colourless
-    because the load path dropped them."""
-    import glob
-    path = styles_json
-    if path is None:
-        cands = glob.glob(os.path.join(_STATE.get("out_dir") or ".", "*.styles.json"))
-        if not cands:
-            return "no style registry found"
-        path = max(cands, key=os.path.getmtime)
-    with open(path) as fh:
-        reg = json.load(fh)
+def camera_frame():
+    """Read the current camera, including any changes made after setup."""
+    scene = bpy.context.scene
+    ob = scene.camera
+    d = ob.data
+    if d.type != "PERSP" or d.sensor_fit != "HORIZONTAL":
+        raise ValueError("Evaluation requires a perspective camera with horizontal sensor fit")
+    w, h = scene.render.resolution_x, scene.render.resolution_y
+    if scene.render.resolution_percentage != 100 or scene.render.use_border or scene.render.pixel_aspect_x != scene.render.pixel_aspect_y:
+        raise ValueError("Scoring requires full resolution, square pixels and no border")
+    return {"schema_version": 1, "convention": "Z_UP_RIGHT_HANDED", "image_size": [w, h],
+            "focal_px": d.lens * w / d.sensor_width,
+            "principal_point": [w/2 - d.shift_x*w, h/2 + d.shift_y*w],
+            "world_from_camera": [list(row) for row in (ob.matrix_world @ Matrix.Diagonal((1, -1, -1, 1)))]}
+
+
+def ensure_materials():
+    """Resolve exact IFC style registry by file hash and IFC GlobalId."""
+    ifc = Path(_STATE["ifc"])
+    path = Path(str(ifc) + ".styles.json")
+    if not path.exists():
+        return {"status": "INCOMPLETE", "reason": f"Missing explicit registry {path}"}
+    reg = json.loads(path.read_text())
+    if reg.get("schema_version") != 1 or reg.get("version") != VERSION or reg.get("ifc_sha256") != hashlib.sha256(ifc.read_bytes()).hexdigest():
+        raise ValueError("Style registry version or IFC hash mismatch; re-save the current IFC")
+    from bonsai.tool import Ifc
     mats = {}
-    for name, rgb in reg.get("styles", {}).items():
-        m = bpy.data.materials.get(f"pts-{name}") or bpy.data.materials.new(f"pts-{name}")
-        m.use_nodes = True
-        bsdf = m.node_tree.nodes.get("Principled BSDF")
+    for name, rgb in reg["styles"].items():
+        mat = bpy.data.materials.get(f"ptb-{name}") or bpy.data.materials.new(f"ptb-{name}")
+        mat.use_nodes = True
+        bsdf = mat.node_tree.nodes.get("Principled BSDF")
         if bsdf:
-            bsdf.inputs["Base Color"].default_value = (*rgb, 1.0)
-            bsdf.inputs["Roughness"].default_value = 0.75
-        m.diffuse_color = (*rgb, 1.0)
-        mats[name] = m
-    n = 0
-    elements = reg.get("elements", {})
+            bsdf.inputs["Base Color"].default_value = (*rgb, 1)
+            bsdf.inputs["Roughness"].default_value = .75
+        mat.diffuse_color = (*rgb, 1)
+        mats[name] = mat
+    applied = set()
     for ob in bpy.context.scene.objects:
         if ob.type != "MESH":
             continue
-        key = ob.name.split("/")[-1]
-        sname = elements.get(key)
-        if sname and sname in mats:
+        entity = Ifc.get_entity(ob)
+        guid = entity.GlobalId if entity else None
+        name = reg["elements"].get(guid)
+        if name in mats:
             ob.data.materials.clear()
-            ob.data.materials.append(mats[sname])
-            n += 1
-    return f"coloured {n} objects from {os.path.basename(path)}"
+            ob.data.materials.append(mats[name])
+            applied.add(guid)
+    missing = sorted(set(reg["elements"]) - applied)
+    return {"status": "PASS" if applied and not missing else "INCOMPLETE", "applied": len(applied), "missing_guids": missing,
+            "note": "Checks registry application, not photographic colour accuracy."}
 
 
-def place_camera(position, target):
-    """Move PhotoCam explicitly (RECON-frame metres). The camera_check verdict
-    sends you here — never fix a camera offset by editing building geometry."""
-    import mathutils
-    ob = bpy.data.objects["PhotoCam"]
-    ob.location = tuple(position)
-    tv = mathutils.Vector(tuple(target))
-    ob.rotation_euler = (tv - ob.location).to_track_quat("-Z", "Y").to_euler()
-    return f"PhotoCam at {tuple(round(v,2) for v in ob.location)} looking at {tuple(target)}"
-
-
-def set_span(x0, x1):
-    _STATE["span"] = (int(x0), int(x1))
-    return f"span set: columns {x0}-{x1} scored as subject_span on every save"
-
-
-# ---------------------------------------------------------------- scoring core
-
-def _load_pixels(path):
-    img = bpy.data.images.load(path, check_existing=False)
+def render_view(name="draft", percentage=50):
+    """Fast unscored preview; does not append evaluation history."""
+    if not 1 <= percentage <= 100 or Path(name).name != name:
+        raise ValueError("Use a simple name and percentage 1..100")
+    scene = bpy.context.scene
+    out = Path(_STATE["out_dir"])
+    out.mkdir(parents=True, exist_ok=True)
+    previous = scene.render.resolution_percentage
     try:
-        w, h = img.size
-        px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, img.channels)
-        rgb = (px[::-1, :, :3] * 255.0)  # Blender rows are bottom-up; flip to image order
-        return rgb
+        scene.render.resolution_percentage = percentage
+        scene.render.filepath = str(out / (name + ".png"))
+        bpy.ops.render.render(write_still=True)
     finally:
-        bpy.data.images.remove(img)
+        scene.render.resolution_percentage = previous
+    return {"render": str(out / (name + ".png")), "photographic_validation": "UNSCORED"}
 
 
-def _resize_to(im, w, h):
-    ys = (np.linspace(0, im.shape[0] - 1, h)).astype(int)
-    xs = (np.linspace(0, im.shape[1] - 1, w)).astype(int)
-    return im[np.ix_(ys, xs)]
-
-
-def _skyline(im, tol=42.0):
-    """First row per column that breaks from that column's own top-margin sky.
-    Port of scan.ts `skyline` — the transpose measurement."""
-    h, w, _ = im.shape
-    y_max = min(14, h)
-    sky = np.median(im[2:y_max, :, :], axis=0)          # (w, 3)
-    d = np.linalg.norm(im - sky[None, :, :], axis=2)    # (h, w)
-    mask = d > tol
-    out = np.full(w, -1, dtype=int)
-    run = np.zeros(w, dtype=int)
-    done = np.zeros(w, dtype=bool)
-    for y in range(2, h):
-        run = np.where(mask[y], run + 1, 0)
-        hit = (~done) & (run >= 4)
-        out[hit] = y - 3
-        done |= hit
-        if done.all():
-            break
-    return out
-
-
-def _worst_segments(cols, signed, limit=3):
-    """Port of scan.ts worstSegments: mean-relative floor, sign-pure runs."""
-    a = np.abs(signed)
-    if not len(a):
-        return None
-    thr = max(4.0, float(a.mean()) * 0.6)
-    segs, cur = [], None
-    for i in range(len(cols)):
-        if a[i] <= thr:
-            continue
-        sgn = 1 if signed[i] > 0 else -1
-        if cur and cols[i] - cur["x1"] <= 12 and cur["sign"] == sgn:
-            cur["errs"].append(float(a[i]))
-            cur["x1"] = int(cols[i])
-        else:
-            if cur:
-                segs.append(cur)
-            cur = {"x0": int(cols[i]), "x1": int(cols[i]), "sign": sgn, "errs": [float(a[i])]}
-    if cur:
-        segs.append(cur)
-    out = []
-    for s in segs:
-        if len(s["errs"]) < 12:
-            continue
-        m = sum(s["errs"]) / len(s["errs"])
-        out.append({
-            "x0": s["x0"], "x1": s["x1"], "columns": len(s["errs"]),
-            "mean_err_px": round(m, 1),
-            "direction": ("render skyline too LOW (render top edge is below the photograph's)"
-                          if s["sign"] > 0 else
-                          "render skyline too HIGH (render top edge is above the photograph's)"),
-            "_mass": m * len(s["errs"]),
-        })
-    out.sort(key=lambda s: -s["_mass"])
-    for s in out:
-        s.pop("_mass")
-    return out[:limit] or None
-
-
-def _skyline_score(ref, ren, span=None):
-    a, b = _skyline(ref), _skyline(ren)
-    w = ref.shape[1]
-    lo = max(0, int(span[0])) if span else int(round(w * 0.03))
-    hi = min(w, int(span[1])) if span else int(w * 0.97)
-    xs = np.arange(lo, hi)
-    ok = (a[lo:hi] >= 0) & (b[lo:hi] >= 0)
-    if not ok.any():
-        return None
-    cols = xs[ok]
-    signed = (b[lo:hi][ok] - a[lo:hi][ok]).astype(float)
-    errs = np.abs(signed)
-    third = len(errs) // 3
-    mean = lambda v: round(float(v.mean()), 1) if len(v) else None
-    return {
-        "mean_top_error_px": mean(errs),
-        "top_error_by_band": {"left": mean(errs[:third]), "middle": mean(errs[third:2 * third]),
-                              "right": mean(errs[2 * third:])},
-        "max_top_error_px": float(errs.max()),
-        "columns_compared": int(len(errs)),
-        "worst_segments": _worst_segments(cols, signed),
-    }
-
-
-def _subject_extent(sky, lo, hi):
-    """Columns whose skyline rises meaningfully above the flat horizon —
-    i.e. where the BUILDING is. Returns (x0, x1, top_row) or None."""
-    seg = sky[lo:hi]
-    valid = seg[seg >= 0]
-    if len(valid) < 50:
-        return None
-    horizon = float(np.median(valid))
-    cols = np.where((seg >= 0) & (seg < horizon - 15))[0]
-    if len(cols) < 40:
-        return None
-    x0, x1 = np.percentile(cols, 3), np.percentile(cols, 97)
-    top = float(np.min(seg[cols]))
-    return (float(x0) + lo, float(x1) + lo, top)
-
-
-def _camera_check(ref_sky, ren_sky, w, lo=None, hi=None):
-    """Is the remaining error CAMERA PLACEMENT rather than geometry?
-
-    Compares WHERE the subject sits and HOW BIG it is, render vs photograph:
-    centre shift = pan/yaw error, width ratio = distance error, top-row shift
-    = height/tilt error. A field run spent four passes (438->354->372->382->416)
-    re-tuning geometry against exactly this signature; nothing named it. A
-    rigid-shift version of this check could not see the scale component and
-    was fooled by flank vegetation — extents are judged inside the subject
-    span only.
+def render_and_score(name="comparison", model_points=None, render_mask=None, tolerance_px=5, min_mask_iou=.95):
+    """Render full-size beauty; optionally score supplied landmarks/mask.
+    render_mask must be an explicit binary subject mask produced from this same
+    model/camera. Beauty-image thresholding is not a mask generation method.
     """
-    lo = int(lo) if lo is not None else int(w * 0.03)
-    hi = int(hi) if hi is not None else int(w * 0.97)
-    # BOTH sides judged in the SAME window — an asymmetric window let the
-    # render's flank trees masquerade as the building and even identity fired.
-    # Pad the span modestly so a shifted building still registers as shifted
-    # rather than vanishing.
-    pad = int(0.10 * w)
-    jlo, jhi = max(0, lo - pad), min(w, hi + pad)
-    ref_e = _subject_extent(ref_sky, jlo, jhi)
-    ren_e = _subject_extent(ren_sky, jlo, jhi)
-    if not ref_e:
-        return None
-    if not ren_e:
-        return {"verdict": "camera_offset",
-                "note": "No building found above the horizon in the render at all — PhotoCam "
-                        "is not looking at the model. Fix the camera position/target "
-                        "(photostudio.place_camera) before anything else."}
-    rx0, rx1, rtop = ref_e
-    nx0, nx1, ntop = ren_e
-    ref_w, ren_w = rx1 - rx0, nx1 - nx0
-    centre_shift = (nx0 + nx1) / 2 - (rx0 + rx1) / 2
-    width_ratio = ren_w / max(1.0, ref_w)
-    top_shift = ntop - rtop
-    if abs(centre_shift) > 0.05 * w or not (0.85 <= width_ratio <= 1.18) or abs(top_shift) > 60:
-        return {
-            "verdict": "camera_offset",
-            "subject_in_photo": {"x0": round(rx0), "x1": round(rx1), "top_row": round(rtop)},
-            "subject_in_render": {"x0": round(nx0), "x1": round(nx1), "top_row": round(ntop)},
-            "centre_shift_px": round(centre_shift, 1),
-            "width_ratio": round(width_ratio, 3),
-            "top_shift_px": round(top_shift, 1),
-            "note": (
-                f"CAMERA PLACEMENT ERROR, not geometry: the building spans columns "
-                f"{nx0:.0f}-{nx1:.0f} in your render but {rx0:.0f}-{rx1:.0f} in the photograph "
-                f"(centre off {centre_shift:+.0f} px, size ratio {width_ratio:.2f}, top edge "
-                f"{top_shift:+.0f} px). width_ratio < 1 means the camera is TOO FAR (dolly in); "
-                f"centre shift means pan/yaw. Fix with photostudio.place_camera and re-score "
-                f"BEFORE touching any building geometry — geometry passes against this "
-                f"signature are waste."
-            ),
-        }
-    return None
-
-
-def _luma_thirds(im, sky_rows):
-    """Left/right-third mean luma inside the subject band — the lighting signal."""
-    h, w, _ = im.shape
-    cols = np.where(sky_rows >= 0)[0]
-    if not len(cols):
-        return None
-    lum = im @ np.array([0.2126, 0.7152, 0.0722])
-    third = max(1, len(cols) // 3)
-    def band(cs):
-        vals = [lum[sky_rows[c]:, c].mean() for c in cs if sky_rows[c] < h - 1]
-        return round(float(np.mean(vals)), 1) if vals else None
-    l, r = band(cols[:third]), band(cols[-third:])
-    ratio = round(max(l, r) / max(1.0, min(l, r)), 3) if l and r else None
-    return {"left_band_luma": l, "right_band_luma": r, "lit_over_shadow_ratio": ratio}
-
-
-def _verdict(history, score, diag):
-    """Two-verdict stop signal, per-variantless (one camera, one name stream)."""
-    prev = [h for h in history if h.get("delta") is not None]
-    if len(prev) < 1 or score.get("delta") is None:
-        return None
-    last = prev[-1]
-    rel = lambda d, v: abs(d) / max(1.0, abs(v))
-    cur_v = score["skyline"]["mean_top_error_px"]
-    if rel(score["delta"], cur_v) >= 0.03 or rel(last["delta"], last["skyline_mean"]) >= 0.03:
-        return None
-    floor = round(diag * 0.01, 1)
-    if cur_v <= floor:
-        return {"verdict": "converged",
-                "note": f"CONVERGED: skyline {cur_v} px, inside the {floor} px delivery floor and "
-                        "unmoved for two passes. Further geometry passes are waste — run the IFC "
-                        "gate (ifc_helpers.gate_report) and deliver."}
-    return {"verdict": "stalled",
-            "note": f"STALLED: skyline {cur_v} px, above the {floor} px floor and unmoved for two "
-                    "passes. Repeating this KIND of pass will not close it — read worst_segments, "
-                    "find which element spans those columns, re-MEASURE it (unproject, view_crop) "
-                    "instead of re-tuning numbers."}
-
-
-# ---------------------------------------------------------------- the gate
-
-def render_view(name, camera=None):
-    """UNSCORED render — presentation shots, rear checks, any camera. Never
-    pushes a number into the history. Use render_and_score for evidence."""
-    scene = bpy.context.scene
-    prev = scene.camera
-    if camera:
-        scene.camera = bpy.data.objects[camera] if isinstance(camera, str) else camera
-    out = os.path.join(_STATE["out_dir"] or ".", f"{name}.png")
-    scene.render.filepath = out
-    bpy.ops.render.render(write_still=True)
-    scene.camera = prev
-    return out
-
-
-def render_and_score(name):
-    """Render PhotoCam to <out_dir>/<name>.png and score it against the
-    reference in the same call. Returns the score dict; also appends to
-    <out_dir>/score-history.json.
-
-    The camera is PINNED to PhotoCam here — a field run switched to a beauty
-    camera and scored it, planting a 416 px "regression" in its history. Only
-    the photograph's viewpoint may be scored; use render_view for everything
-    else."""
-    assert _STATE["ref"], "call setup() first"
-    try:
-        ensure_materials()
-    except Exception:
-        pass  # colour is important, but never block a score over it
-    scene = bpy.context.scene
-    scene.camera = bpy.data.objects["PhotoCam"]
-    w, h = _STATE.get("res") or (scene.render.resolution_x, scene.render.resolution_y)
-    scene.render.resolution_x, scene.render.resolution_y = int(w), int(h)
-    scene.render.resolution_percentage = 100
-    out = os.path.join(_STATE["out_dir"], f"{name}.png")
-    scene.render.filepath = out
-    bpy.ops.render.render(write_still=True)
-
-    ren = _load_pixels(out)
-    ref = _load_pixels(_STATE["ref"])
-    ren = _resize_to(ren, ref.shape[1], ref.shape[0])
-
-    if float(ren.max() - ren.min()) < 2.0:
-        return {"saved": out, "scored": False,
-                "warning": "RENDER IS UNIFORM (blank) — nothing scored. THE SCORING PIPELINE IS "
-                           "HEALTHY; the RENDER is empty. Check the camera position, scene "
-                           "contents and world, then re-render. Do not debug the scorer."}
-
-    ref_sky, ren_sky = _skyline(ref), _skyline(ren)
-    sky = _skyline_score(ref, ren)
-    result = {
-        "saved": out,
-        "scored": True,
-        "image_size": [int(ref.shape[1]), int(ref.shape[0])],
-        "skyline": sky,
-        "luma": _luma_thirds(ren, ren_sky),
-    }
-    sp = _STATE["span"]
-    cam = _camera_check(ref_sky, ren_sky, ref.shape[1],
-                        lo=sp[0] if sp else None, hi=sp[1] if sp else None)
-    if cam:
-        result["camera_check"] = cam
-    if _STATE["span"]:
-        result["subject_span"] = {"x0": _STATE["span"][0], "x1": _STATE["span"][1],
-                                  "skyline": _skyline_score(ref, ren, _STATE["span"])}
-    elif sky and sky["top_error_by_band"]["middle"]:
-        b = sky["top_error_by_band"]
-        flanks = [v for v in (b["left"], b["right"]) if v is not None]
-        if flanks and max(flanks) > 2 * b["middle"]:
-            result["warning"] = ("Flank bands are >2x the middle — the full-frame number is "
-                                 "probably measuring vegetation/sky, not the building. Call "
-                                 "set_span(x0, x1) with the subject's measured columns; every "
-                                 "save then carries a trustworthy subject_span block.")
-
-    cur = sky["mean_top_error_px"] if sky else None
-    hist = _STATE["history"]
-    prev = hist[-1] if hist else None
-    delta = round(cur - prev["skyline_mean"], 2) if (prev and cur is not None) else None
-    if delta is not None:
-        result["delta_vs_previous"] = {"skyline_mean": delta, "since": prev["name"]}
-    entry = {"name": name, "skyline_mean": cur, "delta": delta}
-    diag = math.hypot(ref.shape[1], ref.shape[0])
-    v = _verdict(hist, {"skyline": sky, "delta": delta}, diag)
-    if v:
-        result["converged"] = v
-    hist.append(entry)
-    try:
-        with open(os.path.join(_STATE["out_dir"], "score-history.json"), "w") as fh:
-            json.dump(hist, fh, indent=1)
-    except OSError:
-        pass
-    return result
+    frame = camera_frame()
+    appearance = ensure_materials()
+    rendered = render_view(name, percentage=100)["render"]
+    node, bundle = _STATE["node"], _STATE["evaluator"]
+    if not node or not Path(bundle).is_file():
+        raise RuntimeError("Canonical evaluator unavailable; configure Node and bundled evaluator in setup()")
+    request = {"reference": _STATE["reference"], "render": rendered, "camera": frame,
+               "model_points": model_points or {}, "out_dir": _STATE["out_dir"],
+               "history_path": str(Path(_STATE["out_dir"]) / "score-history.json"), "name": name,
+               "tolerance_px": tolerance_px, "min_mask_iou": min_mask_iou}
+    if _STATE["observations"]:
+        request["observations"] = _STATE["observations"]
+    if render_mask:
+        request["render_mask"] = str(Path(render_mask).resolve())
+    proc = subprocess.run([node, bundle, "--evaluate-json"], input=json.dumps(request), text=True, capture_output=True, timeout=120)
+    if proc.returncode:
+        raise RuntimeError("Canonical evaluator failed: " + proc.stderr[-2000:])
+    return {"render": rendered, "appearance": appearance, "photographic": json.loads(proc.stdout)}

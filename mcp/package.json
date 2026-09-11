@@ -1,6 +1,6 @@
 {
-  "name": "photo-to-threejs-mcp",
-  "version": "0.6.2",
+  "name": "photo-to-bim-mcp",
+  "version": "0.7.0",
   "main": "index.js",
   "scripts": {
     "test": "node test/run.mjs",
@@ -8,12 +8,13 @@
     "serve": "tsx main.ts",
     "stdio": "tsx main.ts --stdio",
     "typecheck": "tsc --noEmit",
-    "build:server": "node build-server.mjs"
+    "build:server": "node build-server.mjs",
+    "serve:ifc": "tsx ifc-main.ts"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "description": "MCP server exposing the photo-to-threejs viewer as an MCP App panel",
+  "license": "Apache-2.0",
+  "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "^1.7.5",
