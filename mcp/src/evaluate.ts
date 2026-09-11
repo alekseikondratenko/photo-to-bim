@@ -368,7 +368,7 @@ export function evaluate(req: EvaluationRequest) {
           : "needs_refinement";
   const report = {
     schema_version: 1,
-    version: "0.7.1",
+    version: "0.7.2",
     status,
     verdict,
     loss,
@@ -387,7 +387,7 @@ export function evaluate(req: EvaluationRequest) {
     note:
       status === "INCOMPLETE"
         ? "No photographic pass is claimed. Add usable observations or explicitly deliver with photographic validation incomplete."
-        : "Only fixed observations and explicit masks control this assessment.",
+        : "Only fixed observations and explicit masks control this assessment. A threshold miss is not an instruction to repeat; refine only when evidence and expected benefit justify another pass.",
   };
   const entry = {
     name: req.name ?? "comparison",

@@ -1,4 +1,4 @@
-# Runtime API 0.7.1
+# Runtime API 0.7.2
 
 The IFC MCP contains six tools: `classify_reference`, `view_crop`, `trace_edges`,
 `calibrate_camera`, `place_features`, `compare_model`. Tool schemas carry exact
@@ -177,4 +177,13 @@ A landmark assessment needs at least four noncollinear, spatially spread points
 and all requested correspondences. Set task-appropriate thresholds before fitting.
 Changing reference/annotations/masks/thresholds creates a new history key. PASS
 means only those checks passed; INCOMPLETE means evidence was unavailable.
-`stalled` means three comparable losses barely changed, not convergence.
+`stalled` means three comparable losses barely changed, not convergence. This is
+an advisory diagnostic, not a minimum of three evaluations. `needs_refinement`
+reports a threshold miss; it does not require another pass. Keep failed or
+incomplete results when further work is not justified.
+
+Early checks are optional. Camera fitting already returns residuals without a
+render; they describe supplied correspondences, not visual acceptance. Existing
+renders can be compared only when they match the model/camera state and reference
+resolution. `render_and_score` always makes a full-resolution render, so keep
+cheap previews unscored unless a quantitative check will inform a useful decision.

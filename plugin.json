@@ -1,5 +1,5 @@
 {
   "name": "photo-to-ifc-building",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation."
 }
