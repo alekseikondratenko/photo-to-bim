@@ -687,70 +687,13 @@ export function solveCamera(
   // withheld-line error is under 5% of the diagonal frames a first draft
   // perfectly well, and the draft's own score is the cheapest next evidence.
   const buildable = !inconsistent && worstLoo !== null && worstLoo < diag * 0.05;
-  const nextSteps: string[] = [];
-  if (buildable && verdict === "weak") {
-    nextSteps.push(
-      "This camera is GOOD ENOUGH to draft with NOW (worst withheld line " +
-      `${r2(worstLoo!)} px < 5% of the diagonal). Further measurement before the first ` +
-      "scored draft is waste — draft, score, and let the score direct any re-measuring. " +
-      "Re-pick the worst line only if the first score's camera_check complains.",
-    );
-  }
-  if (!unprojectReady) {
-    // First, and loud: this is the single largest saving the server offers and
-    // run 5 never engaged it, because nothing said it was off.
-    nextSteps.push(
-      `WARNING: unproject is LOCKED — no usable vertical family was formed (${verticalCount} ` +
-      "vertical line(s) supplied; 2–3 are needed: window jambs, building corners, downpipes, " +
-      "labelled 'vertical'). One more solve_camera call with those lines unlocks " +
-      "world-coordinate feature placement, which replaces per-feature pixel measurement " +
-      "outright — a field run spent ~25 minutes measuring what unproject returns in one call.",
-    );
-  }
-  if (verdict === "weak") {
-    nextSteps.push(
-      "Re-pick one line before building: " +
-      (culprit ? `${culprit} — replace it ` : "replace the worst line named in cross_check.worst_line ") +
-      "with the longest, cleanest run of that family you can see, then solve again. Re-picking " +
-      "is minutes; the geometry a weak fit distorts costs hours.",
-    );
-  } else if (verdict === "inconsistent") {
-    nextSteps.push(
-      "Do not build on this solve — it is inconsistent (see `inconsistent`). Fix the picking " +
-      "first: longest runs, spread apart, endpoints on features you can actually see. Derived " +
-      "quantities are withheld deliberately; do not reconstruct them by hand.",
-    );
-  }
-  if (verdict !== "inconsistent") {
-    // Routing that does NOT depend on the verdict. Three consecutive field
-    // runs — two web, one Blender — proceeded to build on a `weak` solve, and
-    // because this instruction used to ship only with `usable`, each of them
-    // hand-wrote its own unprojection math (four Python files in one run, a
-    // scipy least-squares fit in another) while the tool sat unlocked.
-    //
-    // Draft-first (v0.6.1): with the camera solved, the model's own read of
-    // the photograph is a good first draft — build it WHOLE (massing, roof,
-    // openings) and let the SCORE, not a measuring ritual, decide what gets
-    // measured. Measured against field runs, up-front feature measurement
-    // spent ~30 trace calls before the first render; the score then indicted
-    // only a handful of elements.
-    nextSteps.push(
-      "Build the whole DRAFT now — massing, roof planes AND openings, from your read of " +
-      "the photograph — and score it from this camera immediately. Do not pixel-measure " +
-      "features up front: the score's worst_segments will name the columns that are wrong, " +
-      "and only those elements earn measurement.",
-    );
-    if (unprojectReady) {
-      nextSteps.push(
-        "When the score indicts an element, correct it with `unproject` — never re-derive " +
-        "camera math by hand and never pixel-measure what plane geometry can place. " +
-        "Worked call: unproject({image, camera: <the camera_for_unproject block in this " +
-        "result, verbatim>, points: [[x, y]], plane: {axis: \"y\", value: 0}} (ground; " +
-        "the facade is {axis: \"z\", value: 0}, a gable wall {axis: \"x\", ...}). One call " +
-        "returns world metres with a reprojection check per point.",
-      );
-    }
-  }
+  const action = inconsistent ? "repair_calibration" : !unprojectReady ? "add_vertical_lines" : buildable ? "draft" : "review_calibration";
+  const nextSteps = [
+    action === "draft" ? "Build a draft and compare named visible features. Refine calibration only if independent evidence warrants it." :
+    action === "add_vertical_lines" ? "Supply at least two useful vertical lines to establish world up." :
+    action === "repair_calibration" ? "The calibration is inconsistent; inspect the reported line residuals." :
+    "Review the longest independent lines before relying on this calibration."
+  ];
 
   return {
     size: [W, H],
@@ -758,7 +701,7 @@ export function solveCamera(
      * What to do with this result. Verdict-conditional and ordered, most
      * urgent first — the routing that used to live in skill prose.
      */
-    next: { unproject_locked: !unprojectReady, vertical_lines: verticalCount, buildable, do: nextSteps },
+    next: { action, unproject_locked: !unprojectReady, vertical_lines: verticalCount, buildable, do: nextSteps },
     families: families.map((f) => ({
       label: f.label,
       lines: f.count,
@@ -985,6 +928,8 @@ export function unprojectPoints(
     world,
     reprojection_error_px: reproj,
     max_reprojection_error_px: errs.length ? r2(Math.max(...errs)) : null,
+    dimension_status: "derived",
+    uncertainty_note: "Round-trip consistency does not validate the camera, plane or scale. These coordinates use the legacy camera-aligned Y-up frame.",
     notes: notes.length ? notes : undefined,
   };
 }

@@ -12,5 +12,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src", "server.ts", "main.ts"]
+  "include": ["src", "server.ts", "main.ts", "ifc-server.ts", "ifc-main.ts"]
 }

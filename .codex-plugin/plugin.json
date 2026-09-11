@@ -1,0 +1,26 @@
+{
+  "name": "photo-to-bim",
+  "version": "0.7.0",
+  "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
+  "author": {
+    "name": "Aleksei Kondratenko"
+  },
+  "repository": "https://github.com/alekseikondratenko/photo-to-bim",
+  "license": "Apache-2.0",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Photo to BIM",
+    "shortDescription": "Photo-guided IFC reconstruction",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "longDescription": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
+    "developerName": "Aleksei Kondratenko",
+    "category": "Developer Tools",
+    "defaultPrompt": [
+      "Reconstruct this building photo as IFC with a matching comparison render."
+    ]
+  }
+}

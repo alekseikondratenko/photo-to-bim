@@ -1,23 +1,7 @@
-"""General-shape IFC authoring helpers for the photo-to-bim method.
-
-Load once inside Blender (exec via the MCP `execute_blender_code`, or import in a
-script), author with MEASURED values, save, then view with `bpy.ops.bim.load_project`.
-
-Design rules, learned the hard way across field runs:
-- Pure ifcopenshell — no bpy, no bonsai imports — so the same code runs headless
-  and is covered by the repo's regression test. Viewing is a separate step.
-- Every call sequence here was proven against a live Bonsai install (ifcopenshell
-  0.8.x) by a field run; do not "modernise" calls without re-proving them.
-- NOTHING in here is house-shaped. Massing is any footprint polygon; a roof is
-  any set of 3D planes (a gable is two, a hip is four, a tower cap is none);
-  towers get `opening_grid`. The tower photographs are the regression subjects
-  that keep it that way.
-- Massing placeholders are IfcBuildingElementProxy named 'MASSING-*' on purpose:
-  the delivery gate requires proxy count ~0, so an unreplaced massing block
-  FAILS delivery. Scaffolding that does not decay into fake BIM.
-
-Units are METRES throughout (the file declares SI metres).
+"""IFC4 authoring in SI metres. Geometry and evidence remain separate.
+Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
+VERSION = "0.7.0"
 import math
 
 import ifcopenshell
@@ -38,6 +22,8 @@ def new_model(project_name, storeys, site_name="Site", building_name="Building")
 
     Returns the ctx dict every other helper takes first.
     """
+    for registry in (_WALL_AXES, _OPENING_GEO, _STYLES, _STYLE_RGB, _ELEMENT_STYLES):
+        registry.clear()
     f = ifcopenshell.api.run("project.create_file", version="IFC4")
     _CTX["f"] = f
     project = _run("root.create_entity", ifc_class="IfcProject", name=project_name)
@@ -74,9 +60,8 @@ def new_model(project_name, storeys, site_name="Site", building_name="Building")
 
 
 def evidence_pset(ctx, properties, name="Reconstruction_Evidence"):
-    """Attach the measurement evidence to the building. Every value your RECON
-    ledger calls Verified belongs here — this is what separates the output from
-    a guessed model."""
+    """Attach the measurement evidence to the building. Record observed image facts, derived dimensions and explicit assumptions
+    separately; one photograph does not establish survey accuracy."""
     ps = _run("pset.add_pset", product=ctx["building"], name=name)
     _run("pset.edit_pset", pset=ps, properties=properties)
     return ps
@@ -186,12 +171,11 @@ def style(name, rgb):
 
 def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None, style_name=None):
     """Create an entity with a mesh Body representation, contained in `storey`."""
+    if ctx["f"] is not _CTX.get("f"):
+        raise ValueError("Inactive model context; load a separate helper module for concurrent files")
     el = _run("root.create_entity", ifc_class=ifc_class, name=name)
     if predefined_type is not None and hasattr(el, "PredefinedType"):
-        try:
-            el.PredefinedType = predefined_type
-        except Exception:
-            pass
+        el.PredefinedType = predefined_type
     rep = _run(
         "geometry.add_mesh_representation",
         context=ctx["body"],
@@ -201,7 +185,7 @@ def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None, st
     _run("geometry.assign_representation", product=el, representation=rep)
     if style_name is not None:
         _run("style.assign_representation_styles", shape_representation=rep, styles=[_STYLES[style_name]])
-        _ELEMENT_STYLES[name] = style_name
+        _ELEMENT_STYLES[el.GlobalId] = style_name
     if storey is not None:
         _run("spatial.assign_container", products=[el], relating_structure=storey)
     return el
@@ -220,7 +204,9 @@ def massing(ctx, storey, footprint, height, z0=0.0, name="MASSING-block", style_
 def wall(ctx, storey, p1, p2, height, thickness=0.3, z0=0.0, name="Wall", style_name=None):
     """Straight wall from plan point p1 to p2 (metres), extruded to `height`."""
     dx, dy = p2[0] - p1[0], p2[1] - p1[1]
-    ln = math.hypot(dx, dy) or 1.0
+    ln = math.hypot(dx, dy)
+    if ln <= 0 or height <= 0 or thickness <= 0:
+        raise ValueError("Wall length, height and thickness must be positive")
     nx, ny = -dy / ln * thickness / 2, dx / ln * thickness / 2
     footprint = [
         (p1[0] + nx, p1[1] + ny),
@@ -236,6 +222,25 @@ def wall(ctx, storey, p1, p2, height, thickness=0.3, z0=0.0, name="Wall", style_
 
 
 _WALL_AXES = {}
+
+
+def profile_wall(ctx, storey, p1, p2, profile, thickness=0.3, z0=0.0, name="Profile wall", style_name=None):
+    """Vertical wall with a polygon in (distance along wall, height above z0).
+    Openings use the same local wall axis as wall().
+    """
+    import numpy as np
+    d=np.asarray(p2,dtype=float)-p1; length=float(np.linalg.norm(d))
+    if length <= 0 or thickness <= 0: raise ValueError("Positive wall length and thickness required")
+    u=d/length; n=np.array([-u[1],u[0]])
+    verts=[]
+    for side in (-thickness/2, thickness/2):
+        for along,z in profile:
+            xy=np.asarray(p1)+u*along+n*side; verts.append((float(xy[0]),float(xy[1]),z0+z))
+    count=len(profile)
+    faces=[list(range(count))[::-1],list(range(count,2*count))]+[[i,(i+1)%count,(i+1)%count+count,i+count] for i in range(count)]
+    el=element(ctx,"IfcWall",name,storey,verts,faces,"SOLIDWALL",style_name=style_name)
+    _WALL_AXES[el.id()]=(p1,p2,thickness,z0)
+    return el
 
 
 def slab(ctx, storey, footprint, thickness=0.2, z_top=0.0, name="Slab", predefined="FLOOR", style_name=None):
@@ -261,7 +266,9 @@ def opening(ctx, wall_el, x_along, sill, width, height, name="Opening"):
     to `fill()` to put a window or door in it."""
     p1, p2, t, z0 = _WALL_AXES[wall_el.id()]
     dx, dy = p2[0] - p1[0], p2[1] - p1[1]
-    ln = math.hypot(dx, dy) or 1.0
+    ln = math.hypot(dx, dy)
+    if ln <= 0 or height <= 0 or width <= 0:
+        raise ValueError("Opening dimensions must be positive")
     ux, uy = dx / ln, dy / ln
     nx, ny = -uy, ux
     depth = t + 0.1
@@ -304,87 +311,150 @@ def fill(ctx, opening_el, kind="window", storey=None, name=None, style_name=None
     cls = "IfcDoor" if kind == "door" else "IfcWindow"
     el = element(ctx, cls, name or kind.capitalize(), storey, verts, faces, style_name=style_name)
     _run("feature.add_filling", opening=opening_el, element=el)
+    el.OverallWidth = math.dist(A, B)
+    el.OverallHeight = h
+    qto = _run("pset.add_qto", product=el, name=f"Qto_{cls[3:]}BaseQuantities")
+    _run("pset.edit_qto", qto=qto, properties={"Width": el.OverallWidth, "Height": h, "Area": el.OverallWidth * h})
+    return el
+
+
+def mapped_copy(ctx, source, storey, translation, name=None):
+    """Reuse a source Body with a translated mapped representation.
+    Source geometry must be in world coordinates with no ObjectPlacement;
+    use one unmoved prototype for a repetition group.
+    """
+    import numpy as np
+    if source.ObjectPlacement is not None:
+        raise ValueError("Mapped-copy source must be an unplaced prototype")
+    if ctx["f"] is not _CTX.get("f"):
+        raise ValueError("Inactive model context")
+    el = _run("root.create_entity", ifc_class=source.is_a(), name=name or source.Name)
+    rep = next(r for r in source.Representation.Representations if r.RepresentationIdentifier == "Body")
+    mapped = _run("geometry.map_representation", representation=rep)
+    _run("geometry.assign_representation", product=el, representation=mapped)
+    matrix = np.eye(4); matrix[:3, 3] = translation
+    _run("geometry.edit_object_placement", product=el, matrix=matrix, is_si=True)
+    _run("spatial.assign_container", products=[el], relating_structure=storey)
+    if hasattr(el, "PredefinedType"): el.PredefinedType = source.PredefinedType
+    if source.GlobalId in _ELEMENT_STYLES:
+        _ELEMENT_STYLES[el.GlobalId] = _ELEMENT_STYLES[source.GlobalId]
+    if el.is_a("IfcWindow") or el.is_a("IfcDoor"):
+        el.OverallWidth, el.OverallHeight = source.OverallWidth, source.OverallHeight
+        qto = _run("pset.add_qto", product=el, name=f"Qto_{el.is_a()[3:]}BaseQuantities")
+        _run("pset.edit_qto", qto=qto, properties={"Width": el.OverallWidth, "Height": el.OverallHeight, "Area": el.OverallWidth * el.OverallHeight})
     return el
 
 
 def opening_grid(ctx, wall_el, rows, cols, width, height, sill0, storey_h, x0, gap, kind="window", storey=None):
-    """Tower fenestration: rows x cols of identical openings+fills on one wall.
-    Row r sits at sill0 + r*storey_h; column c at x0 + c*(width+gap)."""
+    """One geometric fill prototype per grid; each opening/fill remains semantic IFC.
+    Use only for repetitions actually visible or explicitly assumed.
+    """
     out = []
+    p1, p2, _, _ = _WALL_AXES[wall_el.id()]
+    length = math.dist(p1, p2)
+    ux, uy = (p2[0]-p1[0])/length, (p2[1]-p1[1])/length
     for r in range(rows):
         for c in range(cols):
             op = opening(ctx, wall_el, x0 + c * (width + gap), sill0 + r * storey_h, width, height,
                          name=f"Opening r{r}c{c}")
-            out.append(fill(ctx, op, kind, storey=storey, name=f"{kind.capitalize()} r{r}c{c}"))
+            name = f"{kind.capitalize()} r{r}c{c}"
+            if not out:
+                el = fill(ctx, op, kind, storey=storey, name=name)
+            else:
+                dx = c * (width + gap)
+                el = mapped_copy(ctx, out[0], storey, (ux*dx, uy*dx, r*storey_h), name)
+                _run("feature.add_filling", opening=op, element=el)
+            out.append(el)
     return out
 
 
 def save(ctx, path):
-    ctx["f"].write(path)
-    # Style registry rides along so the RENDER can be coloured deterministically:
-    # a field run authored six IfcSurfaceStyles and still rendered all-white,
-    # because the load-into-Blender path dropped them. photostudio reads this
-    # file and builds real materials — colour is guaranteed, not hoped for.
-    try:
-        import json as _json
-        with open(path + ".styles.json", "w") as fh:
-            _json.dump({"styles": _STYLE_RGB, "elements": _ELEMENT_STYLES}, fh, indent=1)
-    except OSError:
-        pass
+    import json, hashlib
+    if ctx["f"] is not _CTX.get("f"):
+        raise ValueError("Inactive model context")
+    ctx["f"].write(str(path))
+    registry = {"schema_version": 1, "version": VERSION, "ifc_sha256": hashlib.sha256(open(path, "rb").read()).hexdigest(),
+                "styles": dict(_STYLE_RGB), "elements": dict(_ELEMENT_STYLES)}
+    # Explicitly bound to this IFC, not newest-file discovery in a render directory.
+    with open(str(path) + ".styles.json", "w") as fh:
+        json.dump(registry, fh, indent=2)
     return path
 
 
-# ---------------------------------------------------------------- delivery gate
-
-def gate_report(path_or_file):
-    """The IFC delivery gate, one call. Deterministic; run it before delivering
-    and paste the dict into RECON.md. Any FAIL blocks delivery:
-      - schema errors from ifcopenshell.validate
-      - elements whose geometry the IFC geometry engine cannot open
-      - IfcBuildingElementProxy count > 0 (unreplaced massing, or garnish
-        masquerading as BIM)
-      - elements not contained in any storey
+def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab"), proxy_exceptions=None):
+    """Independent format, geometry and semantic checks. Unavailable != PASS.
+    Proxy exceptions map GlobalId to a nonempty justification. Geometry checks
+    do not establish photographic fidelity, watertight junctions or BIM-authoring
+    interoperability in a downstream application.
     """
-    f = ifcopenshell.open(path_or_file) if isinstance(path_or_file, str) else path_or_file
-    report = {"schema": "PASS", "schema_errors": [], "geometry": "PASS", "geometry_errors": [],
-              "census": {}, "proxies": 0, "uncontained": [], "verdict": "PASS"}
+    import numpy as np
+    f = ifcopenshell.open(str(path_or_file)) if not isinstance(path_or_file, ifcopenshell.file) else path_or_file
+    report = {"schema": "PASS", "geometry": "PASS", "semantics": "PASS", "schema_errors": [],
+              "geometry_errors": [], "semantic_errors": [], "census": {}, "proxies": 0,
+              "proxy_exceptions": {}, "uncontained": [], "geometry_checked": 0, "verdict": "PASS"}
     try:
         import ifcopenshell.validate as v
-        logger = v.json_logger()
-        v.validate(f, logger)
-        errs = [e for e in logger.statements]
-        if errs:
-            report["schema"] = "FAIL"
-            report["schema_errors"] = [str(e)[:200] for e in errs[:10]]
-    except Exception as e:  # validator itself unavailable — say so, never skip silently
-        report["schema"] = f"UNAVAILABLE: {e}"
+        logger = v.json_logger(); v.validate(f, logger)
+        report["schema_errors"] = [str(e)[:400] for e in logger.statements]
+        if report["schema_errors"]: report["schema"] = "FAIL"
+    except Exception as e:
+        report["schema"] = "UNAVAILABLE"; report["schema_errors"].append(str(e))
     try:
         import ifcopenshell.geom as geom
         settings = geom.settings()
-        for el in f.by_type("IfcProduct"):
+        for el in f.by_type("IfcElement"):
             if not el.Representation:
+                report["geometry_errors"].append(f"{el.GlobalId} {el.is_a()} {el.Name}: missing representation")
                 continue
             try:
-                geom.create_shape(settings, el)
+                shape = geom.create_shape(settings, el)  # retain owner while reading geometry
+                coords = np.asarray(shape.geometry.verts)
+                if not len(coords) or not len(shape.geometry.faces) or not np.isfinite(coords).all():
+                    raise ValueError("empty or non-finite geometry")
+                report["geometry_checked"] += 1
             except Exception as e:
-                report["geometry"] = "FAIL"
-                report["geometry_errors"].append(f"{el.is_a()} '{el.Name}': {str(e)[:120]}")
+                report["geometry_errors"].append(f"{el.GlobalId} {el.Name}: {e}")
+        if report["geometry_errors"]: report["geometry"] = "FAIL"
     except Exception as e:
-        report["geometry"] = f"UNAVAILABLE: {e}"
-    for cls in ("IfcWall", "IfcRoof", "IfcSlab", "IfcWindow", "IfcDoor", "IfcOpeningElement",
-                "IfcBuildingStorey", "IfcBuildingElementProxy"):
-        report["census"][cls] = len(f.by_type(cls))
-    report["proxies"] = report["census"]["IfcBuildingElementProxy"]
-    contained = set()
-    for rel in f.by_type("IfcRelContainedInSpatialStructure"):
-        for el in rel.RelatedElements:
-            contained.add(el.id())
+        report["geometry"] = "UNAVAILABLE"; report["geometry_errors"].append(str(e))
+    errors = report["semantic_errors"]
+    classes = set(required_classes) | {"IfcWall", "IfcRoof", "IfcSlab", "IfcWindow", "IfcDoor", "IfcOpeningElement", "IfcBuildingStorey", "IfcBuildingElementProxy"}
+    report["census"] = {cls: len(f.by_type(cls)) for cls in sorted(classes)}
+    for cls in required_classes:
+        if not report["census"][cls]: errors.append(f"Missing required class {cls}")
+    for cls in ("IfcProject", "IfcSite", "IfcBuilding"):
+        if len(f.by_type(cls)) != 1: errors.append(f"Expected exactly one {cls}")
+    if not f.by_type("IfcBuildingStorey"): errors.append("Missing storeys")
+    parent_types = {"IfcSite": "IfcProject", "IfcBuilding": "IfcSite", "IfcBuildingStorey": "IfcBuilding"}
+    for cls, parent in parent_types.items():
+        for el in f.by_type(cls):
+            rels = el.Decomposes
+            if len(rels) != 1 or not rels[0].RelatingObject.is_a(parent): errors.append(f"Invalid spatial parent: {el.Name}")
+    projects=f.by_type("IfcProject")
+    units=projects[0].UnitsInContext.Units if projects and projects[0].UnitsInContext else []
+    if not any(u.is_a("IfcSIUnit") and u.UnitType == "LENGTHUNIT" and u.Name == "METRE" and u.Prefix is None for u in units):
+        errors.append("Project length units must be SI metres")
+    from ifcopenshell.util.element import get_container
     for el in f.by_type("IfcElement"):
-        if el.is_a("IfcOpeningElement"):
-            continue
-        if el.id() not in contained:
-            report["uncontained"].append(f"{el.is_a()} '{el.Name}'")
-    if (report["schema"] == "FAIL" or report["geometry"] == "FAIL"
-            or report["proxies"] > 0 or report["uncontained"]):
-        report["verdict"] = "FAIL"
+        if el.is_a("IfcOpeningElement"): continue
+        container = get_container(el)
+        if not container or not container.is_a("IfcBuildingStorey"):
+            report["uncontained"].append(el.GlobalId); errors.append(f"No storey container: {el.Name}")
+    exceptions = proxy_exceptions or {}
+    for el in f.by_type("IfcBuildingElementProxy"):
+        report["proxies"] += 1
+        reason = exceptions.get(el.GlobalId)
+        if isinstance(reason, str) and reason.strip() and not (el.Name or "").startswith("MASSING-"):
+            report["proxy_exceptions"][el.GlobalId] = reason
+        else: errors.append(f"Unexplained proxy or massing placeholder: {el.Name}")
+    for op in f.by_type("IfcOpeningElement"):
+        if len(op.VoidsElements) != 1: errors.append(f"Opening needs one host: {op.Name}")
+        if len(op.HasFillings) != 1: errors.append(f"Opening needs one filling: {op.Name}")
+    for el in f.by_type("IfcWindow") + f.by_type("IfcDoor"):
+        if len(el.FillsVoids) != 1: errors.append(f"Window/door needs one opening: {el.Name}")
+        if not el.OverallWidth or el.OverallWidth <= 0 or not el.OverallHeight or el.OverallHeight <= 0:
+            errors.append(f"Missing semantic width/height: {el.Name}")
+    if errors: report["semantics"] = "FAIL"
+    statuses = [report[k] for k in ("schema", "geometry", "semantics")]
+    report["verdict"] = "FAIL" if "FAIL" in statuses else "INCOMPLETE" if "UNAVAILABLE" in statuses else "PASS"
     return report

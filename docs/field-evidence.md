@@ -1,3 +1,8 @@
+> Historical notes from 0.6 and earlier. These observations are not controlled
+> benchmark results. Version 0.7 supersedes the mandatory scoring loop, skyline
+> convergence verdicts and camera directives described below. See the README
+> and benchmark protocol for the current design and its limits.
+
 # Field evidence — why the method is shaped like this
 
 Every design decision in photo-to-bim was paid for by an instrumented agent

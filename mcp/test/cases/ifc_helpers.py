@@ -1,11 +1,12 @@
 """The IFC helpers against real ifcopenshell: both shape classes, plus the
 gate's designed failure on an unreplaced massing proxy. Runs wherever a python
 with ifcopenshell is available (Bonsai's own, or `uv pip install ifcopenshell`);
-the suite SKIPs it otherwise rather than failing."""
+missing dependencies fail the release suite."""
 import sys, os, tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..',
                                 'skills', 'photo-to-ifc-building', 'assets', 'blender-template'))
-os.chdir(tempfile.mkdtemp(prefix='ifc-helpers-test-'))
+_tmp = tempfile.TemporaryDirectory(prefix='ifc-helpers-test-')
+os.chdir(_tmp.name)
 import ifc_helpers as H
 
 # ---- Case 1: house-class subject (gable + cross-gable roof, L-footprint) ----
