@@ -72,7 +72,7 @@ startup_timeout_sec = 60
     (target / 'runtime-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if reference:
         shutil.copy2(reference,target / ('house'+reference.suffix.lower()))
-    prompt = '''Use $photo-to-ifc-building to reconstruct house.jpg as real IFC with Blender MCP and Bonsai.
+    prompt = '''Use $photo-to-bim:photo-to-ifc-building to reconstruct house.jpg as real IFC with Blender MCP and Bonsai.
 Match the visible proportions, roof and openings, using estimated dimensions in metres.
 Deliver house.ifc and comparison.png in this folder, with separate IFC and photographic validation.
 Use the local 0.7.0 bootstrap and keep every input/output file inside this folder.
@@ -89,7 +89,8 @@ The authoring agent should load the local bootstrap before it edits the scene.
 The skill is in `.agents/skills/photo-to-ifc-building`; its symlink resolves entirely
 inside this folder. `.codex/config.toml` registers the bundled measurement server.
 This enables the plugin's components locally, rather than installing a global
-marketplace entry. Nothing was added to user-level Codex configuration.
+marketplace entry. The installer does not alter user-level configuration; Codex project trust is a
+separate, folder-specific setting.
 An existing global Blender MCP remains inherited unless this setup explicitly
 supplied a local Blender command. Earlier test folders are unaffected.\nLocally disabled inherited MCP servers: {', '.join(disable_mcp or []) or 'none'}.
 

@@ -153,6 +153,7 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     for name,digest in manifest['files_sha256'].items():
         assert hashlib.sha256((package/name).read_bytes()).hexdigest()==digest
     assert (target/'house.jpg').read_bytes()==image.read_bytes()
+    assert '$photo-to-bim:photo-to-ifc-building' in (target/'PROMPT.txt').read_text()
     assert str(package/'mcp/dist/ifc-server.mjs') in (target/'.codex/config.toml').read_text()
     with pytest.raises(ValueError,match='new or empty'):
         setup.install(target,node=shutil.which('node'))

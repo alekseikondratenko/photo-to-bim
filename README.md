@@ -59,7 +59,8 @@ runtime hashes. It never writes user-level Codex settings or installs a global
 marketplace plugin.
 
 Open that folder as a Codex project, trust it if prompted, and start a fresh
-task using the generated `PROMPT.txt`. The project's `SETUP.md` explains the
+task using the generated `PROMPT.txt`. Codex exposes the local skill as
+`photo-to-bim:photo-to-ifc-building`. The project's `SETUP.md` explains the
 layout. Codex supports [repository skills](https://developers.openai.com/codex/skills/)
 and [trusted project configuration](https://developers.openai.com/codex/config-basic/).
 This setup enables the plugin's components locally; it does not add a global
