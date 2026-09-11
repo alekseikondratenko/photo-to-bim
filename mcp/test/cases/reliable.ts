@@ -311,6 +311,23 @@ try {
       }
     }
     tools.forEach((t) => portableArrays(t.inputSchema));
+    for (const name of [
+      "classify_reference",
+      "trace_edges",
+      "calibrate_camera",
+      "place_features",
+    ]) {
+      assert.equal(
+        tools.find((t) => t.name === name)!.annotations?.readOnlyHint,
+        true,
+      );
+    }
+    for (const name of ["view_crop", "compare_model"]) {
+      assert.notEqual(
+        tools.find((t) => t.name === name)!.annotations?.readOnlyHint,
+        true,
+      );
+    }
     const planeTool = tools.find((t) => t.name === "place_features")!;
     const normalSchema = (planeTool.inputSchema.properties as any).plane
       .properties.normal;

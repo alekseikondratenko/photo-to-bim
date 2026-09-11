@@ -17,7 +17,9 @@ interoperability must be tested; schema validation alone does not establish it.
   advertise homogeneous arrays with exact length bounds. Input values and the
   six-tool interface are unchanged. In test 8, the server started, but Codex
   rejected the camera/placement/comparison tools while building its tool catalog.
-  A successful standalone handshake alone did not catch this.
+  A successful standalone handshake alone did not catch this. Read-only tools
+  also advertise standard MCP read-only/idempotence hints; crop/report writers
+  retain their write permissions.
 - Early quantitative checks remain optional. Reuse fitting residuals or a
   compatible existing render when they can resolve a useful uncertainty. Cheap
   drafts stay unscored; no minimum or fixed count of reconstruction passes is set.
@@ -29,6 +31,11 @@ interoperability must be tested; schema validation alone does not establish it.
 The shared skill and MCP schemas apply to both Codex and Claude Code. Setup
 instructions belong to the respective client sections below; tool responses do
 not carry client-specific routing or installation instructions.
+
+Bounded live checks in Codex and Claude Code exposed all six tools and called
+`place_features` successfully with the same synthetic input. These checks verify
+client compatibility, not reconstruction quality or latency. Test 9 contains the
+frozen 0.7.2 runtime for the next reconstruction run.
 
 ## What changed in 0.7.1
 
@@ -54,8 +61,9 @@ and adds reusable implementations for those gaps:
 - Crop output rejects directories with a clear PNG filename error.
 
 The live synthetic Blender/Bonsai import/render test passed for this release.
-It verifies the adapter, not reconstruction accuracy or a speed gain. Test 8 is
-prepared for a fresh agent run; it is not included as a completed benchmark.
+It verifies the adapter, not reconstruction accuracy or a speed gain. Test 8
+subsequently exercised these helpers, but its client rejected three MCP tool
+schemas. It does not establish an end-to-end tool benchmark.
 
 ## What changed in 0.7
 

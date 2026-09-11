@@ -57,6 +57,11 @@ export function createIfcServer() {
   s.registerTool(
     "classify_reference",
     {
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
       description:
         "Optional shape hints. Inspect the image yourself; sky-based detectors can fail on vegetation and clouds.",
       inputSchema: { image: z.string(), crop: crop.optional() },
@@ -92,6 +97,11 @@ export function createIfcServer() {
   s.registerTool(
     "trace_edges",
     {
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
       description:
         "Batch named line observations. Inspect crops to ensure each trace follows the intended physical edge.",
       inputSchema: {
@@ -131,6 +141,11 @@ export function createIfcServer() {
   s.registerTool(
     "calibrate_camera",
     {
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
       description:
         "Fit line families (default) or fit a camera to fixed 3D landmarks with method=landmarks. Landmark mode keeps geometry and scale fixed, supports optical shift, and excludes unconsumed check points. Both return a complete Z-up frame.",
       inputSchema: {
@@ -313,6 +328,11 @@ export function createIfcServer() {
   s.registerTool(
     "place_features",
     {
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
       description:
         "Intersect image rays with any plane in the same Z-up world as Blender/IFC. Results are conditional estimates; pick sensitivity excludes camera/scale uncertainty.",
       inputSchema: {
