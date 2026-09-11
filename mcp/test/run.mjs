@@ -85,5 +85,24 @@ console.log('\n== 6. IFC helpers (both shape classes) — needs a python with if
   }
 }
 
+console.log('\n== 7. camera_check verdict (needs PIL + the run-5 field fixtures) ==');
+{
+  const py = process.env.IFC_PYTHON ?? 'python3';
+  let can = false;
+  try {
+    execFileSync(py, ['-c', 'import PIL, numpy'], { stdio: 'ignore' });
+    can = fs.existsSync('/Users/alexbest/Desktop/blender-test-5/comparison.png');
+  } catch { /* skip */ }
+  if (!can) console.log('  SKIP  fixtures or PIL unavailable');
+  else {
+    try {
+      const out = execFileSync(py, [path.join(HERE, 'cases', 'camera_check.py')], { encoding: 'utf-8' });
+      ok('camera_check: fires on run-5, quiet on identity + structural', /ALL CAMERA-CHECK CASES PASS/.test(out), out.slice(-150));
+    } catch (e) {
+      ok('camera_check: fires on run-5, quiet on identity + structural', false, String(e.stderr ?? e).slice(-250));
+    }
+  }
+}
+
 console.log(`\n${fail === 0 ? 'ALL GREEN' : 'REGRESSION'} — ${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1,5 +1,5 @@
 {
   "name": "photo-to-ifc-building",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Photograph in, measured IFC out — measurement instruments as MCP tools, the method as a skill, authored in Blender through Bonsai."
 }

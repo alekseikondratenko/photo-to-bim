@@ -681,7 +681,21 @@ export function solveCamera(
           Math.abs(sg.y1 - sg.y0) > Math.abs(sg.x1 - sg.x0) / Math.tan((25 * Math.PI) / 180),
       ).length;
   const unprojectReady = Boolean(focal && up);
+  // "weak" tells the truth about fit quality, but field agents read it as
+  // "not ready to build" and kept measuring — one run spent 23 calls before
+  // its first draft. Buildable is the explicit counter-signal: a camera whose
+  // withheld-line error is under 5% of the diagonal frames a first draft
+  // perfectly well, and the draft's own score is the cheapest next evidence.
+  const buildable = !inconsistent && worstLoo !== null && worstLoo < diag * 0.05;
   const nextSteps: string[] = [];
+  if (buildable && verdict === "weak") {
+    nextSteps.push(
+      "This camera is GOOD ENOUGH to draft with NOW (worst withheld line " +
+      `${r2(worstLoo!)} px < 5% of the diagonal). Further measurement before the first ` +
+      "scored draft is waste — draft, score, and let the score direct any re-measuring. " +
+      "Re-pick the worst line only if the first score's camera_check complains.",
+    );
+  }
   if (!unprojectReady) {
     // First, and loud: this is the single largest saving the server offers and
     // run 5 never engaged it, because nothing said it was off.
@@ -744,7 +758,7 @@ export function solveCamera(
      * What to do with this result. Verdict-conditional and ordered, most
      * urgent first — the routing that used to live in skill prose.
      */
-    next: { unproject_locked: !unprojectReady, vertical_lines: verticalCount, do: nextSteps },
+    next: { unproject_locked: !unprojectReady, vertical_lines: verticalCount, buildable, do: nextSteps },
     families: families.map((f) => ({
       label: f.label,
       lines: f.count,

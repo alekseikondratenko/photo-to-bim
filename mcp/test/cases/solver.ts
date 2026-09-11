@@ -133,3 +133,18 @@ const say = (n: string, cond: boolean, d = "") => console.log(`${n} | ${cond ? "
   say("routing includes the draft-first instruction on every buildable verdict",
       /DRAFT/.test(doTxt), "");
 }
+
+// 6. v0.6.2: a weak-but-buildable camera must SAY it is buildable — the
+//    counter-signal to "weak means keep measuring" (run 5 spent 23 calls).
+{
+  const { W, H, lines } = synth(12);
+  const weakLines = lines.map((l) => ({ ...l }));
+  weakLines[3] = { ...weakLines[3], y1: weakLines[3].y1 + 14 };
+  const r: any = solveCamera([W, H], weakLines, {});
+  const txt = (r.next?.do ?? []).join(" ");
+  say("weak-but-buildable reports buildable: true",
+      r.cross_check.verdict !== "usable" ? r.next.buildable === true : true,
+      `verdict=${r.cross_check.verdict} loo=${r.cross_check.leave_one_out_worst_px}`);
+  say("buildable message overrides diligence",
+      r.cross_check.verdict !== "usable" ? /GOOD ENOUGH to draft with NOW/.test(txt) : true, "");
+}

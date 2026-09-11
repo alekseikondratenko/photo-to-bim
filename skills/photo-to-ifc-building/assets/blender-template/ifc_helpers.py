@@ -161,6 +161,8 @@ def plane_mesh(polygon3d, thickness=0.06):
 
 
 _STYLES = {}
+_STYLE_RGB = {}
+_ELEMENT_STYLES = {}
 
 
 def style(name, rgb):
@@ -178,6 +180,7 @@ def style(name, rgb):
         },
     )
     _STYLES[name] = st
+    _STYLE_RGB[name] = [float(rgb[0]), float(rgb[1]), float(rgb[2])]
     return st
 
 
@@ -198,6 +201,7 @@ def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None, st
     _run("geometry.assign_representation", product=el, representation=rep)
     if style_name is not None:
         _run("style.assign_representation_styles", shape_representation=rep, styles=[_STYLES[style_name]])
+        _ELEMENT_STYLES[name] = style_name
     if storey is not None:
         _run("spatial.assign_container", products=[el], relating_structure=storey)
     return el
@@ -317,6 +321,16 @@ def opening_grid(ctx, wall_el, rows, cols, width, height, sill0, storey_h, x0, g
 
 def save(ctx, path):
     ctx["f"].write(path)
+    # Style registry rides along so the RENDER can be coloured deterministically:
+    # a field run authored six IfcSurfaceStyles and still rendered all-white,
+    # because the load-into-Blender path dropped them. photostudio reads this
+    # file and builds real materials — colour is guaranteed, not hoped for.
+    try:
+        import json as _json
+        with open(path + ".styles.json", "w") as fh:
+            _json.dump({"styles": _STYLE_RGB, "elements": _ELEMENT_STYLES}, fh, indent=1)
+    except OSError:
+        pass
     return path
 
 

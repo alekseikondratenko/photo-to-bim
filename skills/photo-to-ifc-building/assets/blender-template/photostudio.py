@@ -24,7 +24,7 @@ _STATE = {"ref": None, "span": None, "out_dir": None, "history": []}
 
 # ---------------------------------------------------------------- setup
 
-def setup(camera_for_blender, reference_path, out_dir=None, span=None):
+def setup(camera_for_blender, reference_path, out_dir=None, span=None, position=None, target=None):
     """Build PhotoCam from `solve_camera`'s camera_for_blender block (paste it
     verbatim), point the render at the reference's exact size, neutral light.
 
@@ -49,13 +49,21 @@ def setup(camera_for_blender, reference_path, out_dir=None, span=None):
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.camera = ob
-    if cb.get("horizontal_distance_m") is not None and cb.get("eye_height_m") is not None:
-        import mathutils
+    import mathutils
+    if position is not None and target is not None:
+        # The RECON frame knows where the camera stands — pass it in. The
+        # default below ignores the solved yaw and WILL frame a rotated model
+        # wrongly; the first score's camera_check names that mistake, but
+        # passing the frame here avoids spending a pass on it.
+        ob.location = tuple(position)
+        tv = mathutils.Vector(tuple(target))
+        ob.rotation_euler = (tv - ob.location).to_track_quat("-Z", "Y").to_euler()
+    elif cb.get("horizontal_distance_m") is not None and cb.get("eye_height_m") is not None:
         d, e = cb["horizontal_distance_m"], cb["eye_height_m"]
         t = cb.get("tilt_above_horizontal_deg") or 0.0
         ob.location = (0.0, -d, e)
-        target = mathutils.Vector((0.0, 0.0, e + d * math.tan(math.radians(t))))
-        ob.rotation_euler = (target - ob.location).to_track_quat("-Z", "Y").to_euler()
+        tv = mathutils.Vector((0.0, 0.0, e + d * math.tan(math.radians(t))))
+        ob.rotation_euler = (tv - ob.location).to_track_quat("-Z", "Y").to_euler()
     # Neutral, deterministic light — match the photograph later, on evidence.
     if not bpy.data.objects.get("PhotoSun"):
         sun = bpy.data.lights.new("PhotoSun", type="SUN")
@@ -75,6 +83,56 @@ def setup(camera_for_blender, reference_path, out_dir=None, span=None):
     _STATE["out_dir"] = out_dir or os.path.dirname(os.path.abspath(reference_path))
     _STATE["span"] = tuple(span) if span else None
     return f"PhotoCam ready: lens {cb['lens_mm']} mm, shift ({cb['shift_x']}, {cb['shift_y']}), {w}x{h}"
+
+
+def ensure_materials(styles_json=None):
+    """Build real Blender materials from the IFC's style registry
+    (<file>.ifc.styles.json, written by ifc_helpers.save). Called automatically
+    by render_and_score, so a scored render can never be accidentally white —
+    a field run authored six IfcSurfaceStyles and still rendered colourless
+    because the load path dropped them."""
+    import glob
+    path = styles_json
+    if path is None:
+        cands = glob.glob(os.path.join(_STATE.get("out_dir") or ".", "*.styles.json"))
+        if not cands:
+            return "no style registry found"
+        path = max(cands, key=os.path.getmtime)
+    with open(path) as fh:
+        reg = json.load(fh)
+    mats = {}
+    for name, rgb in reg.get("styles", {}).items():
+        m = bpy.data.materials.get(f"pts-{name}") or bpy.data.materials.new(f"pts-{name}")
+        m.use_nodes = True
+        bsdf = m.node_tree.nodes.get("Principled BSDF")
+        if bsdf:
+            bsdf.inputs["Base Color"].default_value = (*rgb, 1.0)
+            bsdf.inputs["Roughness"].default_value = 0.75
+        m.diffuse_color = (*rgb, 1.0)
+        mats[name] = m
+    n = 0
+    elements = reg.get("elements", {})
+    for ob in bpy.context.scene.objects:
+        if ob.type != "MESH":
+            continue
+        key = ob.name.split("/")[-1]
+        sname = elements.get(key)
+        if sname and sname in mats:
+            ob.data.materials.clear()
+            ob.data.materials.append(mats[sname])
+            n += 1
+    return f"coloured {n} objects from {os.path.basename(path)}"
+
+
+def place_camera(position, target):
+    """Move PhotoCam explicitly (RECON-frame metres). The camera_check verdict
+    sends you here — never fix a camera offset by editing building geometry."""
+    import mathutils
+    ob = bpy.data.objects["PhotoCam"]
+    ob.location = tuple(position)
+    tv = mathutils.Vector(tuple(target))
+    ob.rotation_euler = (tv - ob.location).to_track_quat("-Z", "Y").to_euler()
+    return f"PhotoCam at {tuple(round(v,2) for v in ob.location)} looking at {tuple(target)}"
 
 
 def set_span(x0, x1):
@@ -185,6 +243,77 @@ def _skyline_score(ref, ren, span=None):
     }
 
 
+def _subject_extent(sky, lo, hi):
+    """Columns whose skyline rises meaningfully above the flat horizon —
+    i.e. where the BUILDING is. Returns (x0, x1, top_row) or None."""
+    seg = sky[lo:hi]
+    valid = seg[seg >= 0]
+    if len(valid) < 50:
+        return None
+    horizon = float(np.median(valid))
+    cols = np.where((seg >= 0) & (seg < horizon - 15))[0]
+    if len(cols) < 40:
+        return None
+    x0, x1 = np.percentile(cols, 3), np.percentile(cols, 97)
+    top = float(np.min(seg[cols]))
+    return (float(x0) + lo, float(x1) + lo, top)
+
+
+def _camera_check(ref_sky, ren_sky, w, lo=None, hi=None):
+    """Is the remaining error CAMERA PLACEMENT rather than geometry?
+
+    Compares WHERE the subject sits and HOW BIG it is, render vs photograph:
+    centre shift = pan/yaw error, width ratio = distance error, top-row shift
+    = height/tilt error. A field run spent four passes (438->354->372->382->416)
+    re-tuning geometry against exactly this signature; nothing named it. A
+    rigid-shift version of this check could not see the scale component and
+    was fooled by flank vegetation — extents are judged inside the subject
+    span only.
+    """
+    lo = int(lo) if lo is not None else int(w * 0.03)
+    hi = int(hi) if hi is not None else int(w * 0.97)
+    # BOTH sides judged in the SAME window — an asymmetric window let the
+    # render's flank trees masquerade as the building and even identity fired.
+    # Pad the span modestly so a shifted building still registers as shifted
+    # rather than vanishing.
+    pad = int(0.10 * w)
+    jlo, jhi = max(0, lo - pad), min(w, hi + pad)
+    ref_e = _subject_extent(ref_sky, jlo, jhi)
+    ren_e = _subject_extent(ren_sky, jlo, jhi)
+    if not ref_e:
+        return None
+    if not ren_e:
+        return {"verdict": "camera_offset",
+                "note": "No building found above the horizon in the render at all — PhotoCam "
+                        "is not looking at the model. Fix the camera position/target "
+                        "(photostudio.place_camera) before anything else."}
+    rx0, rx1, rtop = ref_e
+    nx0, nx1, ntop = ren_e
+    ref_w, ren_w = rx1 - rx0, nx1 - nx0
+    centre_shift = (nx0 + nx1) / 2 - (rx0 + rx1) / 2
+    width_ratio = ren_w / max(1.0, ref_w)
+    top_shift = ntop - rtop
+    if abs(centre_shift) > 0.05 * w or not (0.85 <= width_ratio <= 1.18) or abs(top_shift) > 60:
+        return {
+            "verdict": "camera_offset",
+            "subject_in_photo": {"x0": round(rx0), "x1": round(rx1), "top_row": round(rtop)},
+            "subject_in_render": {"x0": round(nx0), "x1": round(nx1), "top_row": round(ntop)},
+            "centre_shift_px": round(centre_shift, 1),
+            "width_ratio": round(width_ratio, 3),
+            "top_shift_px": round(top_shift, 1),
+            "note": (
+                f"CAMERA PLACEMENT ERROR, not geometry: the building spans columns "
+                f"{nx0:.0f}-{nx1:.0f} in your render but {rx0:.0f}-{rx1:.0f} in the photograph "
+                f"(centre off {centre_shift:+.0f} px, size ratio {width_ratio:.2f}, top edge "
+                f"{top_shift:+.0f} px). width_ratio < 1 means the camera is TOO FAR (dolly in); "
+                f"centre shift means pan/yaw. Fix with photostudio.place_camera and re-score "
+                f"BEFORE touching any building geometry — geometry passes against this "
+                f"signature are waste."
+            ),
+        }
+    return None
+
+
 def _luma_thirds(im, sky_rows):
     """Left/right-third mean luma inside the subject band — the lighting signal."""
     h, w, _ = im.shape
@@ -250,6 +379,10 @@ def render_and_score(name):
     the photograph's viewpoint may be scored; use render_view for everything
     else."""
     assert _STATE["ref"], "call setup() first"
+    try:
+        ensure_materials()
+    except Exception:
+        pass  # colour is important, but never block a score over it
     scene = bpy.context.scene
     scene.camera = bpy.data.objects["PhotoCam"]
     w, h = _STATE.get("res") or (scene.render.resolution_x, scene.render.resolution_y)
@@ -269,14 +402,20 @@ def render_and_score(name):
                            "HEALTHY; the RENDER is empty. Check the camera position, scene "
                            "contents and world, then re-render. Do not debug the scorer."}
 
+    ref_sky, ren_sky = _skyline(ref), _skyline(ren)
     sky = _skyline_score(ref, ren)
     result = {
         "saved": out,
         "scored": True,
         "image_size": [int(ref.shape[1]), int(ref.shape[0])],
         "skyline": sky,
-        "luma": _luma_thirds(ren, _skyline(ren)),
+        "luma": _luma_thirds(ren, ren_sky),
     }
+    sp = _STATE["span"]
+    cam = _camera_check(ref_sky, ren_sky, ref.shape[1],
+                        lo=sp[0] if sp else None, hi=sp[1] if sp else None)
+    if cam:
+        result["camera_check"] = cam
     if _STATE["span"]:
         result["subject_span"] = {"x0": _STATE["span"][0], "x1": _STATE["span"][1],
                                   "skyline": _skyline_score(ref, ren, _STATE["span"])}

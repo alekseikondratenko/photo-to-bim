@@ -62673,7 +62673,13 @@ function solveCamera(size, segments, known) {
     (sg) => /^(v|vert|vertical|plumb)/i.test(sg.label) || Math.abs(sg.y1 - sg.y0) > Math.abs(sg.x1 - sg.x0) / Math.tan(25 * Math.PI / 180)
   ).length;
   const unprojectReady = Boolean(focal && up);
+  const buildable = !inconsistent && worstLoo !== null && worstLoo < diag * 0.05;
   const nextSteps = [];
+  if (buildable && verdict === "weak") {
+    nextSteps.push(
+      `This camera is GOOD ENOUGH to draft with NOW (worst withheld line ${r2(worstLoo)} px < 5% of the diagonal). Further measurement before the first scored draft is waste \u2014 draft, score, and let the score direct any re-measuring. Re-pick the worst line only if the first score's camera_check complains.`
+    );
+  }
   if (!unprojectReady) {
     nextSteps.push(
       `WARNING: unproject is LOCKED \u2014 no usable vertical family was formed (${verticalCount} vertical line(s) supplied; 2\u20133 are needed: window jambs, building corners, downpipes, labelled 'vertical'). One more solve_camera call with those lines unlocks world-coordinate feature placement, which replaces per-feature pixel measurement outright \u2014 a field run spent ~25 minutes measuring what unproject returns in one call.`
@@ -62704,7 +62710,7 @@ function solveCamera(size, segments, known) {
      * What to do with this result. Verdict-conditional and ordered, most
      * urgent first — the routing that used to live in skill prose.
      */
-    next: { unproject_locked: !unprojectReady, vertical_lines: verticalCount, do: nextSteps },
+    next: { unproject_locked: !unprojectReady, vertical_lines: verticalCount, buildable, do: nextSteps },
     families: families.map((f2) => ({
       label: f2.label,
       lines: f2.count,
@@ -64140,7 +64146,7 @@ function profileFromArgv() {
 function createServer() {
   const profile = profileFromArgv();
   const webTarget = profile !== "ifc";
-  const server = new McpServer({ name: "photo-to-bim", version: "0.6.1" });
+  const server = new McpServer({ name: "photo-to-bim", version: "0.6.2" });
   server.registerTool(
     "classify_reference",
     {

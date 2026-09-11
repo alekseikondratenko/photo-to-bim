@@ -28,8 +28,8 @@ will not need them here.
 Keep ONE file, `RECON.md`, in the working folder, and **rewrite it at every
 step**:
 
-- **Verified** — measurements WITH their evidence ("eave 3.02 m — gutter rows
-  549–551 + rake unprojection agree").
+- **Verified** — measurements WITH their evidence ("eave 3.28 m — indicted by
+  p2 worst_segments, fixed by unprojecting the gutter line").
 - **Assumed** — working values with their source ("storey 2.80 m, DE standard").
 - **REFUTED** — hypotheses killed, with what killed them. Once buried, they
   stay dead.
@@ -64,7 +64,9 @@ Every pass has the same grammar:
 by 3% of its own value across two passes, the score carries a verdict:
 `converged` (inside the delivery floor → run the IFC gate and deliver) or
 `stalled` (still wrong, and more passes of the same kind will not fix it —
-re-MEASURE the element in `worst_segments` instead of re-tuning numbers). Soft
+re-MEASURE the element in `worst_segments` instead of re-tuning numbers). A
+third verdict, `camera_check: camera_offset`, usually appears on the FIRST
+score if at all — it means move the camera, not the geometry (Step 2). Soft
 budget: **~8 scored passes**; going beyond is allowed but write one line in
 RECON.md saying what is still moving. Never iterate on eyeballed screenshots.
 
@@ -80,40 +82,59 @@ The helpers cover both (`massing`/`wall`/`roof(planes)` vs `opening_grid` and
 per-storey stacking) — if you find yourself hand-writing geometry because the
 subject is "not a house", stop: the subject is one of these two classes.
 
-## Step 1 — classify, then solve the camera EARLY
+## The one measurement rule
+
+Stated once, and nothing below contradicts it:
+
+> **Before the first scored draft: only the solver's 4–10 lines and ONE scale
+> anchor. After it: only what the score indicts.**
+
+Every trace, crop and unprojection outside that rule is time spent measuring
+things the draft may not even get wrong. A field run spent 23 measurement
+calls before its first render; the score then pointed at a handful of
+elements. Speed comes from letting the score direct the measuring.
+
+## Step 1 — solve the camera (4–10 lines, nothing else)
 
 1. `classify_reference` on the photograph (aim it with `crop` if the full-frame
    scan comes back blind — it will tell you what it tried).
-2. LOOK with `view_crop` (magnified, coordinate-gridded, up to 6 regions per
-   call — coordinates come back in original-image space). Turn every edge you
-   can see into numbers with `trace_edge` — never read pixels by eye.
-3. `solve_camera` with 4–10 rough lines along real parallel families —
+2. `view_crop` ONLY to locate the lines you are about to trace; `trace_edge`
+   ONLY the 4–10 lines the solver needs, along real parallel families —
    **including 2–3 verticals** (jambs, corners, downpipes; any label works,
-   vertical is detected geometrically). Do not polish lines first: 'weak' plus
-   a named worst line IS the workflow, and the solver converges in 2–3 calls.
-4. **Read the `next` block of every solve result — it is the routing.** It
-   says whether `unproject` is unlocked, what to build first, and which line
-   to re-pick.
-5. Paste `camera_for_blender` into `photostudio.setup(...)` **verbatim**. Do
-   not re-derive the mapping — Blender's native lens shift already encodes the
-   shifted-lens/cropped-frame case (parallel verticals ⇒ principal point on
-   the horizon ⇒ `shift_y`, zero tilt). Verify with ONE render before building.
+   vertical is detected geometrically). This is not the measuring phase; that
+   never comes as a phase at all (see the rule above).
+3. `solve_camera` rough and early: 'weak' plus a named worst line IS the
+   workflow, and it converges in 2–3 calls. **When the result says
+   `buildable: true`, the camera is done** — draft now; more line-polishing
+   before the first score is waste.
+4. **Read the `next` block of every solve result — it is the routing.**
+5. Paste `camera_for_blender` into `photostudio.setup(...)` **verbatim** — and
+   pass `position=`/`target=` from your RECON camera frame (the default
+   placement ignores yaw and WILL misframe a rotated model). Blender's native
+   lens shift already encodes the shifted-lens case; never re-derive the
+   mapping.
+6. Take your ONE scale anchor now (a door head via `unproject`, or a storey
+   height via `measure_pitch`) — one dimension, not a survey.
 
-## Step 2 — draft whole, measure on demand
+## Step 2 — draft whole, then the camera verdict, then refine
 
-With the camera accepted, **build the entire first draft from your visual read
-of the photograph** — massing, roof planes AND openings — and score it
-immediately. Your spatial read is good; what it cannot give you is *which
-parts are wrong*, and that is the score's job: `worst_segments` names the
-columns and the direction, you know which element lives there, and **only
-indicted elements earn measurement**. A field run that measured first spent 30
-`trace_edge` calls before its first render; the score then pointed at a
-handful of elements. Do not pay that toll — anchor scale on ONE measured
-dimension (a door head, a storey height via `measure_pitch`), draft the rest.
+**Build the entire first draft from your visual read of the photograph** —
+massing, roof planes AND openings, styles included — and score it immediately
+(`render_and_score('p1-draft')`). Your spatial read is good; what it cannot
+give you is *which parts are wrong*, and that is the score's job.
 
-When the score indicts an element, correct it with **`unproject`** (image
-points + a named plane → world metres, reprojection-checked) or a targeted
-`trace_edge` — never re-derive camera math by hand; three field runs
+**Read `camera_check` on that first score before touching any geometry.** If
+it reports `camera_offset`, the camera — not the building — is wrong: fix it
+with `photostudio.place_camera(position, target)` and re-score. A field run
+spent FOUR geometry passes (438→354→372→382→416) fighting a misplaced camera
+because nothing named it; the check now names it, and a geometry pass taken
+against that verdict is waste by definition.
+
+With the camera verdict clean, refine: `worst_segments` names the columns and
+the direction, you know which element lives there, and **only indicted
+elements earn measurement** — correct them with **`unproject`** (image points
++ a named plane → world metres, reprojection-checked) or one targeted
+`trace_edge`. Never re-derive camera math by hand; three field runs
 hand-rolled it with the tool unlocked. Do not be the fourth.
 
 As soon as you know the subject's column extent in the photograph, call
@@ -146,7 +167,7 @@ import ifc_helpers as H, photostudio as P
 |---|---|
 | `H.new_model(name, [(storey, elev), ...])` | file + full spatial tree, SI metres |
 | `H.evidence_pset(ctx, {...})` | RECON's Verified table, attached to the building |
-| `H.massing(ctx, storey, footprint, height)` | whole-building block — deliberately an `IfcBuildingElementProxy`, so the delivery gate FAILS until you replace it with real elements |
+| `H.massing(ctx, storey, footprint, height)` | OPTIONAL quick blockout (a proxy the gate fails until replaced). The draft-first flow normally skips it — draft with real walls/roof/openings directly |
 | `H.wall(ctx, storey, p1, p2, height, thickness)` | `IfcWall` along any plan segment |
 | `H.slab(ctx, storey, footprint, thickness, z_top)` | floors, terraces, tower caps |
 | `H.roof(ctx, storey, planes)` | ONE `IfcRoof` from ANY set of 3D plane polygons — a gable is two, a hip four, a flat cap one |
@@ -175,7 +196,9 @@ measurements like everything else: `view_crop` the wall, the roof, the accent
 gable; read the dominant RGB; register each as `H.style('render-white',
 (r, g, b))` and pass `style_name=` to every element helper. Windows get a
 glass style. Three to five styles cover a building; decoration beyond flat
-measured colour is not the deliverable.
+measured colour is not the deliverable. `render_and_score` applies these
+styles to the loaded model automatically (via the registry `H.save` writes) —
+a scored render can never come out accidentally white.
 
 ## Context: massing only, and it never enters the IFC
 
@@ -225,16 +248,18 @@ Cookbook pages in `references/` (roof geometry, scale anchors) apply unchanged
    PINS PhotoCam; presentation shots go through `render_view` and are never
    scored (a field run scored a beauty camera and planted a 416 px ghost
    regression in its own history).
-2. **Re-deriving the camera.** `camera_for_blender` is paste-ready; the only
-   legitimate follow-up is one verification render (negate shifts if mirrored).
+2. **Re-deriving the camera.** `camera_for_blender` is paste-ready; the
+   verification is the FIRST score's `camera_check` — no separate ritual.
 3. **Hand-rolled unprojection.** If you are writing ray×plane code, stop —
    that is `unproject`, with a reprojection check you will not write.
 4. **Refining before the first scored draft** — the frame moves, everything
    re-measures. Draft whole, score, then refine.
 5. **Trusting the full-frame skyline on a real photograph.** Flanks measure
    trees and clouds; `set_span` early, read `subject_span`.
-6. **A converged score against invented targets.** Measure before scoring;
-   placeholder numbers in the evidence pset are lies with provenance.
+6. **Drafted guesses dressed as evidence.** Drafting from your visual read is
+   the METHOD; recording those guesses in `Reconstruction_Evidence` is not —
+   the pset holds measured values only, guesses stay in RECON's Assumed until
+   a score or an unprojection confirms them.
 7. **Openings cut but not filled** — a hole is not a window; the gate's
    geometry check catches some of this, your rear-view eye pass catches the rest.
 8. **Roof planes trimmed to eaves instead of valleys** where masses intersect —
