@@ -119,7 +119,7 @@ def test_bootstrap_ignores_stale_modules(monkeypatch):
     monkeypatch.setitem(sys.modules,'photostudio',types.SimpleNamespace(VERSION='0.6.0'))
     boot=module('bootstrap')
     first,second=boot.load(),boot.load()
-    assert first['version']=='0.8.0'
+    assert first['version']=='0.8.1'
     assert first['studio'] is not second['studio']
     assert first['helpers'] is not second['helpers']
     assert 'ifc_path' in first['studio'].setup.__code__.co_varnames
@@ -147,7 +147,7 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     image=tmp_path/'source.jpg';image.write_bytes(b'test fixture')
     target=tmp_path/'test-project'
     result=setup.install(target,reference=image,node=shutil.which('node'))
-    assert result['version']=='0.8.0'
+    assert result['version']=='0.8.1'
     skill=target/'.agents/skills/photo-to-ifc-building'
     assert skill.is_symlink() and skill.resolve().is_relative_to(target)
     manifest=json.loads((target/'runtime-manifest.json').read_text())
@@ -165,7 +165,7 @@ def test_package_versions_and_mcp_entrypoints_agree():
     codex=json.loads((repo/'.codex-plugin/plugin.json').read_text())
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
-    assert codex['version']==claude['version']==npm['version']=='0.8.0'
+    assert codex['version']==claude['version']==npm['version']=='0.8.1'
     assert json.loads((repo/'.mcp.json').read_text())==json.loads((repo/'mcp.json').read_text())
     assert 'ifc-server.mjs' in (repo/'.mcp.json').read_text()
 
@@ -343,3 +343,25 @@ def test_nested_scaled_mappings_keep_geometry_and_styles(H, tmp_path):
     red, blue = (records[e.GlobalId].geometry for e in copies)
     assert np.array_equal(red.verts, blue.verts)
     assert red.key != blue.key  # identical geometry with different styles cannot share Blender slots
+
+
+def test_documented_bootstrap_survives_fresh_mcp_namespaces(monkeypatch):
+    import re
+    bpy_stub = types.ModuleType('bpy')
+    bpy_stub.app = types.SimpleNamespace(driver_namespace={})
+    monkeypatch.setitem(sys.modules, 'bpy', bpy_stub)
+    monkeypatch.setitem(sys.modules, 'mathutils', types.SimpleNamespace(Matrix=object))
+    reference = TEMPLATE.parents[1]/'references/runtime.md'
+    snippets = re.findall(r'```python\n(.*?)\n```', reference.read_text(), re.S)
+    startup = snippets[0].replace('/absolute/path/to/skill/assets/blender-template/bootstrap.py', str(TEMPLATE/'bootstrap.py'))
+    exec(startup, {})  # First MCP call has its own globals.
+    later = {}
+    exec(snippets[1], later)  # Next call does not inherit the first call's variables.
+    state = later['state']
+    exec("ctx = H.new_model('Persistent fixture', [('Ground', 0)])", state)
+    original_file = state['ctx']['f']
+    third = {}
+    exec(snippets[1], third)
+    exec("wall = H.wall(ctx, ctx['storeys']['Ground'], (0, 0), (4, 0), 3)", third['state'])
+    assert third['state'] is state and state['ctx']['f'] is original_file
+    assert original_file.by_type('IfcWall') == [state['wall']]

@@ -1,5 +1,5 @@
 """Material-aware IFC import and non-mutating appearance checks for Bonsai."""
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 import hashlib
 import json
 from pathlib import Path

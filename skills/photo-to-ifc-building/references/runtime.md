@@ -1,4 +1,4 @@
-# Runtime API 0.8.0
+# Runtime API 0.8.1
 
 The IFC MCP contains six tools: `classify_reference`, `view_crop`, `trace_edges`,
 `calibrate_camera`, `place_features`, `compare_model`. Tool schemas carry exact
@@ -12,21 +12,39 @@ the isolated installer has already copied it into that folder.
 
 ```python
 from pathlib import Path
-import types
+import types, bpy
 p = Path('/absolute/path/to/skill/assets/blender-template/bootstrap.py')
 B = types.ModuleType('photo_to_bim_bootstrap')
 B.__file__ = str(p)
 exec(compile(p.read_text(), str(p), 'exec'), B.__dict__)
 runtime = B.load()
-H, P = runtime['helpers'], runtime['studio']
-S, V = runtime['scene'], runtime['validation']
+# Pick a task-specific key; initialise it once for this reconstruction.
+state = {'runtime': runtime, 'H': runtime['helpers'], 'P': runtime['studio'],
+         'S': runtime['scene'], 'V': runtime['validation']}
+bpy.app.driver_namespace['photo_to_bim_task'] = state
 print(runtime['version'], runtime['capabilities'])
 ```
 
-Reload with this snippet after an upgrade. Each call loads fresh, content-keyed
-modules, avoiding the stale `setup(position=...)` failure from older tests.
-The helper supports one active model per loaded module; call `new_model` to
-reset all registries. Use separate bootstrap loads for concurrent models.
+Blender MCP calls may use fresh Python namespaces. In subsequent calls, retrieve
+this task's state and execute authoring code in that dictionary so model context,
+helper functions and variables persist:
+
+```python
+import bpy
+state = bpy.app.driver_namespace['photo_to_bim_task']
+exec("""
+H, P = runtime['helpers'], runtime['studio']
+S, V = runtime['scene'], runtime['validation']
+# Authoring code here: assignments such as ctx = H.new_model(...) persist in state.
+""", state)
+```
+
+Run the examples below in this persistent dictionary. Import other dependencies
+inside it when needed. Do not reload the bootstrap or replace the dictionary on
+every call: that would reset the active authoring context. Reload deliberately
+after an upgrade or for a new reconstruction. Each bootstrap load creates fresh,
+content-keyed modules; each helper module supports one active model. Use distinct
+state keys and bootstrap loads for separate tasks, and preserve existing work.
 
 ## IFC helper
 

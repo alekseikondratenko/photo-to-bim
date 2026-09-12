@@ -85,12 +85,12 @@ export function viewCropSheet(
     const { im, ox, oy } = applyCrop(full, c);
     // Per-tile scale so no single tile dominates; target ~640 px on the long edge.
     const scale = opts.scale ?? Math.max(1, Math.min(6, Math.round(640 / Math.max(im.w, im.h))));
-    return { im, ox, oy, scale };
+    return { im, ox, oy, scale, up: upscale(im, scale) };
   });
   const cols = tiles.length <= 2 ? tiles.length : tiles.length <= 4 ? 2 : 3;
   const rows = Math.ceil(tiles.length / cols);
-  const cellW = Math.max(...tiles.map((t) => t.im.w * t.scale));
-  const cellH = Math.max(...tiles.map((t) => t.im.h * t.scale));
+  const cellW = Math.max(...tiles.map((t) => t.up.w));
+  const cellH = Math.max(...tiles.map((t) => t.up.h));
   const PAD = 8;
   const W = cols * cellW + (cols + 1) * PAD;
   const H = rows * cellH + (rows + 1) * PAD;
@@ -102,7 +102,7 @@ export function viewCropSheet(
     const tag = String.fromCharCode(65 + i);
     const gx = (i % cols) * (cellW + PAD) + PAD;
     const gy = Math.floor(i / cols) * (cellH + PAD) + PAD;
-    const up = upscale(t.im, t.scale);
+    const up = t.up;
     let grid = opts.grid ?? 0;
     if (!grid) {
       const raw = Math.max(t.im.w, t.im.h) / 8;

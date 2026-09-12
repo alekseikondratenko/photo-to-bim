@@ -3,7 +3,7 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.8.0
+# Photo to IFC building — 0.8.1
 
 Produce an editable, dimensioned IFC reconstruction and a comparison render.
 For ambiguous scale or roof topology, consult [scale anchors](references/scale-anchors.md)
@@ -37,9 +37,11 @@ scene without checking whether it contains work that must be preserved.
    arithmetic consistency, not the correctness of the plane or scale.
 3. **Draft early.** Build the envelope and main roof, then make a cheap unscored
    render. A weak calibration can support a provisional draft; record that
-   uncertainty. Complete a coherent exterior in 3D: infer simple side/rear surfaces
-   consistent with the visible form, and document them as assumptions. For ambiguous
-   forms, use a cheap side/rear viewport look during this draft to catch missing depth
+   uncertainty. Complete a coherent exterior in 3D. Infer unseen geometry consistently
+   with the observed building’s form, curvature and proportions. Preserve visible
+   complexity while limiting unsupported additions, and document uncertain geometry
+   as assumed. For ambiguous forms, use a cheap side/rear viewport look during this
+   draft to catch missing depth
    or disconnected surfaces; no additional scored render is required. If calibration is unavailable, use an explicitly assumed
    camera instead of repeating poor measurements indefinitely. Early quantitative
    checking is optional when existing evidence can resolve a specific uncertainty
