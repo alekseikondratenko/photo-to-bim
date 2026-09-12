@@ -368,7 +368,7 @@ export function evaluate(req: EvaluationRequest) {
           : "needs_refinement";
   const report = {
     schema_version: 1,
-    version: "0.8.2",
+    version: "0.8.3",
     status,
     verdict,
     loss,

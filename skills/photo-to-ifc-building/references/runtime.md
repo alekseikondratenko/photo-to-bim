@@ -1,4 +1,4 @@
-# Runtime API 0.8.2
+# Runtime API 0.8.3
 
 The IFC MCP contains six tools: `classify_reference`, `view_crop`, `trace_edges`,
 `calibrate_camera`, `place_features`, `compare_model`. Tool schemas carry exact

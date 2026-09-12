@@ -3,9 +3,18 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.8.2
+# Photo to IFC building — 0.8.3
 
-Produce an editable, dimensioned IFC reconstruction and a comparison render.
+For a photo-to-IFC request, produce an editable, dimensioned building model and
+a comparison render without requiring the user to repeat the technical brief.
+Match visible proportions, overall silhouette, façade arrangement and the
+photograph’s viewpoint as closely as the evidence supports. Use an
+IfcProject → IfcSite → IfcBuilding → IfcBuildingStorey hierarchy and SI metres.
+Choose IFC classes appropriate to the building, including IfcCurtainWall where
+applicable. Record assumptions about scale, floor heights and hidden geometry;
+represent repeated façade components efficiently while retaining IFC semantics.
+Unless the user specifies otherwise, export `house.ifc` and `comparison.png`
+to the working folder, with the render matching the photograph’s viewpoint.
 For ambiguous scale or roof topology, consult [scale anchors](references/scale-anchors.md)
 or [roof interpretation](references/roof-geometry.md) as needed.
 A single photograph constrains appearance and proportions; absolute scale,
@@ -56,8 +65,7 @@ scene without checking whether it contains work that must be preserved.
    reliably; exclude occluded pixels explicitly. Change camera or geometry
    when correspondences support that diagnosis. Do not alter annotations to
    make a score improve. Corrected annotations start a new evaluation series.
-5. **Author semantics.** Use Project → Site → Building → Storey, SI metres and
-   real IfcWall/IfcRoof/IfcSlab/IfcWindow/IfcDoor classes where applicable.
+5. **Author semantics.** Model real building elements with their appropriate IFC classes.
    Openings void their host walls; doors/windows fill them and carry width and
    height. Replace massing proxies. Use `profile_wall` for gables; model real
    parts, rather than one wall entity per triangle. `framed_fill` preserves separate
@@ -99,8 +107,8 @@ observed features, derived dimensions, assumptions, detail policy and runtime
 version. Store the same key assumptions in an IFC property set. A property
 set is provenance, not proof that a dimension was surveyed.
 
-Deliver the user's filenames (normally `house.ifc`, `comparison.png`) and
-`validation.json` via `runtime["validation"].combine` with separate IFC, photographic,
+Accompany the IFC and comparison render with `validation.json` via
+`runtime["validation"].combine` with separate IFC, photographic,
 appearance and visual-review evidence. Rendering preserves materials; restoration
 is explicit. Never convert visual satisfaction into an automated PASS. Record user
 acceptance only when the user has expressed it; pending review need not delay delivery.

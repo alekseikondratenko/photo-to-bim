@@ -25,7 +25,7 @@ def run(repo, output, node):
     boot = types.ModuleType('integration_bootstrap'); boot.__file__ = str(path)
     exec(compile(path.read_text(), str(path), 'exec'), boot.__dict__)
     rt = boot.load(); H, S, P, V = (rt[k] for k in ('helpers','scene','studio','validation'))
-    assert rt['version'] == '0.8.2'
+    assert rt['version'] == '0.8.3'
     original_scene = bpy.context.window.scene
     original_objects = {ob.name: (tuple(tuple(row) for row in ob.matrix_world), ob.BIMObjectProperties.ifc_definition_id)
                         for ob in original_scene.objects}
@@ -36,7 +36,7 @@ def run(repo, output, node):
     report = None
     try:
         IfcStore.id_map={}; IfcStore.guid_map={}; IfcStore.history=[]; IfcStore.future=[]; IfcStore.edited_objs=set()
-        scene = bpy.data.scenes.new('PhotoToBIM 0.8.2 integration')
+        scene = bpy.data.scenes.new('PhotoToBIM 0.8.3 integration')
         bpy.context.window.scene = scene
         ctx = H.new_model('Adapter fixture',[('Ground',0)])
         st=ctx['storeys']['Ground']
