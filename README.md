@@ -1,15 +1,44 @@
 # photo-to-bim
 
 Photo-guided building reconstruction as semantic IFC, using a small agent skill,
-measurement tools, and Blender with Bonsai. Version **0.7.2** focuses on repeatable
+measurement tools, and Blender with Bonsai. Version **0.8.0** focuses on repeatable
 execution and honest validation. It does not claim survey accuracy from one image
 or a demonstrated speed advantage over a capable agent with Blender alone.
 
 The output has an `IfcProject → IfcSite → IfcBuilding → IfcBuildingStorey`
 hierarchy, SI metre units, and typed walls, roofs, slabs, windows and doors.
 Dimensions derived from pixels remain conditional on camera, scale and assumed
-planes. Hidden geometry is an explicit assumption. Downstream application
+planes. The goal is a coherent exterior, including simple inferred side/rear surfaces
+consistent with the visible form. Hidden geometry is an explicit assumption,
+not recovered ground truth; unseen interiors and speculative decoration are omitted. Downstream application
 interoperability must be tested; schema validation alone does not establish it.
+
+## What changed in 0.8.0
+
+- IFC import and checks share exported tessellation. The native iterator handles
+  representation reuse and opening subtraction; compatible Blender meshes share
+  data while occurrences retain individual placements and IFC links. Changes to
+  IFC bytes, style sidecars or geometry settings invalidate the cache. Current
+  Blender geometry and materials are still checked on every appearance assessment.
+- Large imports can advance in bounded batches through the existing Blender MCP,
+  reporting progress and retaining partial work on cancellation or failure. A
+  batch yields between products; a single complex geometry operation can still
+  block. Small models retain the synchronous API. See the
+  [runtime reference](skills/photo-to-ifc-building/references/runtime.md).
+- Geometry comparison accounts for Blender float32 rounding at tall-building
+  coordinates, with a 0.01 mm base tolerance and a strict 0.1 mm ceiling. Unsupported
+  coordinate magnitudes remain INCOMPLETE instead of receiving unlimited tolerance.
+  IFC coordinates and photo-fit thresholds are unchanged.
+- The skill advises simple hosts with semantic openings for dense facades, avoiding
+  redundant pre-cut holes. It also asks for a coherent exterior with simple,
+  documented hidden-surface assumptions. Ambiguous forms get a cheap side/rear
+  viewport look within drafting; no additional scored-render loop or fixed pass
+  count is introduced. Observation pixels must come from the photograph.
+
+The MCP still exposes six tools with unchanged argument schemas for both Codex and
+Claude Code. Material handoff and shader preservation behavior are unchanged.
+These changes address failure mechanisms observed in local tests; they do not
+establish an end-to-end latency improvement across buildings or clients.
 
 ## What changed in 0.7.2
 
@@ -165,7 +194,7 @@ reported explicitly; the skill permits a limited fallback without repeated probi
 The [skill](skills/photo-to-ifc-building/SKILL.md) describes the working method.
 Its [runtime reference](skills/photo-to-ifc-building/references/runtime.md)
 contains bootstrap, IFC, camera and observation examples. The camera/observation schema version is `1`; the IFC style registry is `2`
-(with legacy v1 reading), and the package version is `0.7.2`.
+(with legacy v1 reading), and the package version is `0.8.0`.
 
 The camera frame uses a right-handed Z-up world in metres. Camera axes are
 right/down/forward; `world_from_camera` includes orientation and translation.
@@ -221,8 +250,8 @@ fail the release suite. Tests build both bundles, check numerical camera/plane
 behaviour, synthetic cloud/occlusion regressions, canonical scorer parity and a
 real stdio MCP handshake, camera-only fitting (including fixed test-7
 correspondences), consumed-check accounting and stale IFC landmark rejection. Python tests use IfcOpenShell to reopen generated IFCs
-and exercise structural failures, geometry reuse and stale-loader/style lookup
-regressions. Adapter boundary tests use stubs; they do **not** replace a live
+and exercise structural failures, repeated geometry with distinct placements and
+voids, cache invalidation, bounded precision, and stale-loader/style lookup regressions. Adapter boundary tests use stubs; they do **not** replace a live
 Blender/Bonsai import/render test. Run the reproducible live test through Blender
 MCP after building the bundle, using `mcp/test/blender_integration.py` and its
 `run(repo, output_directory, node)` function. It creates a synthetic fixture in a

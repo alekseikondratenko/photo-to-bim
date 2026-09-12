@@ -25,7 +25,7 @@ def run(repo, output, node):
     boot = types.ModuleType('integration_bootstrap'); boot.__file__ = str(path)
     exec(compile(path.read_text(), str(path), 'exec'), boot.__dict__)
     rt = boot.load(); H, S, P, V = (rt[k] for k in ('helpers','scene','studio','validation'))
-    assert rt['version'] == '0.7.2'
+    assert rt['version'] == '0.8.0'
     original_scene = bpy.context.window.scene
     original_objects = {ob.name: (tuple(tuple(row) for row in ob.matrix_world), ob.BIMObjectProperties.ifc_definition_id)
                         for ob in original_scene.objects}
@@ -36,7 +36,7 @@ def run(repo, output, node):
     report = None
     try:
         IfcStore.id_map={}; IfcStore.guid_map={}; IfcStore.history=[]; IfcStore.future=[]; IfcStore.edited_objs=set()
-        scene = bpy.data.scenes.new('PhotoToBIM 0.7.2 integration')
+        scene = bpy.data.scenes.new('PhotoToBIM 0.8.0 integration')
         bpy.context.window.scene = scene
         ctx = H.new_model('Adapter fixture',[('Ground',0)])
         st=ctx['storeys']['Ground']
@@ -44,13 +44,42 @@ def run(repo, output, node):
         wall=H.profile_wall(ctx,st,(0,0),(8,0),[(0,0),(8,0),(8,3),(4,5),(0,3)],style_name='wall')
         window=H.framed_fill(ctx,H.opening(ctx,wall,1,.8,1.4,1.5),storey=st,crossbar_at=.6)
         H.framed_fill(ctx,H.opening(ctx,wall,5,0,1,2.1),kind='door',storey=st)
-        H.slab(ctx,st,[(0,0),(8,0),(8,5),(0,5)],style_name='wall')
+        slab=H.slab(ctx,st,[(0,0),(8,0),(8,5),(0,5)],style_name='wall')
+        repeated=H.mapped_copy(ctx,slab,st,(0,0,443.123456789),'High repeated slab')
+        H.mapped_copy(ctx,slab,st,(12,0,0),'Offset repeated slab')
         H.roof(ctx,st,[[(0,0,3),(4,0,5),(4,5,5),(0,5,3)],[(4,0,5),(8,0,3),(8,5,3),(4,5,5)]],style_name='roof')
         ifc=H.save(ctx,output/'fixture.ifc')
         gate=H.gate_report(ifc,required_classes=('IfcWall','IfcRoof','IfcSlab','IfcWindow','IfcDoor'))
         assert gate['verdict']=='PASS',gate
-        imported=S.import_ifc(ifc,scene)
+        job=S.import_ifc(ifc,scene,incremental=True)
+        steps=0
+        while job.phase in ('importing','checking'):
+            before_count=job.imported+job.checked
+            progress=job.step(max_elements=2,max_seconds=.25)
+            assert job.imported+job.checked-before_count<=2,progress
+            steps+=1
+            assert steps<100,progress
+        assert job.phase=='complete',job.status()
+        imported=job.result
         assert imported['appearance']['status']=='PASS', imported
+        assert imported['unique_meshes']<imported['objects'],imported
+        assert job.checked==job.imported==job.status()['total']
+        cache=H._geometry().snapshot(ifc)
+        assert Ifc.get() is not cache.file  # active authoring must not mutate cached export
+        Ifc.get().by_guid(wall.GlobalId).Name='Live authoring edit'
+        assert cache.file.by_guid(wall.GlobalId).Name!='Live authoring edit'
+        Ifc.get().by_guid(wall.GlobalId).Name=wall.Name
+        count=cache.stats()['tessellated_occurrences']
+        assert S.check_appearance(ifc)['status']=='PASS'
+        assert H.gate_report(ifc)['verdict']=='PASS'
+        assert cache.stats()['tessellated_occurrences']==count
+        high=next(ob for ob in scene.objects if ob.get('ptb.global_id')==repeated.GlobalId)
+        original_matrix=high.matrix_world.copy()
+        high.location.z+=.001
+        bpy.context.view_layer.update()
+        assert S.check_appearance(ifc)['status']=='FAIL'
+        high.matrix_world=original_matrix; bpy.context.view_layer.update()
+        assert S.check_appearance(ifc)['status']=='PASS'
         linked=[ob for ob in scene.objects if ob.get('ptb.global_id')==window.GlobalId][0]
         assert len(linked.data.materials)==2
         assert set(p.material_index for p in linked.data.polygons)=={0,1}
@@ -96,10 +125,25 @@ def run(repo, output, node):
         try:S.apply_materials(ifc)
         except ValueError:pass
         else:raise AssertionError('Edited geometry was not rejected')
+        # Partial work is explicit; changed snapshots cannot finish an old import.
+        cancelled=S.import_ifc(ifc,scene,incremental=True)
+        cancelled.step(max_elements=1)
+        assert cancelled.cancel()['status']=='cancelled'
+        assert cancelled.step()['status']=='cancelled' and cancelled.result is None
+        changed=S.import_ifc(ifc,scene,incremental=True)
+        changed.step(max_elements=1)
+        sidecar=Path(str(ifc)+'.styles.json'); saved_sidecar=sidecar.read_bytes()
+        try:
+            sidecar.write_bytes(saved_sidecar+b'\n')
+            assert changed.step()['status']=='failed' and changed.result is None
+        finally: sidecar.write_bytes(saved_sidecar)
         report=V.combine(gate,result['photographic'],result['appearance'])
         report['integration']={'status':'PASS','blender':bpy.app.version_string,'runtime':rt['version'],
             'checks':['IFC reopen and semantics','frame/glass face assignments','IFC-bound landmarks','Blender projection parity',
-                      'render preserves custom shader','missing style and edited geometry fail'],
+                      'render preserves custom shader','missing style and edited geometry fail',
+                      'bounded incremental import and complete occurrence checks','shared meshes retain individual placements',
+                      'high-coordinate roundoff passes but 1 mm placement edit fails','unchanged geometry reused across checks',
+                      'mutable Bonsai file isolated from snapshot','cancelled or changed-snapshot import cannot complete'],
             'synthetic_fixture':True}
     finally:
         bpy.context.window.scene=original_scene

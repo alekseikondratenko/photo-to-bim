@@ -119,7 +119,7 @@ def test_bootstrap_ignores_stale_modules(monkeypatch):
     monkeypatch.setitem(sys.modules,'photostudio',types.SimpleNamespace(VERSION='0.6.0'))
     boot=module('bootstrap')
     first,second=boot.load(),boot.load()
-    assert first['version']=='0.7.2'
+    assert first['version']=='0.8.0'
     assert first['studio'] is not second['studio']
     assert first['helpers'] is not second['helpers']
     assert 'ifc_path' in first['studio'].setup.__code__.co_varnames
@@ -147,7 +147,7 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     image=tmp_path/'source.jpg';image.write_bytes(b'test fixture')
     target=tmp_path/'test-project'
     result=setup.install(target,reference=image,node=shutil.which('node'))
-    assert result['version']=='0.7.2'
+    assert result['version']=='0.8.0'
     skill=target/'.agents/skills/photo-to-ifc-building'
     assert skill.is_symlink() and skill.resolve().is_relative_to(target)
     manifest=json.loads((target/'runtime-manifest.json').read_text())
@@ -165,7 +165,7 @@ def test_package_versions_and_mcp_entrypoints_agree():
     codex=json.loads((repo/'.codex-plugin/plugin.json').read_text())
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
-    assert codex['version']==claude['version']==npm['version']=='0.7.2'
+    assert codex['version']==claude['version']==npm['version']=='0.8.0'
     assert json.loads((repo/'.mcp.json').read_text())==json.loads((repo/'mcp.json').read_text())
     assert 'ifc-server.mjs' in (repo/'.mcp.json').read_text()
 
@@ -234,3 +234,112 @@ def test_mapped_fill_registry_preserves_both_item_styles(H,tmp_path):
     sh=ifcopenshell.geom.create_shape(ifcopenshell.geom.settings(),duplicate)
     assert len(sh.geometry.materials)==2 and set(sh.geometry.material_ids)=={0,1}
     assert H.gate_report(path,required_classes=('IfcWall','IfcWindow'))['verdict']=='PASS'
+
+
+def test_geometry_snapshot_reuse_and_world_placement(H, tmp_path):
+    G = H._geometry()
+    ctx = H.new_model('Repeated', [('Ground', 0)])
+    st = ctx['storeys']['Ground']
+    H.style('stone', (.6, .5, .4))
+    wall = H.wall(ctx, st, (0, 0), (20, 0), 450, style_name='stone')
+    wins = H.opening_grid(ctx, wall, 2, 3, 1.2, 1.4, 441.123456, 3, 1, 2, storey=st)
+    # An occurrence with a rotated local placement must keep its own transform.
+    transform = np.eye(4); transform[:2, :2] = [[0, -1], [1, 0]]; transform[:3, 3] = [9, 8, 0]
+    H._run('geometry.edit_object_placement', product=wins[-1], matrix=transform, is_si=True)
+    path = H.save(ctx, tmp_path/'repeated.ifc')
+    snap = G.snapshot(path)
+    records = dict(snap.iter_records(snap.file.by_type('IfcElement')))
+    settings = ifcopenshell.geom.settings(); settings.set(settings.USE_WORLD_COORDS, True)
+    for el in snap.file.by_type('IfcElement'):
+        shape = ifcopenshell.geom.create_shape(settings, el)
+        assert np.allclose(G.world_vertices(records[el.GlobalId]), np.asarray(shape.geometry.verts).reshape(-1, 3), rtol=0, atol=1e-9)
+        assert records[el.GlobalId].geometry.faces.tolist() == np.asarray(shape.geometry.faces).reshape(-1, 3).tolist()
+    assert len({records[w.GlobalId].geometry.key for w in wins}) <= 2  # direct prototype and mapped repeats
+    before = snap.stats()
+    with patch('ifcopenshell.geom.iterator', side_effect=AssertionError('unchanged geometry recalculated')):
+        gate = H.gate_report(path, required_classes=('IfcWall','IfcWindow'))
+        assert gate['verdict'] == 'PASS', gate
+    assert G.snapshot(path) is snap and snap.stats() == before
+    with pytest.raises(ValueError): records[wall.GlobalId].geometry.verts[0, 0] += 1
+
+
+def test_geometry_snapshot_invalidation(H, tmp_path):
+    G = H._geometry(); ctx, wall, *_ = model(H)
+    path = H.save(ctx, tmp_path/'snapshot.ifc'); first = G.snapshot(path)
+    assert G.snapshot(path) is first
+    options = G.settings(); options.set('mesher-linear-deflection', .002)
+    assert G.snapshot(path, options) is not first
+    first = G.snapshot(path)
+    registry = Path(str(path)+'.styles.json'); registry.write_text(registry.read_text()+'\n')
+    second = G.snapshot(path); assert second is not first
+    # Representation, placement, and style changes all invalidate the exported snapshot.
+    for mutate in (
+        lambda: setattr(wall.Representation.Representations[0].Items[0].Coordinates, 'CoordList', [(x+1, y, z) for x, y, z in wall.Representation.Representations[0].Items[0].Coordinates.CoordList]),
+        lambda: H._run('geometry.edit_object_placement', product=wall, matrix=np.diag([1., 1., 1., 1.]), is_si=True),
+        lambda: setattr(ctx['f'].by_type('IfcColourRgb')[0], 'Red', .23),
+    ):
+        previous = G.snapshot(path); mutate(); H.save(ctx, path)
+        assert G.snapshot(path) is not previous
+
+
+def test_geometry_snapshot_different_voids_and_styles(H, tmp_path):
+    ctx = H.new_model('Variants', [('Ground', 0)]); st = ctx['storeys']['Ground']
+    H.style('a', (.6,.5,.4)); H.style('b', (.1,.2,.3))
+    walls = [H.wall(ctx, st, (0, 0), (8, 0), 3, style_name=style) for style in ('a', 'a', 'b')]
+    H.opening(ctx, walls[0], 1, .8, 1.2, 1.4)
+    H.opening(ctx, walls[1], 4, .8, 1.2, 1.4)
+    path = H.save(ctx, tmp_path/'voids.ifc'); snap = H._geometry().snapshot(path)
+    records = dict(snap.iter_records([snap.file.by_guid(w.GlobalId) for w in walls]))
+    assert len({r.geometry.key for r in records.values()}) == 3
+
+
+def test_export_iterator_omission_is_not_pass(H, tmp_path):
+    ctx, wall, *_ = model(H); path = H.save(ctx, tmp_path/'invalid.ifc')
+    with patch('ifcopenshell.geom.iterator') as iterator:
+        iterator.return_value.initialize.return_value = False
+        report = H.gate_report(path)
+    assert report['geometry'] == report['verdict'] == 'FAIL'
+    assert report['geometry_checked'] == 0
+
+
+def test_precision_roundoff_real_edits_and_bounded_coordinates():
+    G = module('geometry_cache')
+    expected = np.array([[.123456789, 3.14, 443.123456789]])
+    rounded = expected.astype(np.float32).astype(float)
+    assert np.max(abs(rounded-expected)) > 1e-5  # old tolerance falsely failed
+    assert G.compare_vertices(rounded, expected)['status'] == 'PASS'
+    moved = rounded.copy(); moved[0, 2] += .001
+    assert G.compare_vertices(moved, expected)['status'] == 'FAIL'
+    near_origin = np.zeros((1, 3)); displaced = near_origin + .00002
+    assert G.compare_vertices(displaced, near_origin)['status'] == 'FAIL'
+    huge = np.array([[1e6, 0, 0]])
+    assert G.compare_vertices(huge, huge)['status'] == 'INCOMPLETE'
+    assert G.compare_vertices(huge+.001, huge)['status'] == 'FAIL'
+    assert G.compare_vertices([[float('nan'), 0, 0]], near_origin)['status'] == 'FAIL'
+    assert G.compare_vertices(np.zeros((2, 3)), near_origin)['status'] == 'FAIL'
+
+
+def test_nested_scaled_mappings_keep_geometry_and_styles(H, tmp_path):
+    ctx = H.new_model('Nested mappings', [('Ground', 0)]); st = ctx['storeys']['Ground']
+    H.style('red', (.8,.1,.1)); H.style('blue', (.1,.1,.8))
+    sources = [H.slab(ctx, st, [(0,0),(2,0),(2,1),(0,1)], style_name=style) for style in ('red','blue')]
+    copies = [H.mapped_copy(ctx, source, st, (6,2,10)) for source in sources]
+    for el in copies:
+        representation = el.Representation.Representations[0]
+        inner = representation.Items[0]
+        inner.MappingTarget = ctx['f'].create_entity('IfcCartesianTransformationOperator3DnonUniform',
+            LocalOrigin=ctx['f'].create_entity('IfcCartesianPoint', Coordinates=(0.,0.,0.)),
+            Scale=2., Scale2=3., Scale3=.5)
+        nested = H._run('geometry.map_representation', representation=representation)
+        el.Representation.Representations = (nested,)
+    path = H.save(ctx, tmp_path/'nested.ifc'); G = H._geometry(); snap = G.snapshot(path)
+    records = dict(snap.iter_records(snap.file.by_type('IfcElement')))
+    settings = ifcopenshell.geom.settings(); settings.set(settings.USE_WORLD_COORDS, True)
+    for el in snap.file.by_type('IfcElement'):
+        shape = ifcopenshell.geom.create_shape(settings, el)
+        record = records[el.GlobalId]
+        assert np.allclose(G.world_vertices(record), np.array(shape.geometry.verts).reshape(-1,3), rtol=0, atol=1e-9)
+        assert record.geometry.material_ids.tolist() == list(shape.geometry.material_ids)
+    red, blue = (records[e.GlobalId].geometry for e in copies)
+    assert np.array_equal(red.verts, blue.verts)
+    assert red.key != blue.key  # identical geometry with different styles cannot share Blender slots

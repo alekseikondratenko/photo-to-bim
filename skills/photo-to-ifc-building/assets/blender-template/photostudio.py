@@ -1,7 +1,7 @@
 """Blender render adapter. All photo evaluation runs through the bundled JS evaluator.
 Drafts may be unscored. Scored renders use fixed evidence and exact reference pixels.
 """
-VERSION = "0.7.2"
+VERSION = "0.8.0"
 import hashlib
 import json
 import math

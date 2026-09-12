@@ -53,7 +53,7 @@ const unique = (ids: string[]) => {
     throw Error("Observation IDs must be unique");
 };
 export function createIfcServer() {
-  const s = new McpServer({ name: "photo-to-bim", version: "0.7.2" });
+  const s = new McpServer({ name: "photo-to-bim", version: "0.8.0" });
   s.registerTool(
     "classify_reference",
     {

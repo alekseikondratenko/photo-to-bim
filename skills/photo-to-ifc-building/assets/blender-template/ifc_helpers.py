@@ -1,11 +1,27 @@
 """IFC4 authoring in SI metres. Geometry and evidence remain separate.
 Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
-VERSION = "0.7.2"
+VERSION = "0.8.0"
 import math
 
 import ifcopenshell
 import ifcopenshell.api
+
+
+_GEOMETRY = None
+
+
+def _geometry():
+    global _GEOMETRY
+    if _GEOMETRY is None:
+        from pathlib import Path
+        import types
+        path = Path(__file__).with_name('geometry_cache.py')
+        module = types.ModuleType('photo_geometry'); module.__file__ = str(path)
+        exec(compile(path.read_text(), str(path), 'exec'), module.__dict__)
+        if module.VERSION != VERSION: raise RuntimeError('Mixed geometry runtime versions')
+        _GEOMETRY = module
+    return _GEOMETRY
 
 
 def _run(cmd, **kw):
@@ -512,7 +528,8 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
     interoperability in a downstream application.
     """
     import numpy as np
-    f = ifcopenshell.open(str(path_or_file)) if not isinstance(path_or_file, ifcopenshell.file) else path_or_file
+    snapshot = _geometry().snapshot(path_or_file) if not isinstance(path_or_file, ifcopenshell.file) else None
+    f = snapshot.file if snapshot else path_or_file
     report = {"schema": "PASS", "geometry": "PASS", "semantics": "PASS", "schema_errors": [],
               "geometry_errors": [], "semantic_errors": [], "census": {}, "proxies": 0,
               "proxy_exceptions": {}, "uncontained": [], "geometry_checked": 0, "verdict": "PASS"}
@@ -526,14 +543,21 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
     try:
         import ifcopenshell.geom as geom
         settings = geom.settings()
+        if snapshot:
+            try: list(snapshot.iter_records(f.by_type("IfcElement")))
+            except ValueError: pass  # Per-product errors are reported below, never skipped.
         for el in f.by_type("IfcElement"):
             if not el.Representation:
                 report["geometry_errors"].append(f"{el.GlobalId} {el.is_a()} {el.Name}: missing representation")
                 continue
             try:
-                shape = geom.create_shape(settings, el)  # retain owner while reading geometry
-                coords = np.asarray(shape.geometry.verts)
-                if not len(coords) or not len(shape.geometry.faces) or not np.isfinite(coords).all():
+                if snapshot:
+                    record = snapshot.get(el)
+                    coords, faces = _geometry().world_vertices(record), record.geometry.faces
+                else:
+                    shape = geom.create_shape(settings, el)  # Mutable IFC: always evaluate fresh.
+                    coords, faces = np.asarray(shape.geometry.verts), shape.geometry.faces
+                if not len(coords) or not len(faces) or not np.isfinite(coords).all():
                     raise ValueError("empty or non-finite geometry")
                 report["geometry_checked"] += 1
             except Exception as e:

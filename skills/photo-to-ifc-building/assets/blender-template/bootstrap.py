@@ -4,12 +4,12 @@ import importlib.util
 import pathlib
 import sys
 
-VERSION = "0.7.2"
+VERSION = "0.8.0"
 
 def load():
     root = pathlib.Path(__file__).resolve().parent
     modules = {}
-    for name in ("ifc_helpers", "ifc_scene", "photostudio", "validation"):
+    for name in ("geometry_cache", "ifc_helpers", "ifc_scene", "photostudio", "validation"):
         path = root / (name + ".py")
         digest = hashlib.sha256(path.read_bytes()).hexdigest()[:12]
         key = f"photo_to_bim_{name}_{digest}"
@@ -22,8 +22,10 @@ def load():
         if module.VERSION != VERSION:
             raise RuntimeError(f"Mixed helper versions: bootstrap {VERSION}, {name} {module.VERSION}")
         modules[name] = module
+    modules["ifc_helpers"]._GEOMETRY = modules["geometry_cache"]
+    modules["ifc_scene"]._GEOMETRY = modules["geometry_cache"]
     modules["photostudio"]._SCENE = modules["ifc_scene"]
     return {"version": VERSION, "helpers": modules["ifc_helpers"], "studio": modules["photostudio"],
             "scene": modules["ifc_scene"], "validation": modules["validation"],
             "capabilities": ["camera_frame_v1", "canonical_evaluation_v1", "ifc_gate_v1", "profile_wall",
-                             "item_materials_v2", "framed_fill", "ifc_landmarks_v1", "acceptance_v1"]}
+                             "item_materials_v2", "framed_fill", "ifc_landmarks_v1", "acceptance_v1", "incremental_import_v1", "geometry_cache_v1", "bounded_precision_v1"]}

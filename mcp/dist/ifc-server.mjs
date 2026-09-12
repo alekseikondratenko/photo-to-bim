@@ -37191,7 +37191,7 @@ function evaluate(req) {
   const verdict = status === "INCOMPLETE" ? "unavailable" : status === "PASS" ? "satisfied" : stable ? "stalled" : "needs_refinement";
   const report = {
     schema_version: 1,
-    version: "0.7.2",
+    version: "0.8.0",
     status,
     verdict,
     loss,
@@ -37260,7 +37260,7 @@ var unique = (ids) => {
     throw Error("Observation IDs must be unique");
 };
 function createIfcServer() {
-  const s = new McpServer({ name: "photo-to-bim", version: "0.7.2" });
+  const s = new McpServer({ name: "photo-to-bim", version: "0.8.0" });
   s.registerTool(
     "classify_reference",
     {

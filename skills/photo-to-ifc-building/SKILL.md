@@ -3,7 +3,7 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.7.2
+# Photo to IFC building — 0.8.0
 
 Produce an editable, dimensioned IFC reconstruction and a comparison render.
 For ambiguous scale or roof topology, consult [scale anchors](references/scale-anchors.md)
@@ -37,13 +37,17 @@ scene without checking whether it contains work that must be preserved.
    arithmetic consistency, not the correctness of the plane or scale.
 3. **Draft early.** Build the envelope and main roof, then make a cheap unscored
    render. A weak calibration can support a provisional draft; record that
-   uncertainty. If calibration is unavailable, use an explicitly assumed
+   uncertainty. Complete a coherent exterior in 3D: infer simple side/rear surfaces
+   consistent with the visible form, and document them as assumptions. For ambiguous
+   forms, use a cheap side/rear viewport look during this draft to catch missing depth
+   or disconnected surfaces; no additional scored render is required. If calibration is unavailable, use an explicitly assumed
    camera instead of repeating poor measurements indefinitely. Early quantitative
    checking is optional when existing evidence can resolve a specific uncertainty
    before costly detail work; reuse fit residuals or a compatible existing render.
    Do not create extra annotations or renders just to complete an early checkpoint.
 4. **Refine from fixed evidence.** Save stable landmark IDs in `observations.json`
-   before fitting; spread them over the building. Prefer some withheld check
+   before fitting; measure their pixels from the photograph, never by projecting
+   the current model back into the image. Spread them over the building. Prefer some withheld check
    points; set `used_for_fitting: true` if a check later guides camera **or geometry**
    edits. Bind final model landmarks to the exported IFC with `capture_landmarks`.
    Add a subject mask only when the silhouette can be annotated
@@ -67,7 +71,10 @@ Match envelope, roof and major openings before secondary details. Default to
 visible architectural detail; omit unseen interiors and subpixel decoration
 unless requested. Keep decorative render context outside IFC. Repeated real
 components remain semantic occurrences but should share geometry where possible
-(`opening_grid` uses mapped fill geometry). Do not spend the run creating
+(`opening_grid` uses mapped fill geometry). For dense openings, keep host walls
+simple and let IFC openings cut them; avoid manually pre-cutting the same holes
+before adding void relationships. Use incremental import from the runtime
+reference when a large model risks a long blocking Blender call. Do not spend the run creating
 thousands of guessed parts. Record any deliberate simplification.
 
 Repeat a check only after a relevant change or new evidence, when the expected

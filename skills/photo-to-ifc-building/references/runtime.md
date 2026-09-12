@@ -1,4 +1,4 @@
-# Runtime API 0.7.2
+# Runtime API 0.8.0
 
 The IFC MCP contains six tools: `classify_reference`, `view_crop`, `trace_edges`,
 `calibrate_camera`, `place_features`, `compare_model`. Tool schemas carry exact
@@ -73,6 +73,48 @@ collections. Start from a cleared/preserved scene when reimporting to avoid dupl
 geometry. It is a tessellated preview importer, not a parametric-family converter.
 `S.check_appearance(ifc_path)` is read-only; `S.apply_materials(ifc_path)` explicitly
 restores IFC item styles and refuses stale or edited geometry.
+
+## Large imports and coordinate precision
+
+Import uses the IFC geometry iterator, so mapped representations can share kernel
+work. Compatible local meshes share Blender data; each semantic occurrence keeps
+its own placement and IFC link. Geometry after opening subtraction and per-face
+styles determine compatibility. Do not manually pre-cut the same host holes and
+then add IFC voids. This does not require fewer semantic elements or a different
+IFC class.
+
+For a large model, keep an import job in Blender's memory and advance it through
+separate Blender MCP calls (or a main-thread UI timer):
+
+```python
+import bpy
+bpy.app.driver_namespace['ptb_import'] = S.import_ifc('/workspace/house.ifc', incremental=True)
+# Subsequent calls; stop when status is complete, failed, or cancelled.
+job = bpy.app.driver_namespace['ptb_import']
+print(job.step(max_elements=100, max_seconds=.25))
+# job.status() is read-only. job.cancel() stops a partial import.
+```
+
+Batch bounds yield between products; they cannot interrupt one expensive kernel
+operation. Choose practical batches, inspect progress, and do not blindly restart
+a partial import after a client timeout. Cancellation/failure leaves the named
+partial collection inspectable; preserve or remove it deliberately before retrying.
+A completed job includes its appearance report, which may still fail validation.
+The synchronous API remains available for small models.
+
+Import and checks share one export geometry snapshot per bootstrap. IFC bytes,
+style-sidecar bytes, geometry settings, or path changes invalidate it. Bonsai uses
+a separate mutable file. Live in-memory IFC gate checks are always evaluated fresh.
+Every appearance check still examines current objects, placements, faces and styles;
+cached tessellation never substitutes for checking edited Blender geometry.
+
+Coordinate comparison allows two float32 ULPs per coordinate, with a 0.01 mm base
+and a strict 0.1 mm ceiling, to accommodate Blender storage roundoff at tall-building
+coordinates. Reports expose the actual error and allowed tolerance. Coordinates
+requiring a larger allowance return INCOMPLETE (or FAIL for a discrepancy beyond
+the ceiling); use a local origin rather than relaxing the bound. IFC coordinates
+and photographic thresholds are unchanged. This is a numerical comparison policy,
+not a claim of reconstruction accuracy.
 
 ## Camera and observations
 
