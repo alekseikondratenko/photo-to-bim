@@ -1,7 +1,7 @@
 """IFC4 authoring in SI metres. Geometry and evidence remain separate.
 Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 import math
 
 import ifcopenshell

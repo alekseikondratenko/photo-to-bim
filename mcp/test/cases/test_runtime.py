@@ -119,7 +119,7 @@ def test_bootstrap_ignores_stale_modules(monkeypatch):
     monkeypatch.setitem(sys.modules,'photostudio',types.SimpleNamespace(VERSION='0.6.0'))
     boot=module('bootstrap')
     first,second=boot.load(),boot.load()
-    assert first['version']=='0.8.1'
+    assert first['version']=='0.8.2'
     assert first['studio'] is not second['studio']
     assert first['helpers'] is not second['helpers']
     assert 'ifc_path' in first['studio'].setup.__code__.co_varnames
@@ -147,7 +147,7 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     image=tmp_path/'source.jpg';image.write_bytes(b'test fixture')
     target=tmp_path/'test-project'
     result=setup.install(target,reference=image,node=shutil.which('node'))
-    assert result['version']=='0.8.1'
+    assert result['version']=='0.8.2'
     skill=target/'.agents/skills/photo-to-ifc-building'
     assert skill.is_symlink() and skill.resolve().is_relative_to(target)
     manifest=json.loads((target/'runtime-manifest.json').read_text())
@@ -165,7 +165,7 @@ def test_package_versions_and_mcp_entrypoints_agree():
     codex=json.loads((repo/'.codex-plugin/plugin.json').read_text())
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
-    assert codex['version']==claude['version']==npm['version']=='0.8.1'
+    assert codex['version']==claude['version']==npm['version']=='0.8.2'
     assert json.loads((repo/'.mcp.json').read_text())==json.loads((repo/'mcp.json').read_text())
     assert 'ifc-server.mjs' in (repo/'.mcp.json').read_text()
 

@@ -3,7 +3,7 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.8.1
+# Photo to IFC building — 0.8.2
 
 Produce an editable, dimensioned IFC reconstruction and a comparison render.
 For ambiguous scale or roof topology, consult [scale anchors](references/scale-anchors.md)
@@ -69,9 +69,13 @@ scene without checking whether it contains work that must be preserved.
 
 ## Detail and stopping policy
 
-Match envelope, roof and major openings before secondary details. Default to
-visible architectural detail; omit unseen interiors and subpixel decoration
-unless requested. Keep decorative render context outside IFC. Repeated real
+Match envelope, roof and major openings before secondary details. Complete unseen
+exterior surfaces using plausible continuations of observed opening patterns,
+materials and surface articulation where appropriate to the building’s form.
+Do not default to blank façades solely because they are unseen. Keep inferred
+detail subordinate to visible evidence, label it as assumed, and avoid unsupported
+major additions or distinctive features. Omit unseen interiors and subpixel
+decoration unless requested. Keep decorative render context outside IFC. Repeated real
 components remain semantic occurrences but should share geometry where possible
 (`opening_grid` uses mapped fill geometry). For dense openings, keep host walls
 simple and let IFC openings cut them; avoid manually pre-cutting the same holes

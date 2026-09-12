@@ -1,7 +1,7 @@
 # photo-to-bim
 
 Photo-guided building reconstruction as semantic IFC, using a small agent skill,
-measurement tools, and Blender with Bonsai. Version **0.8.1** focuses on repeatable
+measurement tools, and Blender with Bonsai. Version **0.8.2** focuses on repeatable
 execution and honest validation. It does not claim survey accuracy from one image
 or a demonstrated speed advantage over a capable agent with Blender alone.
 
@@ -9,9 +9,23 @@ The output has an `IfcProject → IfcSite → IfcBuilding → IfcBuildingStorey`
 hierarchy, SI metre units, and typed walls, roofs, slabs, windows and doors.
 Dimensions derived from pixels remain conditional on camera, scale and assumed
 planes. The goal is a coherent exterior, including inferred side/rear surfaces
-consistent with the visible form. Hidden geometry is an explicit assumption,
-not recovered ground truth; unseen interiors and speculative decoration are omitted. Downstream application
+consistent with the visible form. Unseen façades may continue observed opening
+patterns, materials and surface articulation where appropriate; being unseen is
+not by itself a reason to leave them blank. These details remain explicitly assumed,
+and do not justify unsupported major additions or distinctive features.
+Hidden geometry is not recovered ground truth; unseen interiors and speculative
+decoration are omitted. Downstream application
 interoperability must be tested; schema validation alone does not establish it.
+
+## What changed in 0.8.2
+
+- Exterior completion guidance now permits plausible continuation of observed
+  opening patterns and surface treatment on unseen façades. Inferred detail stays
+  subordinate to visible evidence and is documented as assumed.
+- This addresses test 18's deliberate blank side/rear façades. It changes the
+  modelling guidance, not the MCP tools, scoring, or stopping policy; no additional
+  renders or checks are required. The next reconstruction tests will assess the
+  behavioral effect.
 
 ## What changed in 0.8.1
 
@@ -209,7 +223,7 @@ reported explicitly; the skill permits a limited fallback without repeated probi
 The [skill](skills/photo-to-ifc-building/SKILL.md) describes the working method.
 Its [runtime reference](skills/photo-to-ifc-building/references/runtime.md)
 contains bootstrap, IFC, camera and observation examples. The camera/observation schema version is `1`; the IFC style registry is `2`
-(with legacy v1 reading), and the package version is `0.8.1`.
+(with legacy v1 reading), and the package version is `0.8.2`.
 
 The camera frame uses a right-handed Z-up world in metres. Camera axes are
 right/down/forward; `world_from_camera` includes orientation and translation.

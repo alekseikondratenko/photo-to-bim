@@ -76,7 +76,7 @@ startup_timeout_sec = 60
 Match the visible proportions, roof and openings, using estimated dimensions in metres.
 Deliver house.ifc and comparison.png in this folder, with separate IFC, photographic, appearance and visual-review evidence.
 Use the local {version} bootstrap and keep every input/output file inside this folder.
-Model visible architectural detail; record scale and hidden-geometry assumptions.
+Prioritize visible detail and plausibly complete unseen exterior surfaces; record scale and inferred-detail assumptions.
 '''
     (target / 'PROMPT.txt').write_text(prompt.replace('house.jpg', 'house'+reference.suffix.lower() if reference else 'house.jpg'))
     (target / 'SETUP.md').write_text(f'''# Photo to BIM test — {version}
