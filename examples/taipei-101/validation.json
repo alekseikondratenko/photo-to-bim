@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "0.7.2",
+  "version": "0.8.3",
   "ifc": {
     "schema": "PASS",
     "geometry": "PASS",
@@ -11,36 +11,35 @@
     "census": {
       "IfcBuildingElementProxy": 0,
       "IfcBuildingStorey": 101,
-      "IfcCurtainWall": 40,
+      "IfcCurtainWall": 44,
       "IfcDoor": 0,
-      "IfcMember": 108,
+      "IfcMember": 1815,
       "IfcOpeningElement": 0,
-      "IfcPlate": 290,
-      "IfcRoof": 11,
-      "IfcSlab": 1,
-      "IfcWall": 1,
+      "IfcRoof": 3,
+      "IfcSlab": 101,
+      "IfcWall": 0,
       "IfcWindow": 0
     },
     "proxies": 0,
     "proxy_exceptions": {},
     "uncontained": [],
-    "geometry_checked": 574,
+    "geometry_checked": 2035,
     "verdict": "PASS"
   },
   "photographic": {
     "name": "comparison",
     "schema_version": 1,
-    "version": "0.7.2",
-    "status": "PASS",
-    "verdict": "satisfied",
-    "loss": 0.9953867131594605,
-    "metric_key": "825561ff334fcfcfd841255b9ba320dd6f3127a2e18baeb611a5a0091ac00fe8",
+    "version": "0.8.3",
+    "status": "FAIL",
+    "verdict": "needs_refinement",
+    "loss": 1.63182751752327,
+    "metric_key": "9c57fe39eade3749d153b0929161eb32f3f79127a34c344d2c60e2f9ffe46e60",
     "landmarks": {
-      "status": "PASS",
-      "rms_px": 2.89805417629615,
-      "max_px": 4.976933565797302,
+      "status": "FAIL",
+      "rms_px": 4.085482369783093,
+      "max_px": 8.15913758761635,
       "tolerance_px": 5,
-      "coverage": 13,
+      "coverage": 14,
       "held_out_count": 0,
       "consumed_check_count": 0,
       "undeclared_check_count": 0,
@@ -48,74 +47,74 @@
       "held_out_rms_px": null,
       "worst": [
         {
-          "id": "tier1-right",
+          "id": "tier1_left",
           "role": "fit",
           "independence": "used",
           "reference": [
-            415,
-            931
+            234,
+            921
           ],
           "projected": [
-            415.86263172021233,
-            926.0983947289033
+            231.98770090621485,
+            928.9070967194543
           ],
-          "error_px": 4.976933565797302
+          "error_px": 8.15913758761635
         },
         {
-          "id": "tier1-front",
+          "id": "top_front",
           "role": "fit",
           "independence": "used",
           "reference": [
-            335,
-            909
+            332,
+            302
           ],
           "projected": [
-            332.74784774375127,
-            912.5384373277942
+            337.45768435145186,
+            305.7810093015825
           ],
-          "error_px": 4.19436866620636
+          "error_px": 6.63945403016965
         },
         {
-          "id": "tier8-front",
+          "id": "tier4_right",
           "role": "fit",
           "independence": "used",
           "reference": [
-            329,
-            305
+            414,
+            688
           ],
           "projected": [
-            332.69872983994526,
-            303.7056460764006
+            412.8612441529499,
+            682.07360907943
           ],
-          "error_px": 3.918667440398403
+          "error_px": 6.034805234852724
         },
         {
-          "id": "crown-left",
+          "id": "tier1_front",
           "role": "fit",
           "independence": "used",
           "reference": [
-            286,
-            203
+            336,
+            908
           ],
           "projected": [
-            282.88095011940163,
-            204.73737303074154
+            336.5842015920681,
+            902.8079003667821
           ],
-          "error_px": 3.5702853115134543
+          "error_px": 5.224862687328416
         },
         {
-          "id": "crown-right",
+          "id": "tier4_front",
           "role": "fit",
           "independence": "used",
           "reference": [
-            363,
-            208
+            334,
+            648
           ],
           "projected": [
-            365.428573075563,
-            210.42929848633162
+            336.9617118007289,
+            644.7790568654576
           ],
-          "error_px": 3.435033961847053
+          "error_px": 4.375638406739349
         }
       ],
       "note": "Projection agreement under the supplied camera; does not independently establish physical dimensions."
@@ -127,41 +126,42 @@
     "problems": [],
     "model_binding": {
       "status": "IFC_SNAPSHOT",
-      "ifc_sha256": "412ec5e1e749c14efddf2a014834e7c9d60a081152cf9b7b55d20162b823b594"
+      "ifc_sha256": "67050017bb54b139e75bc04508dcb43f209df80b1ba5c97582ebd73571013e29"
     },
     "camera_check": {
       "status": "UNDETERMINED",
       "note": "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either."
     },
     "note": "Only fixed observations and explicit masks control this assessment. A threshold miss is not an instruction to repeat; refine only when evidence and expected benefit justify another pass.",
-    "render_sha256": "3ff1547c81d76a3e5f64ab7664c9ae2c958abedd2c11d4033a0a403fde5e0c02",
-    "camera_sha256": "6f0efeab180ffd2073f143a17db4e37f637f97e466bf0e09896ea72732e06ca9"
+    "render_sha256": "695d040a47994fd27b2d7cd04c3d4ac6779d5ea3d76b4786ba87b9a88cb4bb1a",
+    "camera_sha256": "888feb4fdbd71c4b629fa315ea0c9c150bd5f3d68d3f08bff5060d07a35d9db4"
   },
   "appearance": {
     "status": "PASS",
-    "linked_objects": 574,
+    "linked_objects": 2035,
     "missing_guids": [],
     "unlinked_objects": [],
     "errors": [],
     "material_overrides": [],
+    "coordinate_precision": {
+      "maximum_error_m": 1.6733703887439333e-05,
+      "maximum_tolerance_m": 6.103515625e-05,
+      "precision_limited_guids": [],
+      "ceiling_m": 0.0001
+    },
     "note": "Automated linkage/geometry/material checks, not visual acceptance or colour accuracy."
   },
   "visual_review": {
     "decision": "accepted",
     "source": "agent",
     "reviewer": "Codex",
-    "basis": "Final render visually inspected against the photograph. Eight flared tiers, two-face facade grid, stepped crown, medallions, spire and image framing agree at schematic exterior level. Fine ornaments and glazing reflectance simplified; neighboring buildings and landscaping omitted; obscured lower shell shown in full. Selected-point fit does not validate the complete silhouette or survey dimensions."
+    "basis": "Inspected full-resolution render against reference: recognizable tiered envelope, curtain-wall grids, circular ornaments, crown and mast. Approximate geometry and simplified facade detail; ground context omitted, inferred lower podium exposed. Does not meet 5 px maximum criterion."
   },
   "acceptance": {
     "status": "pending_user_review",
-    "deviations": []
+    "deviations": [
+      "photographic"
+    ]
   },
-  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance.",
-  "limitations": [
-    "All 13 landmarks used for camera or geometry fitting; no independent held-out points.",
-    "Full silhouette-mask comparison unavailable and not performed.",
-    "Floor elevations, 508 m height, facade depth and hidden exterior geometry assumed.",
-    "No hidden interior components modelled.",
-    "Render excludes surrounding buildings and vegetation."
-  ]
+  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance."
 }

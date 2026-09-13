@@ -8,8 +8,8 @@ benchmark, and the current packaging revision does not change or rescore them.
 | --- | --- |
 | [White House](white-house/README.md) | 0.8.2 |
 | [Empire State Building](empire-state/README.md) | 0.8.0 |
-| [Taipei 101](taipei-101/README.md) | 0.7.2 |
-| [Taipei: Claude Code and Codex](taipei-comparison/README.md) | 0.8.3 and 0.7.2 |
+| [Taipei 101](taipei-101/README.md) | 0.8.3 |
+| [Taipei: Claude Code and Codex](taipei-comparison/README.md) | 0.8.3 |
 | [Heydar Aliyev Center](heydar-aliyev-center/README.md) | 0.8.0 |
 | [Red-roof house](red-roof-house/README.md) | 0.7.2 |
 | [Earlier house renders](early-runs/README.md) | Earlier development runs |

@@ -5,23 +5,30 @@ The models are shown at equal widths. Both renders and the reference are
 960 × 1547 pixels. The Claude presentation was re-rendered in Blender from its
 original IFC and fitted camera with blue-sky daylight similar to the Codex render.
 IFC geometry, material colours and camera framing were preserved. The original
-Claude render is retained below; the Codex render is unchanged.
+Claude render is retained below; the Codex image is the unedited final render
+from the current run.
 
 | Client and model | Plugin version | Approximate elapsed time |
 | --- | --- | --- |
 | Claude Code · Fable 5.1 | 0.8.3 | 30 minutes |
-| Codex · Astra | 0.7.2 | 14 minutes |
+| Codex · Astra | 0.8.3 | 9 minutes |
 
-Elapsed time is measured from the reconstruction request/start event to the final
-completion response in each session log, rounded to the nearest whole minute.
-It includes tool execution and waits during the task. Installation time is not
-included, nor is the later daylight presentation render. These are individual development runs with different plugin versions
-and detail choices, not a controlled model-speed benchmark.
+Claude time is measured from the reconstruction request to the final response,
+rounded to whole minutes. Codex's approximately 9 minutes is the author's reported
+estimate; its session log records about 8 minutes from task start to completion.
+Both exclude installation and the later Claude daylight presentation render.
+These are individual development runs with different detail choices, not a
+controlled model-speed benchmark.
 
-Both models infer lower geometry: the earlier Codex model extends its tapered
-envelope to an assumed ground level, while the Claude model adds a broad podium.
-Neither render includes the photograph's surrounding ground context, so the
-visible lower silhouettes also reflect different assumptions.
+Both models infer the obscured lower geometry. Codex continues the curtain-wall
+pattern around its lower podium; Claude adds a broader podium. Neither render
+includes the photograph's surrounding ground context, so the exposed undersides
+and lower silhouettes reflect those assumptions.
+
+The updated Codex run passes IFC and appearance checks. Its fitted landmarks have
+4.09 px RMS error and 8.16 px maximum error against a 5 px tolerance, so the
+photographic result remains approximate. There are no held-out points or
+silhouette-mask checks.
 
 - [Original photograph](../taipei-101/reference.jpg)
 - [Claude Code daylight presentation](claude-code-daylight.png)

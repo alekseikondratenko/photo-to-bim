@@ -1,12 +1,7 @@
 {
   "schema_version": 1,
-  "runtime_version": "0.7.2",
-  "reference": "reference.jpg",
-  "reference_sha256": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
-  "image_size": [
-    960,
-    1547
-  ],
+  "runtime_version": "0.8.3",
+  "reference": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
   "camera": {
     "schema_version": 1,
     "convention": "Z_UP_RIGHT_HANDED",
@@ -14,29 +9,29 @@
       960,
       1547
     ],
-    "focal_px": 2250.0,
+    "focal_px": 15469.993489583334,
     "principal_point": [
-      480.0,
-      1199.9999866485596
+      325.0000047683716,
+      675.0000009536743
     ],
     "world_from_camera": [
       [
-        0.8087174892425537,
-        -0.0011664360063150525,
-        -0.5881959795951843,
-        644.1646728515625
+        0.8067007660865784,
+        -0.20953035354614258,
+        -0.5525674223899841,
+        3720.828857421875
       ],
       [
-        0.5881971120834351,
-        0.001275495975278318,
-        0.8087164759635925,
-        -768.052001953125
+        0.5909577012062073,
+        0.2886195182800293,
+        0.7533045411109924,
+        -5071.07763671875
       ],
       [
-        -0.00019307438924442977,
-        -0.9999985098838806,
-        0.0017176101682707667,
-        -2.1517035961151123
+        0.001641589100472629,
+        -0.9342353940010071,
+        0.3566531836986542,
+        -2185.491943359375
       ],
       [
         0.0,
@@ -47,56 +42,39 @@
     ]
   },
   "scale_anchor": {
-    "status": "assumed",
     "height_m": 508,
-    "source": "Nominal architectural height used as an unverified modelling assumption. No external survey or website accessed."
+    "status": "assumed",
+    "source": "Nominal height assumption, not surveyed or independently verified"
   },
   "observed_features": [
-    "Eight outward-flared stacked main facade tiers",
-    "Dense vertical mullions and horizontal glazing/spandrel rhythm",
-    "Teal curtain wall and pale metallic corner trim",
-    "Two large circular facade medallions at lower tower transition",
-    "Smaller flared upper crown with repeated cornices",
-    "Tall cylindrical shaft and ringed tapering antenna"
+    "Eight flared main tiers",
+    "Two visible green curtain-wall faces",
+    "Dense vertical mullions and horizontal spandrels",
+    "Circular podium ornaments",
+    "Setback shoulder, narrower crown and antenna"
   ],
-  "derived_dimensions": {
-    "ground_to_main_tiers_m": 85,
-    "tier_height_m": 37.125,
-    "main_tier_top_elevation_m": 382,
-    "main_tier_bottom_width_m": 50,
-    "main_tier_top_width_m": 58,
-    "crown_cap_elevation_m": 441,
-    "spire_tip_m": 508,
-    "estimated_storeys": 101,
-    "lower_floor_height_m": 3.4,
-    "main_floor_height_m": 4.640625,
-    "upper_floor_height_m": 4.916666666666667
+  "derived_dimensions_m": {
+    "tier_half_width": 27.99659237581963,
+    "podium_height": 56.23564525356956,
+    "tier_height": 39.62350648839418,
+    "tier_top": 373.22369716072296,
+    "crown_top": 436.73899263837893
   },
   "assumptions": {
-    "ScaleStatus": "assumed - not surveyed",
-    "ScaleSource": "508 m nominal total height chosen as unverified anchor; all proportions interpreted from one photograph",
-    "TotalHeight_m": 508.0,
-    "MainTierWidth_m": 58.0,
-    "MainTierBottomWidth_m": 50.0,
-    "BaseHeight_m": 85.0,
-    "TierHeight_m": 37.125,
-    "TierCount": 8,
-    "EstimatedLowerFloorHeight_m": 3.4,
-    "EstimatedMainFloorHeight_m": 4.640625,
-    "EstimatedCrownFloorHeight_m": 4.916666666666667,
-    "HiddenGeometry": "Opposite exterior faces mirrored; lower envelope extended to assumed ground. No interior partitions, core, stairs, services or hidden floor slabs. Surroundings omitted.",
-    "DetailPolicy": "Curtain wall facades and spandrel plates, explicit mullion lattices, simplified ruyi brackets, medallions, cornices and spire. Estimated 101 storeys; floor numbering is interpretive."
+    "ScaleStatus": "assumed",
+    "ScaleSource": "508 m nominal overall height used as assumption, not surveyed",
+    "Reference": "reference.jpg",
+    "HiddenGeometry": "Four-sided continuation of visible facades; ground obscured; no interior layout",
+    "Floors": "101 nominal levels; individual floor elevations estimated",
+    "Camera": "Perspective-corrected appearance fit; not a recovered physical camera location",
+    "Simplification": "Exterior curtain-wall assemblies and repeated mullions; no guessed window operability or interior fittings"
   },
-  "detail_policy": {
-    "semantic_elements": 574,
-    "curtain_wall_assemblies": 40,
-    "mapped_repeat_occurrences": 392,
-    "glazing": "Continuous curtain-wall envelopes with explicit mullions, spandrels and grouped darker vision plates; darker-pane distribution is representative, not pane-by-pane surveyed.",
-    "geometry_precision": "Vertices authored on a 1/32768 m grid for lossless Blender float32 transfer of this 508 m model.",
-    "excluded": "Interior partitions, cores, stairs, services, hidden floor slabs, neighbors and landscaping.",
-    "ornaments": "Ruyi and crown terrace motifs simplified to visible silhouette members."
-  },
-  "stopping_reason": "Envelope, selected landmarks, semantic model and appearance linkage verified. Further reconstruction of fine ornaments, reflections or hidden geometry is not supported sufficiently by this single reference.",
-  "validation": "validation.json",
-  "ifc_sha256": "412ec5e1e749c14efddf2a014834e7c9d60a081152cf9b7b55d20162b823b594"
+  "detail_policy": "101 nominal storeys with estimated slab elevations, 44 curtain-wall face assemblies; 8 repeated tiers share member geometry. Hidden faces repeat the observed facade language. No unseen interiors or neighboring buildings. Ground and lower podium occluded in photograph; extent is inferred.",
+  "camera_limitation": "Long-lens virtual camera fits apparently perspective-corrected photograph. Its below-ground virtual position is an optical approximation, not a physical location.",
+  "validation_limitations": [
+    "All 14 landmark observations used for fitting geometry and camera",
+    "No held-out points or silhouette mask",
+    "Single photograph does not determine absolute dimensions"
+  ],
+  "stopping_reason": "Main exterior and visible detail reconstructed; remaining differences and hidden geometry do not justify further unconstrained fitting."
 }

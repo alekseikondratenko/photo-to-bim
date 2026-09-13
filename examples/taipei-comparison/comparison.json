@@ -1,5 +1,5 @@
 {
-  "timing_basis": "Reconstruction request/start event to final completion response; elapsed time rounded to nearest whole minute; includes tool execution and waits; excludes installation.",
+  "timing_basis": "Approximate whole minutes; Claude rounded from session log, Codex reported by author. Excludes installation and later presentation rendering.",
   "runs": [
     {
       "test_number": 22,
@@ -10,22 +10,24 @@
       "source_session_id": "2818139b-63af-4914-bd69-b3cd82ca4088"
     },
     {
-      "test_number": 11,
+      "test_number": 23,
       "client": "Codex",
       "model": "gpt-6-astra",
-      "plugin_version": "0.7.2",
-      "elapsed_minutes_rounded": 14,
-      "source_session_id": "01a09177-d79a-7d82-aadc-99363e5b46a3"
+      "plugin_version": "0.8.3",
+      "elapsed_minutes_approximate": 9,
+      "timing_source": "Author-reported estimate; session task duration rounds to 8 minutes.",
+      "session_elapsed_minutes_rounded": 8,
+      "source_session_id": "01a09acd-344d-7110-aac6-1f163cd02886"
     }
   ],
   "files_sha256": {
     "../taipei-101/reference.jpg": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
     "claude-code.png": "b700ee9065970441ed416905af31654c79f80e8de91e86afdef0038969ca0991",
-    "../taipei-101/comparison.png": "3ff1547c81d76a3e5f64ab7664c9ae2c958abedd2c11d4033a0a403fde5e0c02",
+    "../taipei-101/comparison.png": "695d040a47994fd27b2d7cd04c3d4ac6779d5ea3d76b4786ba87b9a88cb4bb1a",
     "claude-code-daylight.png": "674a8b7a4558a612b4988ec777bea5de034979f91c800d17bef504093f2b57ee",
     "render_daylight.py": "716cde02f8b10387d0c8670ed0b5fc860a5fa03db70260bad9532101278dc13c"
   },
-  "image_changes": "Claude daylight presentation re-rendered from the original IFC with original camera and IFC colours; new sky and lighting. Original Claude render retained. Codex render and reference unchanged.",
+  "image_changes": "Claude daylight presentation re-rendered from original IFC with original camera and IFC colours; new sky and lighting. Original Claude render retained. Codex display replaced with the unedited final render from the current 0.8.3 run. Reference unchanged.",
   "presentation": {
     "claude_display": "claude-code-daylight.png",
     "claude_original": "claude-code.png",
