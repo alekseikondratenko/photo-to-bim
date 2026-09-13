@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "ifc_sha256": "80902cf7bdc022de95ed2dcd9ef2d0b88c72991da90b6c8227da5029fe09ad60",
+  "bindings": {
+    "front-left-foot": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 0,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        -7.998545454545455,
+        62.4,
+        0.0
+      ],
+      "snap_distance_m": 0.0
+    },
+    "front-arch-upper-left": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 10920,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        -11.812298227714537,
+        80.95656106221801,
+        23.7214730499524
+      ],
+      "snap_distance_m": 1.475552811121985e-14
+    },
+    "front-arch-upper-right": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 13104,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        -8.647811122386953,
+        82.71819334457085,
+        24.42190809699906
+      ],
+      "snap_distance_m": 0.0
+    },
+    "front-slope": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 19656,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        6.939789119393362,
+        84.81964479258554,
+        10.690399551231591
+      ],
+      "snap_distance_m": 0.0
+    },
+    "front-low-right": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 26208,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        16.165903779129213,
+        81.94697768222183,
+        -0.14867444205554614
+      ],
+      "snap_distance_m": 1.4217791915866692e-14
+    },
+    "left-rear-crest": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 8916,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        -46.001968531468535,
+        143.14615384615385,
+        34.693469313382025
+      ],
+      "snap_distance_m": 1.3204100490327164e-05
+    },
+    "rear-valley": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 17652,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        9.215846153846153,
+        136.9923076923077,
+        27.554923076923078
+      ],
+      "snap_distance_m": 0.0
+    },
+    "right-crest": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 24204,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        36.40365384615385,
+        132.37692307692308,
+        41.613076923076925
+      ],
+      "snap_distance_m": 0.0
+    },
+    "right-tip": {
+      "global_id": "24H_sl0QnBIxbIIfyaYBsV",
+      "vertex_index": 28572,
+      "geometry_sha256": "3f2b414be978eb9483e3d4ee71b9d9689c14f8de7998481f4a79abb483c6e3d7",
+      "world": [
+        42.551454545454554,
+        129.3,
+        39.397000000000006
+      ],
+      "snap_distance_m": 0.0
+    }
+  },
+  "model_points": {
+    "front-left-foot": [
+      -7.998545454545455,
+      62.4,
+      0.0
+    ],
+    "front-arch-upper-left": [
+      -11.812298227714537,
+      80.95656106221801,
+      23.7214730499524
+    ],
+    "front-arch-upper-right": [
+      -8.647811122386953,
+      82.71819334457085,
+      24.42190809699906
+    ],
+    "front-slope": [
+      6.939789119393362,
+      84.81964479258554,
+      10.690399551231591
+    ],
+    "front-low-right": [
+      16.165903779129213,
+      81.94697768222183,
+      -0.14867444205554614
+    ],
+    "left-rear-crest": [
+      -46.001968531468535,
+      143.14615384615385,
+      34.693469313382025
+    ],
+    "rear-valley": [
+      9.215846153846153,
+      136.9923076923077,
+      27.554923076923078
+    ],
+    "right-crest": [
+      36.40365384615385,
+      132.37692307692308,
+      41.613076923076925
+    ],
+    "right-tip": [
+      42.551454545454554,
+      129.3,
+      39.397000000000006
+    ]
+  }
+}

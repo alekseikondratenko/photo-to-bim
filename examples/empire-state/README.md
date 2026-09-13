@@ -1,6 +1,6 @@
 # Empire State Building
 
-Development test 16, plugin **0.8.0**, source revision `cbd6d319d2da642a96fb3686d96df3e7c3eedb82`.
+Plugin **0.8.0**, source revision `cbd6d319d2da642a96fb3686d96df3e7c3eedb82`.
 
 | Reference | Reconstruction |
 | --- | --- |
