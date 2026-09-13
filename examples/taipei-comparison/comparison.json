@@ -1,0 +1,27 @@
+{
+  "timing_basis": "Reconstruction request/start event to final completion response; elapsed time rounded to nearest whole minute; includes tool execution and waits; excludes installation.",
+  "runs": [
+    {
+      "test_number": 22,
+      "client": "Claude Code",
+      "model": "claude-fable-5-1",
+      "plugin_version": "0.8.3",
+      "elapsed_minutes_rounded": 30,
+      "source_session_id": "2818139b-63af-4914-bd69-b3cd82ca4088"
+    },
+    {
+      "test_number": 11,
+      "client": "Codex",
+      "model": "gpt-6-astra",
+      "plugin_version": "0.7.2",
+      "elapsed_minutes_rounded": 14,
+      "source_session_id": "01a09177-d79a-7d82-aadc-99363e5b46a3"
+    }
+  ],
+  "files_sha256": {
+    "../taipei-101/reference.jpg": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
+    "claude-code.png": "b700ee9065970441ed416905af31654c79f80e8de91e86afdef0038969ca0991",
+    "../taipei-101/comparison.png": "3ff1547c81d76a3e5f64ab7664c9ae2c958abedd2c11d4033a0a403fde5e0c02"
+  },
+  "image_changes": "None; equal display widths only."
+}
