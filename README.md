@@ -156,6 +156,22 @@ separately; fitted-landmark agreement alone does not establish independent accur
   tools provide measurements. We have not established a speed advantage over a
   capable agent using Blender alone. See the optional [benchmark protocol](benchmarks/README.md).
 
+## Directions
+
+Directions under consideration, not commitments; the repository's behaviour is
+what its current version documents.
+
+- **Multiple photographs.** A second viewpoint constrains the depth axis that a
+  single photo leaves soft, and opens interiors. The landmark machinery with
+  stable observation IDs is the intended substrate for cross-photo fusion.
+- **Supplied measurements.** A laser-measured wall or door entered as a
+  `measured` scale anchor should upgrade dependent dimensions from assumed to
+  measured, with the uncertainty labels propagating. One real measurement is
+  the cheapest large accuracy gain available.
+- **Held-out validation as routine.** Recent runs declare independent held-out
+  landmarks; making that the default for every run is the standing goal for
+  the evidence side.
+
 ## For developers
 
 [Installation and troubleshooting](docs/installation.md) ·
