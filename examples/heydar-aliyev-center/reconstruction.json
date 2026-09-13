@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "runtime_version": "0.8.0",
+  "reference": {
+    "file": "reference.jpg",
+    "sha256": "2c0fbea5ea1098c4aeacc1fe722ee2c7598ca009fae85be2e9a011bcb7e31ab9",
+    "image_size": [
+      2000,
+      1333
+    ]
+  },
+  "camera": {
+    "schema_version": 1,
+    "convention": "Z_UP_RIGHT_HANDED",
+    "image_size": [
+      2000,
+      1333
+    ],
+    "focal_px": 2199.9999152289497,
+    "principal_point": [
+      1000.0,
+      1080.0000109672546
+    ],
+    "world_from_camera": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -7.549790126404332e-08,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        -7.549790126404332e-08,
+        1.899999976158142
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "camera_method": "Assumed level camera with optical shift; hand-observed silhouette controls placed on rays at assumed depths. Not a recovered survey camera.",
+  "scale_anchor": {
+    "status": "assumed",
+    "source": "Nominal glazed entry height 2.5 m; foreground adult height 1.75 m as qualitative plausibility check",
+    "height_m": 2.5,
+    "uncertainty": "No measured scale; at least 25 percent possible absolute-scale variation; depth less constrained"
+  },
+  "observed_features": [
+    "Continuous pale shell flowing from ground through front arch and taller right wing",
+    "Smaller rear-left crest",
+    "Large curved main curtain wall with dark vertical mullions",
+    "Narrow glazed right return",
+    "Low left entrance arch",
+    "Panel-joint lines following the shell",
+    "Shallow main entry steps"
+  ],
+  "derived_dimensions_m": {
+    "envelope_xyz_extent": [
+      92.01008776262063,
+      86.9,
+      41.965505142971956
+    ],
+    "roof_max_height": 41.615932082008435,
+    "ground_slab_thickness": 0.35,
+    "roof_shell_thickness": 0.28,
+    "nominal_glazing_bay": 2.15,
+    "nominal_transom_module": 3.6,
+    "entry_door_height": 2.5
+  },
+  "assumptions": [
+    "Single photograph fixes projected contours but cannot uniquely determine freeform surface depths or absolute dimensions.",
+    "Eye height assumed 1.9 m; focal length 39.6 mm on 36 mm sensor; image principal point [1000,1080].",
+    "Roof geometry is a coherent loft through photo-derived front and rear curves, with assumed depths approximately 62 to 149 m from camera.",
+    "Nominal floor height 4.0 m is an assumption. Actual storey count is unknown; only one exterior-envelope storey and ground slab are authored.",
+    "Rear enclosure is a plain inferred wall under a short curved roof return. No unseen rooms, floorplates, furnishings, or structural system are modelled.",
+    "Glazing is represented by individual semantic curtain panels and mullions. Reflected colours are approximated with a small untextured palette; fine reflections and visible light streaks are not reproduced.",
+    "Roof panel joints are simplified into combined cladding-joint systems. Complex construction layers and subpixel fixing details are omitted.",
+    "Plaza and sky are render-only context; surrounding city buildings, people and vegetation are omitted."
+  ],
+  "semantic_structure": "IfcProject > IfcSite > IfcBuilding > IfcBuildingStorey > exterior elements; curtain panels and mullions aggregate under IfcCurtainWall",
+  "efficiency": {
+    "mapped_repeat_occurrences": 88,
+    "imported_occurrences": 383,
+    "unique_imported_meshes": 295,
+    "curtain_wall_assemblies": 3
+  },
+  "photographic_evidence": {
+    "landmarks": 9,
+    "all_used_for_geometry_fitting": true,
+    "held_out_landmarks": 0,
+    "silhouette_mask": "not supplied",
+    "limitations": "Landmark agreement is limited to fitted contour points. It does not establish independent reconstruction accuracy or full silhouette agreement."
+  },
+  "visual_review": {
+    "front_preview": "Main roof gesture, crests, central arch and left low opening reproduced. Mullion rhythm simplified. Soffit shadow, glazing reflections and narrow right edge differ from photograph.",
+    "rear_preview": "Coherent roof depth and inferred rear wall reviewed in draft-rear-check.png; hidden enclosure remains schematic.",
+    "final": "Final comparison.png inspected. Overall exterior form is recognisable; simplified reflected colour blocks, fa\u00e7ade rhythm, right-edge return and deeper soffit shadow remain visible deviations."
+  },
+  "stopping_reason": "Dominant visible exterior completed and semantic gate passed. Further precision in unseen freeform depth and glazing reflections is unsupported by this single view; remaining simplifications are documented.",
+  "files": {
+    "ifc": "house.ifc",
+    "render": "comparison.png",
+    "validation": "validation.json",
+    "observations": "observations.json",
+    "landmarks": "landmarks.json"
+  }
+}

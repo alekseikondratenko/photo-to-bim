@@ -1,0 +1,29 @@
+{
+  "test_number": 17,
+  "plugin_version": "0.8.0",
+  "source_commit": "cbd6d319d2da642a96fb3686d96df3e7c3eedb82",
+  "reference_included": true,
+  "reference_original_filename": "HAC_photo_by_Iwan_Baan_(2).jpg",
+  "reference_sha256": "2c0fbea5ea1098c4aeacc1fe722ee2c7598ca009fae85be2e9a011bcb7e31ab9",
+  "reference_source": "https://www.archdaily.com/448774/heydar-aliyev-center-zaha-hadid-architects",
+  "publication_changes": [
+    "Reference filename normalized to reference.jpg; image bytes unchanged. Reference copyright notice retained separately from the software licence."
+  ],
+  "files_sha256": {
+    "house.ifc.styles.json": "85d67aedd08552779759cc4bd748f57bc6926aaec9c9be6c81e63cf89db2350a",
+    "reference.jpg": "2c0fbea5ea1098c4aeacc1fe722ee2c7598ca009fae85be2e9a011bcb7e31ab9",
+    "comparison.png": "1a3b1359687a90e7c3dc54291f3884b96576d83d3595cbaef47ac245610a8593",
+    "reconstruction.json": "2510f165cad2380185d3f8d15340faf1435e4da100967169444020a1b4e6b125",
+    "observations.json": "14766c332943a850400719d729d976361a377d9534f61943789d913044f94c25",
+    "validation.json": "5f159a5698a97700da317d3c4e931a8916b2c2c350209c538510809efb6d38e5",
+    "house.ifc": "80902cf7bdc022de95ed2dcd9ef2d0b88c72991da90b6c8227da5029fe09ad60",
+    "landmarks.json": "0be8beb383b35c98c4af3361fad6f25685e23650d349576ccddf5f9e0d55dfb2"
+  },
+  "reference_rights": {
+    "copyright": "Iwan Baan",
+    "open_license_verified": false,
+    "separate_republication_permission_verified": false,
+    "software_license_applies": false,
+    "use": "User-requested visual comparison of the input photograph and generated reconstruction."
+  }
+}

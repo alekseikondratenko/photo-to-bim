@@ -10,6 +10,19 @@ using Codex or Claude Code, Blender, and Bonsai.
 [Download this IFC and read its assumptions](examples/white-house/README.md).
 Reference: Nishkid64, colour correction by Patrickneil, public domain.
 
+**Curved forms, too — Heydar Aliyev Center**
+
+| Reference photograph | Codex IFC reconstruction |
+| --- | --- |
+| ![Heydar Aliyev Center reference photograph by Iwan Baan](examples/heydar-aliyev-center/reference.jpg) | ![Codex reconstruction with curved roof shells](examples/heydar-aliyev-center/comparison.png) |
+
+The curved roof and main opening are reproduced; glazing reflections, panel
+spacing and the right-hand return are simplified. Hidden depth remains assumed.
+[IFC, assumptions and details](examples/heydar-aliyev-center/README.md).
+Reference: © Iwan Baan, via
+[ArchDaily](https://www.archdaily.com/448774/heydar-aliyev-center-zaha-hadid-architects).
+The reference photograph is not covered by this repository's software licence.
+
 ## Use it
 
 **First time?** Install the Blender dependencies below, then give your local Codex
@@ -86,7 +99,7 @@ own measurement server; it does **not** distribute Blender, Bonsai, or Blender M
   </tr>
   <tr>
     <td><img src="examples/taipei-101/reference.jpg" alt="Original Taipei 101 photograph" width="320"></td>
-    <td><img src="examples/taipei-comparison/claude-code.png" alt="Taipei 101 final IFC render from Claude Code with Fable 5.1" width="320"></td>
+    <td><img src="examples/taipei-comparison/claude-code-daylight.png" alt="Claude Code Fable 5.1 Taipei IFC model re-rendered with blue-sky daylight" width="320"></td>
     <td><img src="examples/taipei-101/comparison.png" alt="Taipei 101 final IFC render from Codex with Astra" width="320"></td>
   </tr>
   <tr>
@@ -96,9 +109,11 @@ own measurement server; it does **not** distribute Blender, Bonsai, or Blender M
   </tr>
 </table>
 
-Final renders from test 22 (Fable, plugin 0.8.3) and test 11 (Astra, plugin 0.7.2).
+Fable used plugin 0.8.3; Astra used plugin 0.7.2. The Claude model is shown with
+blue-sky lighting applied afterwards, preserving its IFC geometry, colours and
+original camera. The original Claude render is retained in the run notes.
 Times run from the reconstruction request to the final response, rounded to whole
-minutes. These are illustrative runs with different plugin versions, not a
+minutes, excluding the later presentation render. These are illustrative runs with different plugin versions, not a
 controlled speed comparison. [Run notes](examples/taipei-comparison/README.md).
 
 Reference: AngMoKio, edited by Mylius,
@@ -114,9 +129,10 @@ separately; fitted-landmark agreement alone does not establish independent accur
 
 | Example | Files and evidence | Recorded result |
 | --- | --- | --- |
-| White House · test 19 | [Photo, render, IFC, assumptions](examples/white-house/README.md) | IFC, fitted landmarks and appearance passed |
-| Empire State Building · test 16 | [Photo, render, IFC, assumptions](examples/empire-state/README.md) | IFC and appearance passed; photographic fit needs refinement |
-| Taipei 101 · test 11 | [Photo, render, IFC, assumptions](examples/taipei-101/README.md) | IFC, fitted landmarks and appearance passed |
+| White House | [Photo, render, IFC, assumptions](examples/white-house/README.md) | IFC, fitted landmarks and appearance passed |
+| Empire State Building | [Photo, render, IFC, assumptions](examples/empire-state/README.md) | IFC and appearance passed; photographic fit needs refinement |
+| Taipei 101 | [Photo, render, IFC, assumptions](examples/taipei-101/README.md) | IFC, fitted landmarks and appearance passed |
+| Heydar Aliyev Center | [Render, IFC, assumptions](examples/heydar-aliyev-center/README.md) | Curved roof shells and curtain walls; hidden depth remains assumed |
 
 ## Design decisions and limits
 

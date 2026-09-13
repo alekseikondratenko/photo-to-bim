@@ -1,6 +1,6 @@
 # Taipei 101
 
-Development test 11, plugin **0.7.2**, source revision `408fdd764e6a03be800771b5ae7df6ba6b9921a3`.
+Plugin **0.7.2**, source revision `408fdd764e6a03be800771b5ae7df6ba6b9921a3`.
 
 | Reference | Reconstruction |
 | --- | --- |

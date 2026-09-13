@@ -1,6 +1,6 @@
 # White House
 
-Development test 19, plugin **0.8.2**, source revision `297f64e108e205bd1f176621f48b0922037580ed`.
+Plugin **0.8.2**, source revision `297f64e108e205bd1f176621f48b0922037580ed`.
 
 | Reference | Reconstruction |
 | --- | --- |

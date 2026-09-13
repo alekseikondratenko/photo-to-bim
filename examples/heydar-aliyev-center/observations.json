@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "reference_sha256": "2c0fbea5ea1098c4aeacc1fe722ee2c7598ca009fae85be2e9a011bcb7e31ab9",
+  "image_size": [
+    2000,
+    1333
+  ],
+  "landmarks": [
+    {
+      "id": "front-left-foot",
+      "pixel": [
+        718,
+        1147
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "front-arch-upper-left",
+      "pixel": [
+        679,
+        487
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "front-arch-upper-right",
+      "pixel": [
+        770,
+        481
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "front-slope",
+      "pixel": [
+        1180,
+        852
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "front-low-right",
+      "pixel": [
+        1434,
+        1135
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "left-rear-crest",
+      "pixel": [
+        293,
+        576
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "rear-valley",
+      "pixel": [
+        1148,
+        668
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "right-crest",
+      "pixel": [
+        1605,
+        420
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "right-tip",
+      "pixel": [
+        1724,
+        442
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    }
+  ],
+  "independence_note": "All listed landmarks constrain manual shell geometry; none is an independent check. Image-guided depth remains assumed."
+}
