@@ -95,6 +95,8 @@ hide manifest or client-discovery failures.
 
 ## Shipping check
 
+[Recorded shipping verification](shipping-check.md).
+
 Test the GitHub revision in **fresh, isolated client configurations**, preserving
 normal user settings. For each client:
 
