@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "version": "0.7.2",
+  "ifc": {
+    "schema": "PASS",
+    "geometry": "PASS",
+    "semantics": "PASS",
+    "schema_errors": [],
+    "geometry_errors": [],
+    "semantic_errors": [],
+    "census": {
+      "IfcBuildingElementProxy": 0,
+      "IfcBuildingStorey": 101,
+      "IfcCurtainWall": 40,
+      "IfcDoor": 0,
+      "IfcMember": 108,
+      "IfcOpeningElement": 0,
+      "IfcPlate": 290,
+      "IfcRoof": 11,
+      "IfcSlab": 1,
+      "IfcWall": 1,
+      "IfcWindow": 0
+    },
+    "proxies": 0,
+    "proxy_exceptions": {},
+    "uncontained": [],
+    "geometry_checked": 574,
+    "verdict": "PASS"
+  },
+  "photographic": {
+    "name": "comparison",
+    "schema_version": 1,
+    "version": "0.7.2",
+    "status": "PASS",
+    "verdict": "satisfied",
+    "loss": 0.9953867131594605,
+    "metric_key": "825561ff334fcfcfd841255b9ba320dd6f3127a2e18baeb611a5a0091ac00fe8",
+    "landmarks": {
+      "status": "PASS",
+      "rms_px": 2.89805417629615,
+      "max_px": 4.976933565797302,
+      "tolerance_px": 5,
+      "coverage": 13,
+      "held_out_count": 0,
+      "consumed_check_count": 0,
+      "undeclared_check_count": 0,
+      "independence_status": "NO_INDEPENDENT_CHECKS",
+      "held_out_rms_px": null,
+      "worst": [
+        {
+          "id": "tier1-right",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            415,
+            931
+          ],
+          "projected": [
+            415.86263172021233,
+            926.0983947289033
+          ],
+          "error_px": 4.976933565797302
+        },
+        {
+          "id": "tier1-front",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            335,
+            909
+          ],
+          "projected": [
+            332.74784774375127,
+            912.5384373277942
+          ],
+          "error_px": 4.19436866620636
+        },
+        {
+          "id": "tier8-front",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            329,
+            305
+          ],
+          "projected": [
+            332.69872983994526,
+            303.7056460764006
+          ],
+          "error_px": 3.918667440398403
+        },
+        {
+          "id": "crown-left",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            286,
+            203
+          ],
+          "projected": [
+            282.88095011940163,
+            204.73737303074154
+          ],
+          "error_px": 3.5702853115134543
+        },
+        {
+          "id": "crown-right",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            363,
+            208
+          ],
+          "projected": [
+            365.428573075563,
+            210.42929848633162
+          ],
+          "error_px": 3.435033961847053
+        }
+      ],
+      "note": "Projection agreement under the supplied camera; does not independently establish physical dimensions."
+    },
+    "silhouette": {
+      "status": "UNAVAILABLE",
+      "reason": "Provide a fixed reference subject mask and a rendered subject-only binary mask."
+    },
+    "problems": [],
+    "model_binding": {
+      "status": "IFC_SNAPSHOT",
+      "ifc_sha256": "412ec5e1e749c14efddf2a014834e7c9d60a081152cf9b7b55d20162b823b594"
+    },
+    "camera_check": {
+      "status": "UNDETERMINED",
+      "note": "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either."
+    },
+    "note": "Only fixed observations and explicit masks control this assessment. A threshold miss is not an instruction to repeat; refine only when evidence and expected benefit justify another pass.",
+    "render_sha256": "3ff1547c81d76a3e5f64ab7664c9ae2c958abedd2c11d4033a0a403fde5e0c02",
+    "camera_sha256": "6f0efeab180ffd2073f143a17db4e37f637f97e466bf0e09896ea72732e06ca9"
+  },
+  "appearance": {
+    "status": "PASS",
+    "linked_objects": 574,
+    "missing_guids": [],
+    "unlinked_objects": [],
+    "errors": [],
+    "material_overrides": [],
+    "note": "Automated linkage/geometry/material checks, not visual acceptance or colour accuracy."
+  },
+  "visual_review": {
+    "decision": "accepted",
+    "source": "agent",
+    "reviewer": "Codex",
+    "basis": "Final render visually inspected against the photograph. Eight flared tiers, two-face facade grid, stepped crown, medallions, spire and image framing agree at schematic exterior level. Fine ornaments and glazing reflectance simplified; neighboring buildings and landscaping omitted; obscured lower shell shown in full. Selected-point fit does not validate the complete silhouette or survey dimensions."
+  },
+  "acceptance": {
+    "status": "pending_user_review",
+    "deviations": []
+  },
+  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance.",
+  "limitations": [
+    "All 13 landmarks used for camera or geometry fitting; no independent held-out points.",
+    "Full silhouette-mask comparison unavailable and not performed.",
+    "Floor elevations, 508 m height, facade depth and hidden exterior geometry assumed.",
+    "No hidden interior components modelled.",
+    "Render excludes surrounding buildings and vegetation."
+  ]
+}

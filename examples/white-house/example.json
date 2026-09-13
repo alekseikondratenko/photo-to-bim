@@ -1,0 +1,21 @@
+{
+  "test_number": 19,
+  "plugin_version": "0.8.2",
+  "source_commit": "297f64e108e205bd1f176621f48b0922037580ed",
+  "reference_included": true,
+  "reference_original_filename": "North_Façade_White_House.JPG",
+  "reference_sha256": "e7aa4177135ac4b476795066ce1d3a636e6ee94f7e9856e4b0a1aad0a03e393d",
+  "publication_changes": [
+    "Reference filename normalized in reconstruction.json; original filename retained here."
+  ],
+  "files_sha256": {
+    "comparison.png": "17d5709a38ef7177e48b17d83f5cf359fd50e1836bef186f94e7500250ebed2a",
+    "house.ifc": "360bf61e71b49e2483155dc29753f10596c69f39f7269a4efa52097d02a9319f",
+    "house.ifc.styles.json": "17de24d5f6c7fc37015ad8e11dbc85fce5ef52691421ccfc7e7a912d3e837303",
+    "landmarks.json": "9df084d9080e32fbfa5321abb05cfe902ab3f7bd084e33f0bd7c437031e7a785",
+    "observations.json": "2df5481ca9c33e06373a19c69695216624b672d9ecef1227f0415823f021d661",
+    "reconstruction.json": "ddd64545e14933c643bee5607df3b5393c75742ddd8548594f898e3c9acb2926",
+    "reference.jpg": "e7aa4177135ac4b476795066ce1d3a636e6ee94f7e9856e4b0a1aad0a03e393d",
+    "validation.json": "d4145135dc7f5aca57142f83862eb404769b91db905a398e4dbdc0e4ee7054b0"
+  }
+}

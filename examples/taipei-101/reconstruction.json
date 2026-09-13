@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "runtime_version": "0.7.2",
+  "reference": "reference.jpg",
+  "reference_sha256": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
+  "image_size": [
+    960,
+    1547
+  ],
+  "camera": {
+    "schema_version": 1,
+    "convention": "Z_UP_RIGHT_HANDED",
+    "image_size": [
+      960,
+      1547
+    ],
+    "focal_px": 2250.0,
+    "principal_point": [
+      480.0,
+      1199.9999866485596
+    ],
+    "world_from_camera": [
+      [
+        0.8087174892425537,
+        -0.0011664360063150525,
+        -0.5881959795951843,
+        644.1646728515625
+      ],
+      [
+        0.5881971120834351,
+        0.001275495975278318,
+        0.8087164759635925,
+        -768.052001953125
+      ],
+      [
+        -0.00019307438924442977,
+        -0.9999985098838806,
+        0.0017176101682707667,
+        -2.1517035961151123
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "scale_anchor": {
+    "status": "assumed",
+    "height_m": 508,
+    "source": "Nominal architectural height used as an unverified modelling assumption. No external survey or website accessed."
+  },
+  "observed_features": [
+    "Eight outward-flared stacked main facade tiers",
+    "Dense vertical mullions and horizontal glazing/spandrel rhythm",
+    "Teal curtain wall and pale metallic corner trim",
+    "Two large circular facade medallions at lower tower transition",
+    "Smaller flared upper crown with repeated cornices",
+    "Tall cylindrical shaft and ringed tapering antenna"
+  ],
+  "derived_dimensions": {
+    "ground_to_main_tiers_m": 85,
+    "tier_height_m": 37.125,
+    "main_tier_top_elevation_m": 382,
+    "main_tier_bottom_width_m": 50,
+    "main_tier_top_width_m": 58,
+    "crown_cap_elevation_m": 441,
+    "spire_tip_m": 508,
+    "estimated_storeys": 101,
+    "lower_floor_height_m": 3.4,
+    "main_floor_height_m": 4.640625,
+    "upper_floor_height_m": 4.916666666666667
+  },
+  "assumptions": {
+    "ScaleStatus": "assumed - not surveyed",
+    "ScaleSource": "508 m nominal total height chosen as unverified anchor; all proportions interpreted from one photograph",
+    "TotalHeight_m": 508.0,
+    "MainTierWidth_m": 58.0,
+    "MainTierBottomWidth_m": 50.0,
+    "BaseHeight_m": 85.0,
+    "TierHeight_m": 37.125,
+    "TierCount": 8,
+    "EstimatedLowerFloorHeight_m": 3.4,
+    "EstimatedMainFloorHeight_m": 4.640625,
+    "EstimatedCrownFloorHeight_m": 4.916666666666667,
+    "HiddenGeometry": "Opposite exterior faces mirrored; lower envelope extended to assumed ground. No interior partitions, core, stairs, services or hidden floor slabs. Surroundings omitted.",
+    "DetailPolicy": "Curtain wall facades and spandrel plates, explicit mullion lattices, simplified ruyi brackets, medallions, cornices and spire. Estimated 101 storeys; floor numbering is interpretive."
+  },
+  "detail_policy": {
+    "semantic_elements": 574,
+    "curtain_wall_assemblies": 40,
+    "mapped_repeat_occurrences": 392,
+    "glazing": "Continuous curtain-wall envelopes with explicit mullions, spandrels and grouped darker vision plates; darker-pane distribution is representative, not pane-by-pane surveyed.",
+    "geometry_precision": "Vertices authored on a 1/32768 m grid for lossless Blender float32 transfer of this 508 m model.",
+    "excluded": "Interior partitions, cores, stairs, services, hidden floor slabs, neighbors and landscaping.",
+    "ornaments": "Ruyi and crown terrace motifs simplified to visible silhouette members."
+  },
+  "stopping_reason": "Envelope, selected landmarks, semantic model and appearance linkage verified. Further reconstruction of fine ornaments, reflections or hidden geometry is not supported sufficiently by this single reference.",
+  "validation": "validation.json",
+  "ifc_sha256": "412ec5e1e749c14efddf2a014834e7c9d60a081152cf9b7b55d20162b823b594"
+}

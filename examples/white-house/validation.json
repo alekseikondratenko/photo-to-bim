@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "version": "0.8.2",
+  "ifc": {
+    "schema": "PASS",
+    "geometry": "PASS",
+    "semantics": "PASS",
+    "schema_errors": [],
+    "geometry_errors": [],
+    "semantic_errors": [],
+    "census": {
+      "IfcBuildingElementProxy": 0,
+      "IfcBuildingStorey": 3,
+      "IfcChimney": 3,
+      "IfcColumn": 8,
+      "IfcDoor": 1,
+      "IfcMember": 107,
+      "IfcOpeningElement": 65,
+      "IfcRailing": 23,
+      "IfcRoof": 3,
+      "IfcSlab": 4,
+      "IfcWall": 41,
+      "IfcWindow": 64
+    },
+    "proxies": 0,
+    "proxy_exceptions": {},
+    "uncontained": [],
+    "geometry_checked": 406,
+    "verdict": "PASS"
+  },
+  "photographic": {
+    "schema_version": 1,
+    "version": "0.8.2",
+    "status": "PASS",
+    "verdict": "satisfied",
+    "loss": 0.6664064734059287,
+    "metric_key": "9011cc3058e21aa383d288325ef177de2a8dd24b26085d9fcefdc94d4b13cf13",
+    "landmarks": {
+      "status": "PASS",
+      "rms_px": 1.9539612190637523,
+      "max_px": 3.332032367029644,
+      "tolerance_px": 5,
+      "coverage": 11,
+      "held_out_count": 0,
+      "consumed_check_count": 0,
+      "undeclared_check_count": 0,
+      "independence_status": "NO_INDEPENDENT_CHECKS",
+      "held_out_rms_px": null,
+      "worst": [
+        {
+          "id": "right-inner-upper-br",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            1357,
+            689
+          ],
+          "projected": [
+            1360.1904692032313,
+            689.9609089229298
+          ],
+          "error_px": 3.332032367029644
+        },
+        {
+          "id": "pediment-left",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            625,
+            433
+          ],
+          "projected": [
+            625.9291979878102,
+            430.52521974998683
+          ],
+          "error_px": 2.643472372922736
+        },
+        {
+          "id": "pediment-apex",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            950,
+            297
+          ],
+          "projected": [
+            949.355028992287,
+            295.01143519462374
+          ],
+          "error_px": 2.0905448060186282
+        },
+        {
+          "id": "right-upper-br",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            1779,
+            686
+          ],
+          "projected": [
+            1780.8300186242946,
+            685.5530619476826
+          ],
+          "error_px": 1.88380513532429
+        },
+        {
+          "id": "left-upper-br",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            232,
+            700
+          ],
+          "projected": [
+            231.53520652225006,
+            701.7879938761923
+          ],
+          "error_px": 1.847418490288586
+        }
+      ],
+      "note": "Projection agreement under the supplied camera; does not independently establish physical dimensions."
+    },
+    "silhouette": {
+      "status": "UNAVAILABLE",
+      "reason": "Provide a fixed reference subject mask and a rendered subject-only binary mask."
+    },
+    "problems": [],
+    "model_binding": {
+      "status": "IFC_SNAPSHOT",
+      "ifc_sha256": "360bf61e71b49e2483155dc29753f10596c69f39f7269a4efa52097d02a9319f"
+    },
+    "camera_check": {
+      "status": "UNDETERMINED",
+      "note": "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either."
+    },
+    "note": "Only fixed observations and explicit masks control this assessment. A threshold miss is not an instruction to repeat; refine only when evidence and expected benefit justify another pass."
+  },
+  "appearance": {
+    "status": "PASS",
+    "linked_objects": 341,
+    "missing_guids": [],
+    "unlinked_objects": [],
+    "errors": [],
+    "material_overrides": [],
+    "coordinate_precision": {
+      "maximum_error_m": 2.510632707952709e-06,
+      "maximum_tolerance_m": 1e-05,
+      "precision_limited_guids": [],
+      "ceiling_m": 0.0001
+    },
+    "note": "Automated linkage/geometry/material checks, not visual acceptance or colour accuracy."
+  },
+  "visual_review": {
+    "decision": "accepted",
+    "source": "agent",
+    "reviewer": "Codex",
+    "basis": "Inspected full 1920x1285 comparison and oblique draft. Main facade proportions, 11-bay rhythm, portico silhouette, roof balustrade and viewpoint are consistent with source. Carved detail and landscaping are simplified; illumination is flatter and cooler, entrance fanlight joinery approximate, and missing left tree changes occlusion. Scale and rear geometry are assumptions. This is a useful exterior reconstruction, not a photoreal or surveyed replica."
+  },
+  "acceptance": {
+    "status": "pending_user_review",
+    "deviations": []
+  },
+  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance.",
+  "limitations": [
+    "No independent held-out landmarks. All 11 were consumed for fitting.",
+    "Silhouette overlap was not measured; source envelope is partly hidden by vegetation.",
+    "Automated appearance check verifies IFC geometry/material linkage, not photographic colour or ornament accuracy."
+  ],
+  "stopping_reason": "Primary exterior, semantic export and fixed-landmark accuracy achieved. Further historical detail and hidden geometry are unsupported by the single photograph; ornamental and landscaping refinements are disproportionate to the available evidence."
+}

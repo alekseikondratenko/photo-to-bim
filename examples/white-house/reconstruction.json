@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "reference": "reference.jpg",
+  "reference_sha256": "e7aa4177135ac4b476795066ce1d3a636e6ee94f7e9856e4b0a1aad0a03e393d",
+  "runtime_version": "0.8.2",
+  "camera": {
+    "schema_version": 1,
+    "convention": "Z_UP_RIGHT_HANDED",
+    "image_size": [
+      1920,
+      1285
+    ],
+    "focal_px": 4500.0,
+    "principal_point": [
+      960,
+      801
+    ],
+    "world_from_camera": [
+      [
+        0.9965097621369083,
+        -0.008470536847371719,
+        -0.08304547518491745,
+        10.0
+      ],
+      [
+        0.08304247769445959,
+        -0.0007058780380181347,
+        0.9965457320213318,
+        -126.0
+      ],
+      [
+        -0.008499896979819573,
+        -0.9999638162865209,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "camera_method": "Assumed plausible offset camera with shifted principal point; image rays used to derive exterior component placement. Rejected unconstrained camera fits yielding below-ground camera.",
+  "scale_anchor": {
+    "status": "assumed",
+    "source": "Visible upper north sash window",
+    "height_m": 2.6,
+    "width_m": 1.3,
+    "uncertainty_m": 0.3
+  },
+  "observed_features": [
+    "11-bay north masonry facade",
+    "Two principal sash window tiers, six-over-six glazing",
+    "Four frontal Ionic columns and side returns",
+    "Pedimented north portico, alternating segmental and triangular window hoods",
+    "Roof balustrades, attic screen, chimneys, flagpole"
+  ],
+  "derived_dimensions_m": {
+    "main_width": 48.91800675660405,
+    "main_depth_assumed": 23.0,
+    "ground_floor_height": 5.2,
+    "upper_storey_height_to_roof": 6.2,
+    "roof_parapet_height": 13.0,
+    "portico_projection": 5.7,
+    "portico_width": 17.583777326908574,
+    "portico_pediment_apex": 16.577198242976593,
+    "column_capital_elevation": 11.109429747374092
+  },
+  "assumptions": [
+    "Absolute size is not surveyed. Nominal sash height sets approximate scale.",
+    "Main depth 23 m, rear and side openings, flat concealed roof, attic depth and slab elevations inferred.",
+    "Rear repeats observed sash language with simplified frames; no interiors, furniture, rooms, stairs or hidden services.",
+    "Ionic scrolls, stone profiles and dentils are simplified at photograph resolution.",
+    "The rectangular entrance fanlight glazing is screened by an arched stone surround; its exact historic joinery is unverified.",
+    "Ground level is obscured. Garden and fountain are approximate decorative render context, excluded from IFC."
+  ],
+  "detail_policy": {
+    "shared_geometry": "201 mapped IFC items; 341 rendered semantic occurrences use 140 unique meshes before final refinement. Sash, surround, columns, capitals, hoods and side balusters share geometry.",
+    "not_observed": "No curtain walls; facade glazing is modelled as windows in masonry.",
+    "omitted": "Unseen interiors and subpixel historic ornament.",
+    "side_balusters": "Individual repeated posts are IfcMember; grouped front/rear panels and copings are IfcRailing."
+  },
+  "evidence_limits": {
+    "all_landmarks_used_for_fitting": true,
+    "independent_check_points": 0,
+    "silhouette_mask": "Not annotated because trees and shrubs occlude the envelope.",
+    "photographic_validation": "Separate from IFC validity; only fixed landmark projection is scored."
+  },
+  "refinement": "Upper sash height revised from 2.7 to 2.6 m; camera roll reduced 0.143 degrees and principal point raised 2 pixels, guided by unchanged observations.",
+  "side_review": "Oblique rendered review confirmed closed main envelope and roof continuity. Assumed attic screen extended down to main roof after this review.",
+  "final_validation": {
+    "ifc": "PASS",
+    "appearance": "PASS",
+    "fitted_landmarks": "PASS",
+    "rms_px": 1.9539612190637523,
+    "max_px": 3.332032367029644,
+    "silhouette": "UNAVAILABLE",
+    "independent_landmarks": 0
+  },
+  "remaining_visual_mismatch": "Inspected full 1920x1285 comparison and oblique draft. Main facade proportions, 11-bay rhythm, portico silhouette, roof balustrade and viewpoint are consistent with source. Carved detail and landscaping are simplified; illumination is flatter and cooler, entrance fanlight joinery approximate, and missing left tree changes occlusion. Scale and rear geometry are assumptions. This is a useful exterior reconstruction, not a photoreal or surveyed replica."
+}

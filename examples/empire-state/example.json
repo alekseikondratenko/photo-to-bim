@@ -1,0 +1,21 @@
+{
+  "test_number": 16,
+  "plugin_version": "0.8.0",
+  "source_commit": "cbd6d319d2da642a96fb3686d96df3e7c3eedb82",
+  "reference_included": true,
+  "reference_original_filename": "Empire_State_Building_2020_alexbest.jpg",
+  "reference_sha256": "1afa053b95edaf125771d93e5d355cb6b87c55414f2969425d622eeeed8b00eb",
+  "publication_changes": [
+    "Reference filename normalized in reconstruction.json; original filename retained here."
+  ],
+  "files_sha256": {
+    "comparison.png": "f84872a59e356526f715ce3e48e23630d317c2600637067bf555e911f928a47c",
+    "house.ifc": "ba139936e4fc07cf03466bf1e42c4e5a73565b3d817c9e9500d70386bda83164",
+    "house.ifc.styles.json": "bb64bf66414ebe43b6a4d0bbd48cb299a9328f807031cd9e1c6a085389150de8",
+    "landmarks.json": "721d93a2ce5223c12d33fe1ca7e721c571ca701aa07ff6e1ee85c7c52295fac3",
+    "observations.json": "7bf1ec8078f988f525505601dfcafaf1b15919cb1c80280594e66be66e3541b3",
+    "reconstruction.json": "64a9fdda11ada19e63d9919f3151e78fbab1bf4997d6c1defd1cf19b0c375e42",
+    "reference.jpg": "1afa053b95edaf125771d93e5d355cb6b87c55414f2969425d622eeeed8b00eb",
+    "validation.json": "c17148bb11faae0b1c4a70c1868cca8226e2803d973b1bae8c82f821baf37eaa"
+  }
+}

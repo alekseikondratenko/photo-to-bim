@@ -1,0 +1,21 @@
+{
+  "test_number": 11,
+  "plugin_version": "0.7.2",
+  "source_commit": "408fdd764e6a03be800771b5ae7df6ba6b9921a3",
+  "reference_included": true,
+  "reference_original_filename": "Taipei_101_2009_amk-EditMylius.jpg",
+  "reference_sha256": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
+  "publication_changes": [
+    "Reference filename normalized in reconstruction.json; original filename retained here."
+  ],
+  "files_sha256": {
+    "comparison.png": "3ff1547c81d76a3e5f64ab7664c9ae2c958abedd2c11d4033a0a403fde5e0c02",
+    "house.ifc": "412ec5e1e749c14efddf2a014834e7c9d60a081152cf9b7b55d20162b823b594",
+    "house.ifc.styles.json": "1cca8f40b026da397e6dd8093c4cbee35ee1f54d0aeecae50268e0922e993968",
+    "landmarks.json": "c919159ca5ab65387d0dc8d9598c346d9e55355b0ca9e1ba75f963b5295c8c7e",
+    "observations.json": "6c0b4234a7fdb6021208a8e2fef892efcbea35a1b18f35e51c25f26452fc0194",
+    "reconstruction.json": "6448fdea401e09168c3ca37b27724997a6cc203bf76db29d947c6c41c7297d87",
+    "reference.jpg": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
+    "validation.json": "4a4c5dc0c9938dba74c35af8280bbe1b0a3e1e601f19aac7e1d0ef67d6fa39bb"
+  }
+}
