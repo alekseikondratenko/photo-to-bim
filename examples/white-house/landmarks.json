@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "ifc_sha256": "360bf61e71b49e2483155dc29753f10596c69f39f7269a4efa52097d02a9319f",
+  "bindings": {
+    "left-upper-tl": {
+      "global_id": "3CgaYzCqfFIwBdELrjxRri",
+      "vertex_index": 3,
+      "geometry_sha256": "52ea46a8cdfe43c94b7c3347c8555b41205a6d0f7ab13dad2276fc5ee1a63511",
+      "world": [
+        -22.574456676128843,
+        -0.08,
+        8.600000000000001
+      ],
+      "snap_distance_m": 1.7763568394002505e-15
+    },
+    "left-upper-br": {
+      "global_id": "3CgaYzCqfFIwBdELrjxRri",
+      "vertex_index": 9,
+      "geometry_sha256": "52ea46a8cdfe43c94b7c3347c8555b41205a6d0f7ab13dad2276fc5ee1a63511",
+      "world": [
+        -21.274456676128843,
+        -0.08,
+        6.0
+      ],
+      "snap_distance_m": 3.552713678800501e-15
+    },
+    "left-inner-upper-tl": {
+      "global_id": "3BaKlAWyD51ApxcwwewIeK",
+      "vertex_index": 3,
+      "geometry_sha256": "ddcb1bc492d40223e651669e08dab17a631ca994f9de6d483bea5c29cb9cfc4d",
+      "world": [
+        -10.919840470791943,
+        -0.08,
+        8.600000000000001
+      ],
+      "snap_distance_m": 2.5121479338940403e-15
+    },
+    "left-inner-upper-br": {
+      "global_id": "3BaKlAWyD51ApxcwwewIeK",
+      "vertex_index": 9,
+      "geometry_sha256": "ddcb1bc492d40223e651669e08dab17a631ca994f9de6d483bea5c29cb9cfc4d",
+      "world": [
+        -9.619840470791942,
+        -0.08,
+        6.0
+      ],
+      "snap_distance_m": 1.7763568394002505e-15
+    },
+    "right-inner-upper-tl": {
+      "global_id": "35_iPPcsz42RrbUW3qxnzL",
+      "vertex_index": 3,
+      "geometry_sha256": "76c9bfbf1a1dfdc835a1046a863887e151c97ef4e83b2d3bc6f5f7876250ad6f",
+      "world": [
+        9.425498621874365,
+        -0.08,
+        8.600000000000001
+      ],
+      "snap_distance_m": 3.972054645195637e-15
+    },
+    "right-inner-upper-br": {
+      "global_id": "35_iPPcsz42RrbUW3qxnzL",
+      "vertex_index": 9,
+      "geometry_sha256": "76c9bfbf1a1dfdc835a1046a863887e151c97ef4e83b2d3bc6f5f7876250ad6f",
+      "world": [
+        10.725498621874365,
+        -0.08,
+        6.0
+      ],
+      "snap_distance_m": 3.552713678800501e-15
+    },
+    "right-upper-tl": {
+      "global_id": "0pitRaLaL6jgCyXKk7BAjb",
+      "vertex_index": 3,
+      "geometry_sha256": "afb82a0aeebd0cd4a5ce891c7dd839379dc2fc13f3d0027e1aea00dbbd7910ac",
+      "world": [
+        21.01453478692243,
+        -0.08,
+        8.600000000000001
+      ],
+      "snap_distance_m": 3.972054645195637e-15
+    },
+    "right-upper-br": {
+      "global_id": "0pitRaLaL6jgCyXKk7BAjb",
+      "vertex_index": 9,
+      "geometry_sha256": "afb82a0aeebd0cd4a5ce891c7dd839379dc2fc13f3d0027e1aea00dbbd7910ac",
+      "world": [
+        22.31453478692243,
+        -0.08,
+        6.0
+      ],
+      "snap_distance_m": 0.0
+    },
+    "pediment-left": {
+      "global_id": "19$vLcGKvCcuy5CxFX2NE_",
+      "vertex_index": 3,
+      "geometry_sha256": "62c7484f678b2310def61fcddbc414fabb87000deba1870e9222a2235155385a",
+      "world": [
+        -8.987678073596733,
+        -5.7,
+        13.075934363251129
+      ],
+      "snap_distance_m": 0.0
+    },
+    "pediment-apex": {
+      "global_id": "19$vLcGKvCcuy5CxFX2NE_",
+      "vertex_index": 2,
+      "geometry_sha256": "62c7484f678b2310def61fcddbc414fabb87000deba1870e9222a2235155385a",
+      "world": [
+        -0.19578941014244666,
+        -5.7,
+        16.577198242976593
+      ],
+      "snap_distance_m": 0.0
+    },
+    "pediment-right": {
+      "global_id": "19$vLcGKvCcuy5CxFX2NE_",
+      "vertex_index": 9,
+      "geometry_sha256": "62c7484f678b2310def61fcddbc414fabb87000deba1870e9222a2235155385a",
+      "world": [
+        8.596099253311841,
+        -5.7,
+        13.075934363251129
+      ],
+      "snap_distance_m": 0.0
+    }
+  },
+  "model_points": {
+    "left-upper-tl": [
+      -22.574456676128843,
+      -0.08,
+      8.600000000000001
+    ],
+    "left-upper-br": [
+      -21.274456676128843,
+      -0.08,
+      6.0
+    ],
+    "left-inner-upper-tl": [
+      -10.919840470791943,
+      -0.08,
+      8.600000000000001
+    ],
+    "left-inner-upper-br": [
+      -9.619840470791942,
+      -0.08,
+      6.0
+    ],
+    "right-inner-upper-tl": [
+      9.425498621874365,
+      -0.08,
+      8.600000000000001
+    ],
+    "right-inner-upper-br": [
+      10.725498621874365,
+      -0.08,
+      6.0
+    ],
+    "right-upper-tl": [
+      21.01453478692243,
+      -0.08,
+      8.600000000000001
+    ],
+    "right-upper-br": [
+      22.31453478692243,
+      -0.08,
+      6.0
+    ],
+    "pediment-left": [
+      -8.987678073596733,
+      -5.7,
+      13.075934363251129
+    ],
+    "pediment-apex": [
+      -0.19578941014244666,
+      -5.7,
+      16.577198242976593
+    ],
+    "pediment-right": [
+      8.596099253311841,
+      -5.7,
+      13.075934363251129
+    ]
+  }
+}

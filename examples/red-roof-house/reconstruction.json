@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "runtime_version": "0.7.2",
+  "reference": "reference-not-redistributed",
+  "reference_sha256": "8ba0f4375ca75540a47dd047da195a72e81c7c636c926c7a94a27cf63d2711c3",
+  "camera": {
+    "schema_version": 1,
+    "convention": "Z_UP_RIGHT_HANDED",
+    "image_size": [
+      2000,
+      890
+    ],
+    "focal_px": 1147.7493709988064,
+    "principal_point": [
+      1000.0,
+      776.6068351268768
+    ],
+    "world_from_camera": [
+      [
+        0.7071397304534912,
+        -0.07185275107622147,
+        0.7034135460853577,
+        -10.673157691955566
+      ],
+      [
+        -0.7070550918579102,
+        -0.07909771800041199,
+        0.7027208805084229,
+        -12.492960929870605
+      ],
+      [
+        0.0051459819078445435,
+        -0.9942739605903625,
+        -0.10673699527978897,
+        1.0054705142974854
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "scale_anchor": {
+    "status": "assumed",
+    "source": "Patio-door height estimated from photo",
+    "height_m": 2.2,
+    "note": "No measured dimensions supplied; single-photo reconstruction is not a survey."
+  },
+  "derived_dimensions_m": {
+    "main_length": 12.630512589059695,
+    "main_width": 8.4286614623673,
+    "main_ridge": 8.209762820238085,
+    "roof_outer_eave": 3.2049943491042687,
+    "upper_floor": 3.1576281472649237,
+    "external_wall_thickness": 0.30313230213743264
+  },
+  "observed_features": [
+    "Steep main gable with visible west and terrace elevations",
+    "Projecting red cross-gable with clipped valley roof junctions",
+    "Eight windows and two glazed patio doors",
+    "Dark profiled roof tiles, metal gutters, downpipes and terrace"
+  ],
+  "assumptions": [
+    "Absolute scale is inferred from an approximately 2.2 m patio door",
+    "Roof depths, hidden rear and east walls, slab and wall thicknesses are estimates",
+    "No unseen openings, interior room partitions or furniture inferred",
+    "Glazing uses warm opaque appearance surfaces rather than surveyed glass build-ups"
+  ],
+  "detail_policy": "Semantic envelope and visible architectural parts; roof tile courses combined into four IfcCovering fields. Lawn is render-only context. Detached carport, vegetation, car, furniture and interiors omitted.",
+  "validation_scope": {
+    "ifc": "Reopened export; schema, finite geometry, hierarchy, SI units, containment, ten hosted openings and semantic fill dimensions checked",
+    "photographic": "Seven IFC-bound fitted landmarks only; no independent held-out points or silhouette mask",
+    "appearance": "IFC geometry linkage verified; render-only shader overrides explicitly recorded"
+  },
+  "stopping_reason": "Dominant building proportions, roof topology and visible openings reproduced; remaining refinements would mainly infer unsupported scene detail."
+}

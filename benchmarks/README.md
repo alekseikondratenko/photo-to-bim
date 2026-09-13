@@ -1,13 +1,11 @@
-# Reconstruction benchmark protocol
+# Optional reconstruction benchmark protocol
 
-0.7.1 has automated regression coverage and a live synthetic Blender/Bonsai
-import/render check. Test 7 exercised 0.7.0. Test 8 used the 0.7.1 helpers but its
-client rejected three MCP tool schemas, so it did not exercise the full tool set.
-0.7.2 fixes those schemas; verify actual client exposure before a benchmark run. Earlier desktop tests changed model, prompting,
-scene state and plugin version; they motivate fixes but do not isolate causality.
+This is a research protocol for evaluating changes, not an instruction to run
+extra iterations during normal reconstruction. The public examples are selected
+development runs and do not establish a causal speed or accuracy improvement.
 
 Compare three arms: (A) Blender/Bonsai with the concise task only, (B) the same
-plus measurement MCP tools, (C) tools plus the 0.7 skill. Use the same model,
+plus measurement MCP tools, (C) tools plus the current skill. Use the same model,
 reasoning setting, input image, scale information, deliverables, detail policy
 and budget. Start a fresh Codex task and a clean Blender scene per trial.
 Randomize arm order and repeat each arm at least three times per photograph.
@@ -31,5 +29,4 @@ assumptions without seeing which arm produced the model.
 
 Acceptance should prioritize fewer failed/incomplete deliveries and less outcome
 variance at comparable detail. Claim a speed or accuracy gain only after the
-controlled runs support it. Test 7 is an exploratory integration run, not itself
-proof of improvement.
+controlled runs support it. A single exploratory integration run is not itself proof of improvement.

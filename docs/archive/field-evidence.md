@@ -1,3 +1,8 @@
+# Historical field notes
+
+Archived from the earlier Three.js experiments. This is not the current IFC
+workflow or installation guide; see [the current README](../../README.md).
+
 > Historical notes from 0.6 and earlier. These observations are not controlled
 > benchmark results. Version 0.7 supersedes the mandatory scoring loop, skyline
 > convergence verdicts and camera directives described below. See the README

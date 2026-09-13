@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "reference": "reference.jpg",
+  "reference_sha256": "1afa053b95edaf125771d93e5d355cb6b87c55414f2969425d622eeeed8b00eb",
+  "runtime_version": "0.8.0",
+  "camera": {
+    "schema_version": 1,
+    "convention": "Z_UP_RIGHT_HANDED",
+    "image_size": [
+      1125,
+      1500
+    ],
+    "focal_px": 3500.0,
+    "principal_point": [
+      547.0000002533197,
+      750.0
+    ],
+    "world_from_camera": [
+      [
+        0.8480480909347534,
+        -0.03763502836227417,
+        -0.5285811424255371,
+        662.3991088867188
+      ],
+      [
+        0.5299192667007446,
+        0.0602286197245121,
+        0.845906674861908,
+        -1060.0601806640625
+      ],
+      [
+        -6.224745163763146e-09,
+        -0.9974748492240906,
+        0.07102029025554657,
+        130.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "scale_anchor": {
+    "height_m": 443,
+    "status": "assumed",
+    "source": "Nominal 443 m model height to antenna tip; not verified from external sources"
+  },
+  "observed_features": [
+    "stepped masonry skyscraper",
+    "dense recessed vertical window bays",
+    "metal spandrels",
+    "terrace setbacks",
+    "ribbed metal crown",
+    "antenna",
+    "occluded base"
+  ],
+  "derived_dimensions_m": {
+    "segments": [
+      [
+        "Base",
+        0,
+        55,
+        88,
+        67,
+        15
+      ],
+      [
+        "Lower setback",
+        55,
+        76.2,
+        72,
+        64,
+        6
+      ],
+      [
+        "Shoulder",
+        76.2,
+        104,
+        61,
+        57,
+        8
+      ],
+      [
+        "Main shaft",
+        104,
+        267,
+        54,
+        54,
+        46
+      ],
+      [
+        "Upper shaft",
+        267,
+        301,
+        48,
+        48,
+        10
+      ],
+      [
+        "Crown base",
+        301,
+        325,
+        36,
+        36,
+        7
+      ],
+      [
+        "Crown terrace",
+        325,
+        335,
+        26,
+        26,
+        3
+      ]
+    ],
+    "antenna_tip": 443
+  },
+  "assumptions": {
+    "ScaleStatus": "ASSUMED - not surveyed",
+    "ScaleSource": "Nominal 443 m model height to antenna tip; not verified from external sources",
+    "Storeys": "95 inferred exterior facade levels plus crown/mast/antenna datums; numbering is reconstruction-specific",
+    "FloorHeights": "Facade rows 3.0 to 3.7 m, derived from visible repetition and the assumed scale",
+    "HiddenGeometry": "Base obscured by surrounding buildings; rear faces closed with simple walls without invented windows or interiors",
+    "PlanDepth": "Approximately square tower plan and rectangular podium assumed from visible two-face perspective",
+    "Facade": "Masonry walls with voided window openings; shared mapped framed windows and metal spandrels; crown curtain enclosure and ribs",
+    "DetailPolicy": "Visible bay rhythm represented; omitted unreadable ornament, antenna lattice minutiae, context buildings and interior structure",
+    "Camera": "Assumed focal 3500 px and elevated viewpoint, envelope refined using photograph picks; not independently calibrated",
+    "ValidationLimits": "All selected landmarks consumed for fitting; no held-out points or silhouette mask. Surrounding city excluded from render."
+  },
+  "detail_policy": "Visible bay rhythm represented; omitted unreadable ornament, antenna lattice minutiae, context buildings and interior structure",
+  "camera_fit_status": "Assumed camera; plan/height refinements consumed fixed image picks",
+  "render_lighting": "Sun from front-left and blue-grey world, isolated building without city context"
+}

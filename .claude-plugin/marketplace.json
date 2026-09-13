@@ -12,18 +12,7 @@
       "name": "photo-to-ifc-building",
       "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
       "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/photo-to-ifc-building"
-      ],
-      "mcpServers": {
-        "photo-to-bim": {
-          "command": "node",
-          "args": [
-            "${CLAUDE_PLUGIN_ROOT}/mcp/dist/ifc-server.mjs"
-          ]
-        }
-      }
+      "strict": true
     }
   ]
 }

@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "reference_sha256": "1afa053b95edaf125771d93e5d355cb6b87c55414f2969425d622eeeed8b00eb",
+  "image_size": [
+    1125,
+    1500
+  ],
+  "landmarks": [
+    {
+      "id": "tip",
+      "pixel": [
+        547,
+        134
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "mast-left",
+      "pixel": [
+        532,
+        319
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "mast-right",
+      "pixel": [
+        560,
+        319
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown-left",
+      "pixel": [
+        497,
+        441
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown-corner",
+      "pixel": [
+        558,
+        422
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "upper-left",
+      "pixel": [
+        478,
+        460
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "upper-right",
+      "pixel": [
+        614,
+        455
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "mid-left",
+      "pixel": [
+        451,
+        527
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "mid-right",
+      "pixel": [
+        638,
+        522
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shaft-left",
+      "pixel": [
+        441,
+        620
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shaft-corner",
+      "pixel": [
+        571,
+        600
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shaft-right",
+      "pixel": [
+        648,
+        618
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shaft-bottom-left",
+      "pixel": [
+        431,
+        1088
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shaft-bottom-right",
+      "pixel": [
+        649,
+        1084
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "podium-left",
+      "pixel": [
+        400,
+        1147
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "podium-right",
+      "pixel": [
+        674,
+        1155
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    }
+  ]
+}

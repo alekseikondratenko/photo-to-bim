@@ -34,6 +34,8 @@ def install(target, reference=None, node=None, blender_command=None, blender_arg
     package.mkdir(parents=True)
     for dirname in ('skills', '.codex-plugin'):
         shutil.copytree(REPO / dirname, package / dirname, ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
+    (package / '.claude-plugin').mkdir()
+    shutil.copy2(REPO / '.claude-plugin/plugin.json', package / '.claude-plugin/plugin.json')
     (package / 'mcp/dist').mkdir(parents=True)
     shutil.copy2(bundle, package / 'mcp/dist/ifc-server.mjs')
     for name in ('mcp.json','.mcp.json','plugin.json','LICENSE','NOTICE'):

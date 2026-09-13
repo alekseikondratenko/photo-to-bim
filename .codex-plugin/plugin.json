@@ -1,5 +1,5 @@
 {
-  "name": "photo-to-bim",
+  "name": "photo-to-ifc-building",
   "version": "0.8.3",
   "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
   "author": {

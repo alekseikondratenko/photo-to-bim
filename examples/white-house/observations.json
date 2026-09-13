@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "reference_sha256": "e7aa4177135ac4b476795066ce1d3a636e6ee94f7e9856e4b0a1aad0a03e393d",
+  "image_size": [
+    1920,
+    1285
+  ],
+  "landmarks": [
+    {
+      "id": "left-upper-tl",
+      "pixel": [
+        185,
+        611
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "left-upper-br",
+      "pixel": [
+        232,
+        700
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "left-inner-upper-tl",
+      "pixel": [
+        592,
+        606
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "left-inner-upper-br",
+      "pixel": [
+        636,
+        697
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "right-inner-upper-tl",
+      "pixel": [
+        1313,
+        599
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "right-inner-upper-br",
+      "pixel": [
+        1357,
+        689
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "right-upper-tl",
+      "pixel": [
+        1734,
+        592
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "right-upper-br",
+      "pixel": [
+        1779,
+        686
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "pediment-left",
+      "pixel": [
+        625,
+        433
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "pediment-apex",
+      "pixel": [
+        950,
+        297
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "pediment-right",
+      "pixel": [
+        1278,
+        422
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    }
+  ],
+  "annotation_notes": "Image-picked outer sash corners and portico roof ridge/eaves. All consumed for camera or geometry refinement. Vegetation occludes base; no reliable full silhouette mask."
+}

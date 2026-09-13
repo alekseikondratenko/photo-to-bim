@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "reference_sha256": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
+  "image_size": [
+    960,
+    1547
+  ],
+  "landmarks": [
+    {
+      "id": "spire-tip",
+      "pixel": [
+        326,
+        56
+      ],
+      "world": [
+        0,
+        0,
+        508
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown-front",
+      "pixel": [
+        328,
+        191
+      ],
+      "world": [
+        13,
+        -13,
+        441
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown-left",
+      "pixel": [
+        286,
+        203
+      ],
+      "world": [
+        -13,
+        -13,
+        441
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown-right",
+      "pixel": [
+        363,
+        208
+      ],
+      "world": [
+        13,
+        13,
+        441
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier8-front",
+      "pixel": [
+        329,
+        305
+      ],
+      "world": [
+        29,
+        -29,
+        382
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier8-left",
+      "pixel": [
+        233,
+        337
+      ],
+      "world": [
+        -29,
+        -29,
+        382
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier8-right",
+      "pixel": [
+        414,
+        346
+      ],
+      "world": [
+        29,
+        29,
+        382
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier4-front",
+      "pixel": [
+        333,
+        651
+      ],
+      "world": [
+        29,
+        -29,
+        233.5
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier4-left",
+      "pixel": [
+        232,
+        668
+      ],
+      "world": [
+        -29,
+        -29,
+        233.5
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier4-right",
+      "pixel": [
+        415,
+        678
+      ],
+      "world": [
+        29,
+        29,
+        233.5
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier1-front",
+      "pixel": [
+        335,
+        909
+      ],
+      "world": [
+        29,
+        -29,
+        122.125
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier1-left",
+      "pixel": [
+        232,
+        923
+      ],
+      "world": [
+        -29,
+        -29,
+        122.125
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier1-right",
+      "pixel": [
+        415,
+        931
+      ],
+      "world": [
+        29,
+        29,
+        122.125
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    }
+  ]
+}

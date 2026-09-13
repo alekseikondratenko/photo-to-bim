@@ -1,61 +1,52 @@
-photo-to-threejs
+photo-to-bim
 Copyright 2026 Aleksei Kondratenko
 
-This product includes software developed as an original work by the copyright
-holder, licensed under the Apache License, Version 2.0 (see LICENSE).
+Code is licensed under the Apache License, Version 2.0 (see LICENSE).
 
---------------------------------------------------------------------------------
 Prior work
---------------------------------------------------------------------------------
+----------
+This repository grew out of photo-to-threejs:
+https://github.com/alekseikondratenko/photo-to-threejs
 
-The first reconstruction in this project (Residential Tower AM271) was produced
-with the help of the img2threejs process harness:
+That project acknowledged img2threejs (Apache-2.0):
+https://github.com/img2threejs/img2threejs
+Its early process harness and documentation discipline informed development.
+This historical attribution is retained; it is not an installation dependency.
 
-    img2threejs
-    https://github.com/img2threejs/img2threejs
-    Licensed under the Apache License, Version 2.0
+Third-party dependencies
+------------------------
+Bundled JavaScript incorporates dependencies under their respective licenses,
+including three.js, @modelcontextprotocol/sdk, @modelcontextprotocol/ext-apps,
+Zod, pngjs, jpeg-js, Express and cors (MIT). Vite is a development dependency
+(MIT). Dependency identities and exact versions are recorded in
+mcp/package-lock.json; bundled license comments are retained in mcp/dist/.
 
-What was actually carried over from it is set out honestly in README.md under
-"Provenance". In summary: one utility function was genuinely reused
-(`build_detail_inventory.load_image`, a standard-library PNG decoder); its
-spec/gating and PBR-extraction steps were used for one development subject only;
-and its honesty discipline shaped the documentation conventions throughout. The
-viewer, the geometry library, the measurement harness, the scoring loop and all
-three 3D models in this repository are original work.
+Blender, Bonsai/IfcOpenShell and Blender MCP are installed separately and are
+not redistributed as add-ons by this plugin.
 
---------------------------------------------------------------------------------
-Third-party runtime dependencies
---------------------------------------------------------------------------------
+Reference images
+----------------
+Photographs are not covered by the repository's software license.
 
-three.js — MIT License — https://github.com/mrdoob/three.js
-Vite — MIT License — https://github.com/vitejs/vite
-@modelcontextprotocol/sdk — MIT License
-@modelcontextprotocol/ext-apps — MIT License
+mcp/test/photos/reference-whitehouse.jpg
+  Tomasz Zielonka, via Unsplash. Unsplash License:
+  https://unsplash.com/license
 
---------------------------------------------------------------------------------
-Reference photographs
---------------------------------------------------------------------------------
+mcp/test/photos/reference-taipei101.jpg
+examples/taipei-101/reference.jpg
+  AngMoKio, edited by Mylius. CC BY-SA 3.0:
+  https://creativecommons.org/licenses/by-sa/3.0/
+  https://commons.wikimedia.org/wiki/File:Taipei_101_2009_amk-EditMylius.jpg
 
-Reference imagery is licensed separately from the code and is NOT covered by the
-Apache License above. See docs/LICENSING.md for the per-image position.
+mcp/test/photos/reference-empirestate.jpg
+examples/empire-state/reference.jpg
+  Aleksei Kondratenko, 19 August 2020. CC BY 4.0:
+  https://creativecommons.org/licenses/by/4.0/
 
-Included in this repository:
+examples/white-house/reference.jpg
+  Nishkid64, colour correction by Patrickneil. Public domain:
+  https://commons.wikimedia.org/wiki/File:North_Fa%C3%A7ade_White_House.JPG
 
-  viewer/public/reference-whitehouse.jpg
-      Photograph by Tomasz Zielonka, via Unsplash.
-      Unsplash License (https://unsplash.com/license).
-
-  viewer/public/reference-taipei101.jpg
-      "Taipei 101" by AngMoKio, via Wikimedia Commons.
-      Licensed CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
-      Edited by Mylius. Reused here under the same licence.
-
-  viewer/public/reference-empirestate.jpg
-      Photograph by Aleksei Kondratenko, 19 August 2020. Nikon Coolpix P900.
-      Licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
-
-Deliberately NOT included: the stock photograph the White House model was
-originally solved against, whose provenance could not be established. The 3D
-model built from it is unaffected and remains part of this repository —
-depicting a building is separate from redistributing a photograph of it
-(17 U.S.C. §120(a); UK CDPA s.62). See docs/LICENSING.md.
+The red-roof house source image is not redistributed pending source confirmation.
+Generated reconstruction renders are included. See examples/README.md and the
+individual example pages for run context, attribution and validation limits.
