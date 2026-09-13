@@ -26,6 +26,13 @@ versions and client settings. Installing a plugin does **not** itself install or
 upgrade Node, uv, Blender, or add-ons. The user still completes any necessary
 Blender UI steps. Do not update all dependencies merely because newer ones exist.
 
+For the macOS/Linux shell commands below, run `command -v uvx` (or `which uvx`)
+in your terminal and confirm it returns an absolute executable path. If it does
+not, install uv or fix your terminal PATH first. The registration commands resolve
+and store that path so Blender MCP does not depend on a GUI client's PATH matching
+your terminal. Keep machine-specific paths in local configuration, not this repo;
+if uv moves, update the registered path.
+
 ## Codex: install for all projects
 
 Run in a terminal with the Codex CLI available:
@@ -44,7 +51,7 @@ codex mcp get blender
 If it is missing:
 
 ```sh
-codex mcp add blender -- uvx blender-mcp
+codex mcp add blender -- "$(command -v uvx)" blender-mcp
 ```
 
 This registers Blender MCP in your user-level Codex configuration. The plugin
@@ -64,31 +71,39 @@ and [MCP configuration](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
 
 ## Claude Code: install for all projects
 
-```sh
-claude plugin marketplace add alekseikondratenko/photo-to-bim
-claude plugin install photo-to-ifc-building@photo-to-bim --scope user
-```
+1. **Install the plugin for your user account:**
 
-Inspect the existing bridge first:
+   ```sh
+   claude plugin marketplace add alekseikondratenko/photo-to-bim
+   claude plugin install photo-to-ifc-building@photo-to-bim --scope user
+   ```
 
-```sh
-claude mcp get blender
-```
+2. **Inspect the existing Blender bridge:**
 
-If it is missing:
+   ```sh
+   claude mcp get blender
+   ```
 
-```sh
-claude mcp add --transport stdio --scope user blender -- uvx blender-mcp
-```
+   If it is missing, register it using the absolute `uvx` path checked above:
 
-Restart Claude Code. Use `/plugin` to check the plugin and `/mcp` to check the
-servers. Accept any trust or tool-permission prompts your client requires.
+   ```sh
+   claude mcp add --transport stdio --scope user blender -- "$(command -v uvx)" blender-mcp
+   ```
+
+3. **Restart Claude Code before your first reconstruction.** Exit and reopen the
+   CLI, or restart the app if you use its Claude Code interface. In the new
+   session, use `/plugin` to check the plugin and `/mcp` to check both servers.
+   Accept any trust or tool-permission prompts your client requires. Recent
+   versions also support `/reload-plugins`, but a fresh session is the simplest
+   way to load both the plugin and the separately registered Blender bridge.
+
 [Official Claude Code installation guide](https://code.claude.com/docs/en/discover-plugins)
 and [MCP configuration](https://code.claude.com/docs/en/mcp).
 
 ## Verify once before modelling
 
-Open Blender, confirm Bonsai is enabled, and start the add-on's socket server.
+Open Blender and confirm Bonsai and Blender MCP are enabled. The current Blender
+MCP add-on starts its socket server automatically by default.
 In a new task, ask:
 
 > Verify Photo to BIM and Blender MCP are available. List the six measurement
@@ -113,7 +128,9 @@ Codex / Claude Code
 
 The client starts both stdio processes. `uvx` downloads and caches the Blender MCP
 package when needed. The Blender add-on listens on its configured port, normally
-9876. Keep Blender open and start its server again after each Blender restart.
+9876. Keep Blender open while the agent works. With the current add-on's default
+auto-start enabled, its server starts when Blender opens; no manual connection
+step is needed for each photograph.
 Do not launch another stdio bridge manually in a terminal for the same client.
 
 The add-on and this plugin are separate installations. This repository does not
@@ -128,7 +145,11 @@ listener on that same machine; generic cloud sessions do not share its localhost
   your terminal. Fix the app's PATH or configure an executable path appropriate
   to your machine. Do not copy someone else's absolute path.
 - **Connection refused:** Blender must be open with the add-on's server running.
-  Check that bridge and add-on use the same host/port.
+  If you use an older add-on, disabled auto-start, or stopped the server manually,
+  press **N** in the 3D Viewport, open **BlenderMCP** / **MCP for Blender**, and
+  click **Start MCP Server** or **Connect** (the label depends on the version).
+  Enable **Auto-Start Server** if available. Check that bridge and add-on use the
+  same host/port.
 - **Bonsai import fails:** enable the compatible Bonsai release inside the Blender
   instance serving the connection.
 - **Duplicate tools:** remove or disable an older Photo to BIM installation or

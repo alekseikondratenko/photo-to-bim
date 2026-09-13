@@ -30,8 +30,8 @@ cannot reach your computer's `localhost` without additional infrastructure.
 
 1. Create a new working folder, add the photograph, and open that folder in Codex
    or Claude Code. Start a fresh task after installing the plugin.
-2. Open Blender with Bonsai enabled. Start the Blender MCP server in its sidebar
-   and **leave Blender open** while the agent works.
+2. Open Blender with Bonsai and Blender MCP enabled, and **leave Blender open**
+   while the agent works.
 3. Send:
 
    > Create an IFC model of the building in this photograph using Blender and Bonsai.
@@ -61,9 +61,12 @@ projects; modelling scripts and evidence are created as needed during the task.
    from that repository. In Blender's **Preferences → Add-ons**, choose
    **Install from Disk…** from the menu (or **Install…** in older versions), select
    the file, and enable **MCP for Blender** / **Blender MCP**.
-4. In the 3D Viewport, press **N**, open the **BlenderMCP** tab, and click its
-   server-start button (labelled **Start MCP Server** or **Connect** depending on
-   the add-on version). Start it again after restarting Blender.
+
+The current Blender MCP add-on starts its server automatically by default when
+enabled and when Blender opens. Install and enable it once; no manual connection
+step is needed for each photograph. If it does not connect, see
+[troubleshooting](docs/installation.md#troubleshooting) for older versions or
+disabled auto-start.
 
 The client also needs **Node.js 22+**, **uv/uvx**, and a Python version supported
 by Blender MCP (currently **3.10+**). `uv` can manage that Python interpreter;
@@ -71,7 +74,7 @@ Blender has its own Python, and Bonsai supplies its IFC libraries inside Blender
 See [dependencies and client setup](docs/installation.md). This plugin ships its
 own measurement server; it does **not** distribute Blender, Bonsai, or Blender MCP.
 
-## Examples
+## Simple Benchmark Testing
 
 These are selected development runs, made with the plugin version recorded in
 each example. They demonstrate outputs, not a controlled speed comparison or a
@@ -83,18 +86,6 @@ separately; none of these runs has independent held-out landmarks.
 | White House · test 19 | [Photo, render, IFC, assumptions](examples/white-house/README.md) | IFC, fitted landmarks and appearance passed |
 | Empire State Building · test 16 | [Photo, render, IFC, assumptions](examples/empire-state/README.md) | IFC and appearance passed; photographic fit needs refinement |
 | Taipei 101 · test 11 | [Photo, render, IFC, assumptions](examples/taipei-101/README.md) | IFC, fitted landmarks and appearance passed |
-| Red-roof house · test 9 | [Render, IFC, assumptions](examples/red-roof-house/README.md) | IFC and fitted landmarks passed; appearance evidence incomplete |
-
-### Earlier house runs
-
-| Claude Code · Fable 5.1 | Codex · Astra |
-| --- | --- |
-| ![Claude Code house result](examples/early-runs/claude-code.png) | ![Codex house draft](examples/early-runs/codex-draft.png) |
-| About **30 minutes** of active work, as reported by the author; idle gaps excluded. | About **8–9 minutes** to this displayed draft. |
-
-These images come from different runs and plugin versions. The Codex image is a
-**draft**, not its later final deliverable. Time varies with the subject, model,
-hardware, detail and interruptions. [Run notes](examples/early-runs/README.md).
 
 ## Design decisions and limits
 
@@ -124,3 +115,8 @@ hardware, detail and interruptions. [Run notes](examples/early-runs/README.md).
 
 Code is licensed under [Apache-2.0](LICENSE). Reference images have separate
 credits and terms; see [NOTICE](NOTICE) and the individual examples.
+
+## Related Work
+
+[Photo to Three.js](https://github.com/alekseikondratenko/photo-to-threejs) —
+reconstruct buildings from photographs as procedural Three.js models.
