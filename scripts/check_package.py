@@ -24,7 +24,11 @@ def check():
     assert entry['source'] == './' and entry['strict'] is True
     assert not ({'skills', 'mcpServers'} & entry.keys()), 'Duplicate component declarations'
     assert (ROOT / 'skills/photo-to-ifc-building/SKILL.md').is_file()
-    assert read_json('mcp.json') == read_json('.mcp.json')
+    assert manifests[0]['$schema'] == 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json'
+    portable = read_json('mcp.json')
+    assert portable.pop('$schema') == 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json'
+    normalized = json.loads(json.dumps(portable).replace('${PLUGIN_ROOT}', '${CLAUDE_PLUGIN_ROOT}'))
+    assert normalized == read_json('.mcp.json')
     servers = read_json('.mcp.json')['mcpServers']
     assert set(servers) == {'photo-to-bim'}, 'Do not bundle the external Blender bridge'
     server = servers['photo-to-bim']

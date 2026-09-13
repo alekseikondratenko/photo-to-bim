@@ -166,7 +166,10 @@ def test_package_versions_and_mcp_entrypoints_agree():
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
     assert codex['version']==claude['version']==npm['version']=='0.8.3'
-    assert json.loads((repo/'.mcp.json').read_text())==json.loads((repo/'mcp.json').read_text())
+    portable=json.loads((repo/'mcp.json').read_text())
+    assert portable.pop('$schema')=='https://agent-plugins.org/schemas/1.0.0/mcp.schema.json'
+    normalized=json.loads(json.dumps(portable).replace('${PLUGIN_ROOT}','${CLAUDE_PLUGIN_ROOT}'))
+    assert json.loads((repo/'.mcp.json').read_text())==normalized
     assert 'ifc-server.mjs' in (repo/'.mcp.json').read_text()
 
 def test_framed_fill_item_styles_rotated_host_and_dimensions(H,tmp_path):

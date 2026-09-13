@@ -12,7 +12,7 @@ remain at 0.8.3 in this documentation/packaging revision.
 | `.codex-plugin/plugin.json` | Codex compatibility metadata and interface |
 | `.claude-plugin/plugin.json` | Claude Code plugin metadata |
 | `.claude-plugin/marketplace.json` | GitHub marketplace entry, also understood by Codex |
-| `.mcp.json`, `mcp.json` | Claude/compatibility and portable MCP entry points; kept identical |
+| `.mcp.json`, `mcp.json` | Claude/compatibility and portable MCP entry points; equivalent server, client-specific path syntax |
 | `skills/photo-to-ifc-building/` | Shared skill, reference notes and Blender Python helpers |
 | `mcp/dist/ifc-server.mjs` | Prebuilt measurement server used by the plugin |
 | `mcp/ifc-*.ts`, `mcp/src/` | Server source and shared measurement modules |
@@ -25,6 +25,12 @@ The marketplace and all manifests use the plugin identifier
 server is named `photo-to-bim`. The marketplace points at the plugin root.
 Client-specific manifests contain metadata, not a second copy of the skill.
 `.mcp.json` belongs at the **root**, not inside `.claude-plugin/`.
+
+The portable files declare their Agent Plugins `$schema`. Codex uses
+`${PLUGIN_ROOT}` in `mcp.json`; Claude Code uses `${CLAUDE_PLUGIN_ROOT}` in
+`.mcp.json`. Omitting the portable schema can make Codex select the legacy
+configuration and pass a placeholder literally to Node, so testing only a direct
+`node` launch is insufficient. The packaging check covers both entry points.
 
 The repository retains the original Three.js server/UI sources and bundle
 (`mcp/server.ts`, `mcp/main.ts`, `mcp/dist/server.mjs`, and associated frontend

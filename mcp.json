@@ -1,9 +1,10 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "photo-to-bim": {
       "command": "node",
       "args": [
-        "${CLAUDE_PLUGIN_ROOT}/mcp/dist/ifc-server.mjs"
+        "${PLUGIN_ROOT}/mcp/dist/ifc-server.mjs"
       ],
       "type": "stdio"
     }
