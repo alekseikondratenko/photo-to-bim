@@ -76,10 +76,41 @@ own measurement server; it does **not** distribute Blender, Bonsai, or Blender M
 
 ## Simple Benchmark Testing
 
+### Taipei 101: one photograph, two agents
+
+<table>
+  <tr>
+    <th width="33%">Original photograph</th>
+    <th width="33%">Claude Code · Fable 5.1</th>
+    <th width="33%">Codex · Astra</th>
+  </tr>
+  <tr>
+    <td><img src="examples/taipei-101/reference.jpg" alt="Original Taipei 101 photograph" width="320"></td>
+    <td><img src="examples/taipei-comparison/claude-code.png" alt="Taipei 101 final IFC render from Claude Code with Fable 5.1" width="320"></td>
+    <td><img src="examples/taipei-101/comparison.png" alt="Taipei 101 final IFC render from Codex with Astra" width="320"></td>
+  </tr>
+  <tr>
+    <td>Same input photograph</td>
+    <td>About <strong>30 minutes</strong></td>
+    <td>About <strong>14 minutes</strong></td>
+  </tr>
+</table>
+
+Final renders from test 22 (Fable, plugin 0.8.3) and test 11 (Astra, plugin 0.7.2).
+Times run from the reconstruction request to the final response, rounded to whole
+minutes. These are illustrative runs with different plugin versions, not a
+controlled speed comparison. [Run notes](examples/taipei-comparison/README.md).
+
+Reference: AngMoKio, edited by Mylius,
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/),
+[original source](https://commons.wikimedia.org/wiki/File:Taipei_101_2009_amk-EditMylius.jpg).
+
+### More examples
+
 These are selected development runs, made with the plugin version recorded in
 each example. They demonstrate outputs, not a controlled speed comparison or a
 claim of survey accuracy. IFC validity and photographic agreement are reported
-separately; none of these runs has independent held-out landmarks.
+separately; fitted-landmark agreement alone does not establish independent accuracy.
 
 | Example | Files and evidence | Recorded result |
 | --- | --- | --- |
