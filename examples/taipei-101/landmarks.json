@@ -1,216 +1,232 @@
 {
   "schema_version": 1,
-  "ifc_sha256": "412ec5e1e749c14efddf2a014834e7c9d60a081152cf9b7b55d20162b823b594",
+  "ifc_sha256": "67050017bb54b139e75bc04508dcb43f209df80b1ba5c97582ebd73571013e29",
   "bindings": {
-    "tier1-front": {
-      "global_id": "1xIdgaNG13IQK0MnosuamI",
+    "tip": {
+      "global_id": "1f_LEqEKDCTOYbThEJVfuB",
       "vertex_index": 2,
-      "geometry_sha256": "b87a6dd4eddc90b5608f96c27734d6d01b760248cdfe13c949846f8a131cc2ed",
-      "world": [
-        29.0,
-        -29.0,
-        122.125
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier1-left": {
-      "global_id": "1xIdgaNG13IQK0MnosuamI",
-      "vertex_index": 3,
-      "geometry_sha256": "b87a6dd4eddc90b5608f96c27734d6d01b760248cdfe13c949846f8a131cc2ed",
-      "world": [
-        -29.0,
-        -29.0,
-        122.125
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier1-right": {
-      "global_id": "1xIdgaNG13IQK0MnosuamI",
-      "vertex_index": 1,
-      "geometry_sha256": "b87a6dd4eddc90b5608f96c27734d6d01b760248cdfe13c949846f8a131cc2ed",
-      "world": [
-        29.0,
-        29.0,
-        122.125
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier4-front": {
-      "global_id": "33vx_zQ8bAeAUb8b_$rvfq",
-      "vertex_index": 2,
-      "geometry_sha256": "425ccfbc1a5ebb084804d53630764cfe45ffeb98738d1c9d8c9d4f152a70727e",
-      "world": [
-        29.0,
-        -29.0,
-        233.5
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier4-left": {
-      "global_id": "33vx_zQ8bAeAUb8b_$rvfq",
-      "vertex_index": 3,
-      "geometry_sha256": "425ccfbc1a5ebb084804d53630764cfe45ffeb98738d1c9d8c9d4f152a70727e",
-      "world": [
-        -29.0,
-        -29.0,
-        233.5
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier4-right": {
-      "global_id": "33vx_zQ8bAeAUb8b_$rvfq",
-      "vertex_index": 1,
-      "geometry_sha256": "425ccfbc1a5ebb084804d53630764cfe45ffeb98738d1c9d8c9d4f152a70727e",
-      "world": [
-        29.0,
-        29.0,
-        233.5
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier8-front": {
-      "global_id": "0zqD2F6gr4Mvkhbvx5t3sI",
-      "vertex_index": 2,
-      "geometry_sha256": "bbda9567a2a45e10262556d719f4910913662600d2f4027088be6732cd3c58c7",
-      "world": [
-        29.0,
-        -29.0,
-        382.0
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier8-left": {
-      "global_id": "0zqD2F6gr4Mvkhbvx5t3sI",
-      "vertex_index": 3,
-      "geometry_sha256": "bbda9567a2a45e10262556d719f4910913662600d2f4027088be6732cd3c58c7",
-      "world": [
-        -29.0,
-        -29.0,
-        382.0
-      ],
-      "snap_distance_m": 0.0
-    },
-    "tier8-right": {
-      "global_id": "0zqD2F6gr4Mvkhbvx5t3sI",
-      "vertex_index": 1,
-      "geometry_sha256": "bbda9567a2a45e10262556d719f4910913662600d2f4027088be6732cd3c58c7",
-      "world": [
-        29.0,
-        29.0,
-        382.0
-      ],
-      "snap_distance_m": 0.0
-    },
-    "crown-front": {
-      "global_id": "3yhK$tLNH4P9ImSOj90aOf",
-      "vertex_index": 2,
-      "geometry_sha256": "d49b9e1cdd07bef1bed9c04955235b139fca9a9033334ba7e274a199acf8741d",
-      "world": [
-        13.0,
-        -13.0,
-        441.0
-      ],
-      "snap_distance_m": 0.0
-    },
-    "crown-left": {
-      "global_id": "3yhK$tLNH4P9ImSOj90aOf",
-      "vertex_index": 3,
-      "geometry_sha256": "d49b9e1cdd07bef1bed9c04955235b139fca9a9033334ba7e274a199acf8741d",
-      "world": [
-        -13.0,
-        -13.0,
-        441.0
-      ],
-      "snap_distance_m": 0.0
-    },
-    "crown-right": {
-      "global_id": "3yhK$tLNH4P9ImSOj90aOf",
-      "vertex_index": 1,
-      "geometry_sha256": "d49b9e1cdd07bef1bed9c04955235b139fca9a9033334ba7e274a199acf8741d",
-      "world": [
-        13.0,
-        13.0,
-        441.0
-      ],
-      "snap_distance_m": 0.0
-    },
-    "spire-tip": {
-      "global_id": "3rZqx2UzT54eOX4ZOyEwYX",
-      "vertex_index": 144,
-      "geometry_sha256": "71d20fbbc5e016a3efff18b89b370115538c21335fe8ce56786c9864e468b703",
+      "geometry_sha256": "eb5edff85a6c8b13e17d20b9606c99797273950b20012aae01574302f29afb1a",
       "world": [
         0.0,
         0.0,
         508.0
       ],
       "snap_distance_m": 0.0
+    },
+    "crown_front": {
+      "global_id": "176Uk9D9D9aOkduLMmmUgX",
+      "vertex_index": 1,
+      "geometry_sha256": "bbe21caf405ce24583d2da8af92bc7646673be6a0a840b29ca0f5e4ed9dcaee5",
+      "world": [
+        12.0,
+        -12.0,
+        436.73899263837893
+      ],
+      "snap_distance_m": 0.0
+    },
+    "crown_left": {
+      "global_id": "176Uk9D9D9aOkduLMmmUgX",
+      "vertex_index": 0,
+      "geometry_sha256": "bbe21caf405ce24583d2da8af92bc7646673be6a0a840b29ca0f5e4ed9dcaee5",
+      "world": [
+        -12.0,
+        -12.0,
+        436.73899263837893
+      ],
+      "snap_distance_m": 0.0
+    },
+    "crown_right": {
+      "global_id": "1bY$mQ7mHDGgFUqNfnKzwy",
+      "vertex_index": 1,
+      "geometry_sha256": "0e08cac9189070bb442c29d0aa10f13bc6088e2322b9a599cc93b3c1e2be0d4a",
+      "world": [
+        12.0,
+        12.0,
+        436.73899263837893
+      ],
+      "snap_distance_m": 0.0
+    },
+    "top_front": {
+      "global_id": "1oDV2hSIj7cvyFUwaAqp39",
+      "vertex_index": 1,
+      "geometry_sha256": "2466b9182a56341b2caf82ba58fa9d25c53d6a7f5932ba73d4b2964e0296041f",
+      "world": [
+        27.99659237581963,
+        -27.99659237581963,
+        373.22369716072296
+      ],
+      "snap_distance_m": 0.0
+    },
+    "top_left": {
+      "global_id": "1oDV2hSIj7cvyFUwaAqp39",
+      "vertex_index": 0,
+      "geometry_sha256": "2466b9182a56341b2caf82ba58fa9d25c53d6a7f5932ba73d4b2964e0296041f",
+      "world": [
+        -27.99659237581963,
+        -27.99659237581963,
+        373.22369716072296
+      ],
+      "snap_distance_m": 0.0
+    },
+    "top_right": {
+      "global_id": "3Db909Fnn9bu6$$wVH3HUg",
+      "vertex_index": 1,
+      "geometry_sha256": "abb298e75f33fe5082d1f08befda51f14109ab7bf02efec12151a878c6fbdfb9",
+      "world": [
+        27.99659237581963,
+        27.99659237581963,
+        373.22369716072296
+      ],
+      "snap_distance_m": 0.0
+    },
+    "tier4_front": {
+      "global_id": "2btoV6Gmf44QL4JdHSXeLp",
+      "vertex_index": 1,
+      "geometry_sha256": "6a23a6f56b958590b06336b20262994e4faa4706c26e45645c838d891308fabe",
+      "world": [
+        27.99659237581963,
+        -27.99659237581963,
+        214.72967120714628
+      ],
+      "snap_distance_m": 0.0
+    },
+    "tier4_left": {
+      "global_id": "2btoV6Gmf44QL4JdHSXeLp",
+      "vertex_index": 0,
+      "geometry_sha256": "6a23a6f56b958590b06336b20262994e4faa4706c26e45645c838d891308fabe",
+      "world": [
+        -27.99659237581963,
+        -27.99659237581963,
+        214.72967120714628
+      ],
+      "snap_distance_m": 0.0
+    },
+    "tier4_right": {
+      "global_id": "0Iiud3ozjEa8Abo7dfo70E",
+      "vertex_index": 1,
+      "geometry_sha256": "de66243431d7956db76d82504ede3889915f585ace9f13301b025e66a0e1a062",
+      "world": [
+        27.99659237581963,
+        27.99659237581963,
+        214.72967120714628
+      ],
+      "snap_distance_m": 0.0
+    },
+    "tier1_front": {
+      "global_id": "1touGMvmP7z996nFpRvQuZ",
+      "vertex_index": 1,
+      "geometry_sha256": "109006704e46c1a338837671df55d3cecff6f525b03bf00420004847fe5e47bb",
+      "world": [
+        27.99659237581963,
+        -27.99659237581963,
+        95.85915174196373
+      ],
+      "snap_distance_m": 0.0
+    },
+    "tier1_left": {
+      "global_id": "1touGMvmP7z996nFpRvQuZ",
+      "vertex_index": 0,
+      "geometry_sha256": "109006704e46c1a338837671df55d3cecff6f525b03bf00420004847fe5e47bb",
+      "world": [
+        -27.99659237581963,
+        -27.99659237581963,
+        95.85915174196373
+      ],
+      "snap_distance_m": 0.0
+    },
+    "tier1_right": {
+      "global_id": "14meW0M1X2nPEixuySm191",
+      "vertex_index": 1,
+      "geometry_sha256": "f715fde29f11343b81e80de34e83b1f74552bcbcb8a8ed6ccdbc8bc9483af396",
+      "world": [
+        27.99659237581963,
+        27.99659237581963,
+        95.85915174196373
+      ],
+      "snap_distance_m": 0.0
+    },
+    "base_front": {
+      "global_id": "1jdNkEhl9EyOyZG98UJOCh",
+      "vertex_index": 1,
+      "geometry_sha256": "8f74195c2f7604738b20fa30a0d125f9158b68a75ffc0c64e25ed9f4fdb1fb61",
+      "world": [
+        23.99659237581963,
+        -23.99659237581963,
+        56.23564525356956
+      ],
+      "snap_distance_m": 0.0
     }
   },
   "model_points": {
-    "tier1-front": [
-      29.0,
-      -29.0,
-      122.125
-    ],
-    "tier1-left": [
-      -29.0,
-      -29.0,
-      122.125
-    ],
-    "tier1-right": [
-      29.0,
-      29.0,
-      122.125
-    ],
-    "tier4-front": [
-      29.0,
-      -29.0,
-      233.5
-    ],
-    "tier4-left": [
-      -29.0,
-      -29.0,
-      233.5
-    ],
-    "tier4-right": [
-      29.0,
-      29.0,
-      233.5
-    ],
-    "tier8-front": [
-      29.0,
-      -29.0,
-      382.0
-    ],
-    "tier8-left": [
-      -29.0,
-      -29.0,
-      382.0
-    ],
-    "tier8-right": [
-      29.0,
-      29.0,
-      382.0
-    ],
-    "crown-front": [
-      13.0,
-      -13.0,
-      441.0
-    ],
-    "crown-left": [
-      -13.0,
-      -13.0,
-      441.0
-    ],
-    "crown-right": [
-      13.0,
-      13.0,
-      441.0
-    ],
-    "spire-tip": [
+    "tip": [
       0.0,
       0.0,
       508.0
+    ],
+    "crown_front": [
+      12.0,
+      -12.0,
+      436.73899263837893
+    ],
+    "crown_left": [
+      -12.0,
+      -12.0,
+      436.73899263837893
+    ],
+    "crown_right": [
+      12.0,
+      12.0,
+      436.73899263837893
+    ],
+    "top_front": [
+      27.99659237581963,
+      -27.99659237581963,
+      373.22369716072296
+    ],
+    "top_left": [
+      -27.99659237581963,
+      -27.99659237581963,
+      373.22369716072296
+    ],
+    "top_right": [
+      27.99659237581963,
+      27.99659237581963,
+      373.22369716072296
+    ],
+    "tier4_front": [
+      27.99659237581963,
+      -27.99659237581963,
+      214.72967120714628
+    ],
+    "tier4_left": [
+      -27.99659237581963,
+      -27.99659237581963,
+      214.72967120714628
+    ],
+    "tier4_right": [
+      27.99659237581963,
+      27.99659237581963,
+      214.72967120714628
+    ],
+    "tier1_front": [
+      27.99659237581963,
+      -27.99659237581963,
+      95.85915174196373
+    ],
+    "tier1_left": [
+      -27.99659237581963,
+      -27.99659237581963,
+      95.85915174196373
+    ],
+    "tier1_right": [
+      27.99659237581963,
+      27.99659237581963,
+      95.85915174196373
+    ],
+    "base_front": [
+      23.99659237581963,
+      -23.99659237581963,
+      56.23564525356956
     ]
   }
 }

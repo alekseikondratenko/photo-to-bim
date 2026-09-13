@@ -1,7 +1,7 @@
 {
-  "test_number": 11,
-  "plugin_version": "0.7.2",
-  "source_commit": "408fdd764e6a03be800771b5ae7df6ba6b9921a3",
+  "test_number": 23,
+  "plugin_version": "0.8.3",
+  "source_commit": "c1a8d34e87222413b14c46f36ac732418ac532c2",
   "reference_included": true,
   "reference_original_filename": "Taipei_101_2009_amk-EditMylius.jpg",
   "reference_sha256": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
@@ -9,13 +9,14 @@
     "Reference filename normalized in reconstruction.json; original filename retained here."
   ],
   "files_sha256": {
-    "comparison.png": "3ff1547c81d76a3e5f64ab7664c9ae2c958abedd2c11d4033a0a403fde5e0c02",
-    "house.ifc": "412ec5e1e749c14efddf2a014834e7c9d60a081152cf9b7b55d20162b823b594",
-    "house.ifc.styles.json": "1cca8f40b026da397e6dd8093c4cbee35ee1f54d0aeecae50268e0922e993968",
-    "landmarks.json": "c919159ca5ab65387d0dc8d9598c346d9e55355b0ca9e1ba75f963b5295c8c7e",
-    "observations.json": "6c0b4234a7fdb6021208a8e2fef892efcbea35a1b18f35e51c25f26452fc0194",
-    "reconstruction.json": "6448fdea401e09168c3ca37b27724997a6cc203bf76db29d947c6c41c7297d87",
+    "comparison.png": "695d040a47994fd27b2d7cd04c3d4ac6779d5ea3d76b4786ba87b9a88cb4bb1a",
+    "house.ifc": "67050017bb54b139e75bc04508dcb43f209df80b1ba5c97582ebd73571013e29",
+    "house.ifc.styles.json": "d454428c818eb7a1356a547a30e7d72f436a9a48f82df04e421456b72d6bc7cc",
+    "landmarks.json": "3dcbadbbf80c7da2f5e7809138777d7b5e36f37f5c613f3356aef45e8111f7c8",
+    "observations.json": "9f5c6fd70a6e01f3fc6f7879208f17f2f1cac2effd3e32d5eed32a087ce0430d",
+    "reconstruction.json": "a525d0af3d7244cb51bb8270d9c250701a942bc952e65e3398aed9ad440eb5c6",
     "reference.jpg": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
-    "validation.json": "4a4c5dc0c9938dba74c35af8280bbe1b0a3e1e601f19aac7e1d0ef67d6fa39bb"
-  }
+    "validation.json": "2d8dc888269d9ed23faeea8c9579e7c2f90f1ce28e4c91b7a2455c36bdcad4d8"
+  },
+  "source_revision_basis": "Runtime helper files verified byte-for-byte against this repository revision."
 }

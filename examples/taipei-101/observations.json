@@ -7,10 +7,10 @@
   ],
   "landmarks": [
     {
-      "id": "spire-tip",
+      "id": "tip",
       "pixel": [
         326,
-        56
+        57
       ],
       "world": [
         0,
@@ -18,175 +18,259 @@
         508
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        0.0,
+        0.0,
+        508.0
+      ]
     },
     {
-      "id": "crown-front",
+      "id": "crown_front",
       "pixel": [
-        328,
-        191
+        329,
+        190
       ],
       "world": [
-        13,
-        -13,
-        441
+        12,
+        -12,
+        450
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        12.0,
+        -12.0,
+        436.73899263837893
+      ]
     },
     {
-      "id": "crown-left",
+      "id": "crown_left",
       "pixel": [
         286,
         203
       ],
       "world": [
-        -13,
-        -13,
-        441
+        -12,
+        -12,
+        450
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        -12.0,
+        -12.0,
+        436.73899263837893
+      ]
     },
     {
-      "id": "crown-right",
+      "id": "crown_right",
       "pixel": [
-        363,
-        208
+        362,
+        210
       ],
       "world": [
-        13,
-        13,
-        441
+        12,
+        12,
+        450
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        12.0,
+        12.0,
+        436.73899263837893
+      ]
     },
     {
-      "id": "tier8-front",
+      "id": "top_front",
       "pixel": [
-        329,
-        305
+        332,
+        302
       ],
       "world": [
         29,
         -29,
-        382
+        400
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        27.99659237581963,
+        -27.99659237581963,
+        373.22369716072296
+      ]
     },
     {
-      "id": "tier8-left",
+      "id": "top_left",
       "pixel": [
-        233,
-        337
+        234,
+        331
       ],
       "world": [
         -29,
         -29,
-        382
+        400
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        -27.99659237581963,
+        -27.99659237581963,
+        373.22369716072296
+      ]
     },
     {
-      "id": "tier8-right",
+      "id": "top_right",
       "pixel": [
         414,
-        346
+        348
       ],
       "world": [
         29,
         29,
-        382
+        400
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        27.99659237581963,
+        27.99659237581963,
+        373.22369716072296
+      ]
     },
     {
-      "id": "tier4-front",
+      "id": "tier4_front",
       "pixel": [
-        333,
-        651
+        334,
+        648
       ],
       "world": [
         29,
         -29,
-        233.5
+        240
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        27.99659237581963,
+        -27.99659237581963,
+        214.72967120714628
+      ]
     },
     {
-      "id": "tier4-left",
+      "id": "tier4_left",
       "pixel": [
-        232,
-        668
+        234,
+        671
       ],
       "world": [
         -29,
         -29,
-        233.5
+        240
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        -27.99659237581963,
+        -27.99659237581963,
+        214.72967120714628
+      ]
     },
     {
-      "id": "tier4-right",
+      "id": "tier4_right",
       "pixel": [
-        415,
-        678
+        414,
+        688
       ],
       "world": [
         29,
         29,
-        233.5
+        240
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        27.99659237581963,
+        27.99659237581963,
+        214.72967120714628
+      ]
     },
     {
-      "id": "tier1-front",
+      "id": "tier1_front",
       "pixel": [
-        335,
-        909
+        336,
+        908
       ],
       "world": [
         29,
         -29,
-        122.125
+        120
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        27.99659237581963,
+        -27.99659237581963,
+        95.85915174196373
+      ]
     },
     {
-      "id": "tier1-left",
+      "id": "tier1_left",
       "pixel": [
-        232,
-        923
+        234,
+        921
       ],
       "world": [
         -29,
         -29,
-        122.125
+        120
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        -27.99659237581963,
+        -27.99659237581963,
+        95.85915174196373
+      ]
     },
     {
-      "id": "tier1-right",
+      "id": "tier1_right",
       "pixel": [
-        415,
-        931
+        414,
+        939
       ],
       "world": [
         29,
         29,
-        122.125
+        120
       ],
       "role": "fit",
-      "used_for_fitting": true
+      "used_for_fitting": true,
+      "final_world": [
+        27.99659237581963,
+        27.99659237581963,
+        95.85915174196373
+      ]
+    },
+    {
+      "id": "base_front",
+      "pixel": [
+        336,
+        992
+      ],
+      "world": [
+        25,
+        -25,
+        80
+      ],
+      "role": "fit",
+      "used_for_fitting": true,
+      "final_world": [
+        23.99659237581963,
+        -23.99659237581963,
+        56.23564525356956
+      ]
     }
   ]
 }

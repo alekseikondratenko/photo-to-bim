@@ -1,6 +1,7 @@
 # Taipei 101
 
-Plugin **0.7.2**, source revision `408fdd764e6a03be800771b5ae7df6ba6b9921a3`.
+Plugin **0.8.3**. Runtime files match the repository revision recorded in
+[publication metadata](example.json).
 
 | Reference | Reconstruction |
 | --- | --- |
@@ -12,9 +13,18 @@ Plugin **0.7.2**, source revision `408fdd764e6a03be800771b5ae7df6ba6b9921a3`.
 ## Recorded evidence
 
 - IFC: **PASS**.
-- Fitted landmarks: **PASS**, RMS **2.90 px**, maximum **4.98 px**, tolerance **5 px**.
+- Fitted landmarks: **needs refinement**, RMS **4.09 px**, maximum **8.16 px**, tolerance **5 px**.
 - Appearance: **PASS**.
-- Held-out landmarks: **0**. No independent photographic accuracy is established.
+- Fitted points: **14**; held-out landmarks: **0**; no silhouette mask.
+  No independent photographic accuracy is established.
+- Semantic model: **101 storeys**, **2,035 elements**, including **44 curtain walls**.
+
+The run loaded the user-installed skill and used both Blender MCP and the
+measurement MCP. It inspected envelope and detailed drafts, then evaluated the
+final IFC-bound landmarks without a prolonged refinement loop. Hidden faces
+continue the visible façade pattern; the lower podium and ground level are
+inferred. Ground context is omitted. The camera is an appearance-fitting
+approximation, not a recovered physical camera position.
 
 These are the original run's reports, not newly scored results. Read the report
 for visual-review limits and outstanding discrepancies. Dimensions and hidden
