@@ -1,0 +1,25 @@
+{
+  "source_ifc_sha256": "f315ebfb53955f0c45011091323aed2685ba45887fb2738349f6bec7c76703e7",
+  "full_express_errors": 0,
+  "schema_errors": [],
+  "physical_elements": 6764,
+  "typed_elements": 6697,
+  "material_assigned": 6763,
+  "classes": {
+    "IfcCovering": 377,
+    "IfcMember": 42,
+    "IfcRoof": 7,
+    "IfcSlab": 89,
+    "IfcWall": 356,
+    "IfcWindow": 5892,
+    "IfcElementAssembly": 1,
+    "IfcOpeningElement": 5892
+  },
+  "mapped_occurrences": 5854,
+  "geometry_checked": 12655,
+  "geometry_failures": [],
+  "duplicate_guids": [],
+  "uncontained": [],
+  "notes": "89 inferred floorplates, 356 walls and 5,892 individually identifiable hosted windows; 5,854 mapped occurrences share source geometry. All 12,655 represented products, including openings, convert and full EXPRESS validation passes. 67 physical elements lack a type family; the geometry-less assembly parent has no own material. Floor count, setbacks, depth and overall height are assumptions. The entrance is obscured, so no door was invented.",
+  "limits": "Geometry conversion is not a watertightness, clash, constructability or downstream application certification. Floor plans and unseen geometry are inferred. Original photographic evaluation is preserved."
+}

@@ -1,0 +1,80 @@
+{
+  "source_ifc_sha256": "272da424a013f181c29ccf0869a8138b9924c3aee1678161fd8ced2304955fd4",
+  "full_express_errors": 7,
+  "schema_errors": [
+    {
+      "level": "error",
+      "message": "(not exists(predefinedtype) or predefinedtype != IfcChimneyTypeEnum.USERDEFINED or (predefinedtype == IfcChimneyTypeEnum.USERDEFINED and exists(SELF.ObjectType)))\n\nViolated by:\n    ((not True or 'USERDEFINED' != 'USERDEFINED' or ('USERDEFINED' == 'USERDEFINED' and False)))\n     +  where True = exists('USERDEFINED')\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   False = exists(<indeterminate_type object at 0x108b0aa50>)\n     +    where <indeterminate_type object at 0x108b0aa50> = #47705=IfcChimney('0xhYdCVTz7pu_S5v4U$Ja7',$,'left visible chimney',$,$,#47739,#47733,$,.USERDEFINED.).ObjectType\n\nOn instance:\n    #47705=IfcChimney('0xhYdCVTz7pu_S5v4U$Ja7',$,'left visible chimney',$,$,#47739,#47733,$,.USERDEFINED.)\n",
+      "type": "entity_rule",
+      "instance": "#47705=IfcChimney('0xhYdCVTz7pu_S5v4U$Ja7',$,'left visible chimney',$,$,#47739,#47733,$,.USERDEFINED.)",
+      "attribute": "IfcChimney.CorrectPredefinedType"
+    },
+    {
+      "level": "error",
+      "message": "(not exists(predefinedtype) or predefinedtype != IfcChimneyTypeEnum.USERDEFINED or (predefinedtype == IfcChimneyTypeEnum.USERDEFINED and exists(SELF.ObjectType)))\n\nViolated by:\n    ((not True or 'USERDEFINED' != 'USERDEFINED' or ('USERDEFINED' == 'USERDEFINED' and False)))\n     +  where True = exists('USERDEFINED')\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   False = exists(<indeterminate_type object at 0x108b0aa50>)\n     +    where <indeterminate_type object at 0x108b0aa50> = #47744=IfcChimney('1Yo747vxLC0OTYStQcF3tB',$,'right visible chimney',$,$,#47778,#47772,$,.USERDEFINED.).ObjectType\n\nOn instance:\n    #47744=IfcChimney('1Yo747vxLC0OTYStQcF3tB',$,'right visible chimney',$,$,#47778,#47772,$,.USERDEFINED.)\n",
+      "type": "entity_rule",
+      "instance": "#47744=IfcChimney('1Yo747vxLC0OTYStQcF3tB',$,'right visible chimney',$,$,#47778,#47772,$,.USERDEFINED.)",
+      "attribute": "IfcChimney.CorrectPredefinedType"
+    },
+    {
+      "level": "error",
+      "message": "(not exists(predefinedtype) or predefinedtype != IfcChimneyTypeEnum.USERDEFINED or (predefinedtype == IfcChimneyTypeEnum.USERDEFINED and exists(SELF.ObjectType)))\n\nViolated by:\n    ((not True or 'USERDEFINED' != 'USERDEFINED' or ('USERDEFINED' == 'USERDEFINED' and False)))\n     +  where True = exists('USERDEFINED')\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   False = exists(<indeterminate_type object at 0x108b0aa50>)\n     +    where <indeterminate_type object at 0x108b0aa50> = #47783=IfcChimney('0S_ms8ipT99PcI$9aTVefM',$,'far-right visible chimney',$,$,#47817,#47811,$,.USERDEFINED.).ObjectType\n\nOn instance:\n    #47783=IfcChimney('0S_ms8ipT99PcI$9aTVefM',$,'far-right visible chimney',$,$,#47817,#47811,$,.USERDEFINED.)\n",
+      "type": "entity_rule",
+      "instance": "#47783=IfcChimney('0S_ms8ipT99PcI$9aTVefM',$,'far-right visible chimney',$,$,#47817,#47811,$,.USERDEFINED.)",
+      "attribute": "IfcChimney.CorrectPredefinedType"
+    },
+    {
+      "level": "error",
+      "message": "(predefinedtype != IfcChimneyTypeEnum.USERDEFINED or (predefinedtype == IfcChimneyTypeEnum.USERDEFINED and exists(SELF.ElementType)))\n\nViolated by:\n    (('USERDEFINED' != 'USERDEFINED' or ('USERDEFINED' == 'USERDEFINED' and False)))\n     +  where 'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   False = exists(<indeterminate_type object at 0x108b0aa50>)\n     +    where <indeterminate_type object at 0x108b0aa50> = #52614=IfcChimneyType('3O65wjFD572ffl$yGw0V6m',$,'Tall roof chimney',$,$,$,$,$,$,.USERDEFINED.).ElementType\n\nOn instance:\n    #52614=IfcChimneyType('3O65wjFD572ffl$yGw0V6m',$,'Tall roof chimney',$,$,$,$,$,$,.USERDEFINED.)\n",
+      "type": "entity_rule",
+      "instance": "#52614=IfcChimneyType('3O65wjFD572ffl$yGw0V6m',$,'Tall roof chimney',$,$,$,$,$,$,.USERDEFINED.)",
+      "attribute": "IfcChimneyType.CorrectPredefinedType"
+    },
+    {
+      "level": "error",
+      "message": "(predefinedtype != IfcChimneyTypeEnum.USERDEFINED or (predefinedtype == IfcChimneyTypeEnum.USERDEFINED and exists(SELF.ElementType)))\n\nViolated by:\n    (('USERDEFINED' != 'USERDEFINED' or ('USERDEFINED' == 'USERDEFINED' and False)))\n     +  where 'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   'USERDEFINED' = IfcChimneyTypeEnum.USERDEFINED\n     +  and   False = exists(<indeterminate_type object at 0x108b0aa50>)\n     +    where <indeterminate_type object at 0x108b0aa50> = #52616=IfcChimneyType('3jltk2qTL0Ffl2HkYAc1Ne',$,'Low roof chimney',$,$,$,$,$,$,.USERDEFINED.).ElementType\n\nOn instance:\n    #52616=IfcChimneyType('3jltk2qTL0Ffl2HkYAc1Ne',$,'Low roof chimney',$,$,$,$,$,$,.USERDEFINED.)\n",
+      "type": "entity_rule",
+      "instance": "#52616=IfcChimneyType('3jltk2qTL0Ffl2HkYAc1Ne',$,'Low roof chimney',$,$,$,$,$,$,.USERDEFINED.)",
+      "attribute": "IfcChimneyType.CorrectPredefinedType"
+    },
+    {
+      "level": "error",
+      "message": "(not exists(predefinedtype) or predefinedtype != IfcMemberTypeEnum.USERDEFINED or (predefinedtype == IfcMemberTypeEnum.USERDEFINED and exists(SELF.ObjectType)))\n\nViolated by:\n    ((not True or 'USERDEFINED' != 'USERDEFINED' or ('USERDEFINED' == 'USERDEFINED' and False)))\n     +  where True = exists('USERDEFINED')\n     +  and   'USERDEFINED' = IfcMemberTypeEnum.USERDEFINED\n     +  and   'USERDEFINED' = IfcMemberTypeEnum.USERDEFINED\n     +  and   False = exists(<indeterminate_type object at 0x108b0aa50>)\n     +    where <indeterminate_type object at 0x108b0aa50> = #52428=IfcMember('3Sypko4sX2Qh9IdEuRUMQu',$,'Roof flagpole',$,$,#52456,#52450,$,.USERDEFINED.).ObjectType\n\nOn instance:\n    #52428=IfcMember('3Sypko4sX2Qh9IdEuRUMQu',$,'Roof flagpole',$,$,#52456,#52450,$,.USERDEFINED.)\n",
+      "type": "entity_rule",
+      "instance": "#52428=IfcMember('3Sypko4sX2Qh9IdEuRUMQu',$,'Roof flagpole',$,$,#52456,#52450,$,.USERDEFINED.)",
+      "attribute": "IfcMember.CorrectPredefinedType"
+    },
+    {
+      "level": "error",
+      "message": "(predefinedtype != IfcMemberTypeEnum.USERDEFINED or (predefinedtype == IfcMemberTypeEnum.USERDEFINED and exists(SELF.ElementType)))\n\nViolated by:\n    (('USERDEFINED' != 'USERDEFINED' or ('USERDEFINED' == 'USERDEFINED' and False)))\n     +  where 'USERDEFINED' = IfcMemberTypeEnum.USERDEFINED\n     +  and   'USERDEFINED' = IfcMemberTypeEnum.USERDEFINED\n     +  and   False = exists(<indeterminate_type object at 0x108b0aa50>)\n     +    where <indeterminate_type object at 0x108b0aa50> = #52622=IfcMemberType('1rr7jcbCP7mRbMfp9ZNjmC',$,'Roof flagpole',$,$,$,$,$,$,.USERDEFINED.).ElementType\n\nOn instance:\n    #52622=IfcMemberType('1rr7jcbCP7mRbMfp9ZNjmC',$,'Roof flagpole',$,$,$,$,$,$,.USERDEFINED.)\n",
+      "type": "entity_rule",
+      "instance": "#52622=IfcMemberType('1rr7jcbCP7mRbMfp9ZNjmC',$,'Roof flagpole',$,$,$,$,$,$,.USERDEFINED.)",
+      "attribute": "IfcMemberType.CorrectPredefinedType"
+    }
+  ],
+  "physical_elements": 204,
+  "typed_elements": 204,
+  "material_assigned": 204,
+  "classes": {
+    "IfcBeam": 5,
+    "IfcChimney": 3,
+    "IfcColumn": 8,
+    "IfcCovering": 85,
+    "IfcDoor": 1,
+    "IfcMember": 1,
+    "IfcRailing": 5,
+    "IfcRoof": 3,
+    "IfcSlab": 7,
+    "IfcWall": 17,
+    "IfcWindow": 68,
+    "IfcLightFixture": 1,
+    "IfcOpeningElement": 69
+  },
+  "mapped_occurrences": 59,
+  "geometry_checked": 273,
+  "geometry_failures": [],
+  "duplicate_guids": [],
+  "uncontained": [],
+  "notes": "Two inferred occupied floorplates, 68 windows and one door, all with hosted openings. All 204 physical elements have types and material associations. Every represented element converts. Full EXPRESS validation found seven custom-type label errors affecting three chimneys, a flagpole and their types. The source IFC is preserved; release 0.8.4 adds a helper fix and a cheap export check for this case. The original run-time PASS was a narrower check, not a full EXPRESS pass.",
+  "limits": "Geometry conversion is not a watertightness, clash, constructability or downstream application certification. Floor plans and unseen geometry are inferred. Original photographic evaluation is preserved."
+}

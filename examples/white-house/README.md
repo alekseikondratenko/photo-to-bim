@@ -1,39 +1,17 @@
 # White House
 
-Plugin **0.8.2**, source revision `297f64e108e205bd1f176621f48b0922037580ed`.
-
-| Reference | Reconstruction |
+| Reference | IFC reconstruction |
 | --- | --- |
 | ![Reference](reference.jpg) | ![Reconstruction](comparison.png) |
 
-[Download IFC](house.ifc) · [Assumptions and camera](reconstruction.json) ·
-[Original validation report](validation.json) · [Publication metadata](example.json)
+[Download IFC](house.ifc) · [Assumptions](reconstruction.json) · [Independent IFC review](review.json) · [Photographic evaluation](evaluation.json) · [File provenance](example.json)
 
-## Recorded evidence
+Generated with **0.8.4-dev.3**. Two inferred occupied floorplates, 68 windows and one door, all with hosted openings. All 204 physical elements have types and material associations. Every represented element converts. Full EXPRESS validation found seven custom-type label errors affecting three chimneys, a flagpole and their types. The source IFC is preserved; release 0.8.4 adds a helper fix and a cheap export check for this case. The original run-time PASS was a narrower check, not a full EXPRESS pass.
 
-- IFC: **PASS**.
-- Fitted landmarks: **PASS**, RMS **1.95 px**, maximum **3.33 px**, tolerance **5 px**.
-- Appearance: **PASS**.
-- Held-out landmarks: **0**. No independent photographic accuracy is established.
+Fitted-landmark error: **6.89 px RMS / 14.60 px maximum**, against a 5 px tolerance. The recorded photographic verdict is **needs_refinement**. No held-out landmarks or silhouette mask were supplied. A pleasing render and a valid IFC structure do not establish survey accuracy.
 
-These are the original run's reports, not newly scored results. Read the report
-for visual-review limits and outstanding discrepancies. Dimensions and hidden
-geometry are assumptions from one view. This is not a survey model.
+The IFC and render are unchanged from the run. JSON paths are normalized for distribution. Original run validation is retained alongside the later independent review; consult both when assessing the model. The represented elements target approximate LOD 200, not a certified architectural deliverable. No invented room layouts or building services are included.
 
-## Files
+## Reference
 
-The IFC and comparison render are final delivery snapshots. The style sidecar
-retains Blender appearance metadata; ordinary IFC readers use the IFC itself.
-`observations.json` and `landmarks.json` retain the annotations and IFC bindings
-behind the reported fit. `example.json` records the source revision and published
-file hashes without machine-specific configuration.
-
-Intermediate renders, logs, scripts, local setup files and client configuration
-are intentionally omitted. This is an inspectable output package, not a complete
-replay environment. The IFC bytes and their hashes are unchanged.
-
-## Image credit
-
-Reference photograph: [North Façade White House](https://commons.wikimedia.org/wiki/File:North_Fa%C3%A7ade_White_House.JPG), Nishkid64, with colour correction by Patrickneil. Released into the public domain. The reference bytes are unchanged.
-
-Reference images are separate from the repository's software license.
+Reference: Nishkid64, colour correction by Patrickneil, [public domain source](https://commons.wikimedia.org/wiki/File:North_Fa%C3%A7ade_White_House.JPG). Image terms are separate from the repository's software licence.

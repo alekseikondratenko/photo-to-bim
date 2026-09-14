@@ -1,7 +1,7 @@
 """IFC4 authoring in SI metres. Geometry and evidence remain separate.
 Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
-VERSION = "0.8.4-dev.3"
+VERSION = "0.8.4"
 import math
 
 import ifcopenshell
@@ -128,6 +128,8 @@ def assign_type(ctx, products, name, predefined_type=None):
                                            predefined_type=predefined_type)
     if existing and predefined_type and typ.PredefinedType != predefined_type:
         raise ValueError('Existing type has a different predefined type')
+    if getattr(typ, 'PredefinedType', None) == 'USERDEFINED' and not typ.ElementType:
+        typ.ElementType = name
     _run('type.assign_type', related_objects=products, relating_type=typ, should_map_representations=False)
     return typ
 
@@ -269,6 +271,8 @@ def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None, st
     el = _run("root.create_entity", ifc_class=ifc_class, name=name)
     if predefined_type is not None and hasattr(el, "PredefinedType"):
         el.PredefinedType = predefined_type
+        if predefined_type == 'USERDEFINED':
+            el.ObjectType = name
     rep = _run(
         "geometry.add_mesh_representation",
         context=ctx["body"],
@@ -651,7 +655,7 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
     report = {"schema": "PASS", "geometry": "PASS", "semantics": "PASS", "schema_errors": [],
               "geometry_errors": [], "semantic_errors": [], "census": {}, "proxies": 0,
               "proxy_exceptions": {}, "uncontained": [], "geometry_checked": 0, "verdict": "PASS",
-              "schema_check_scope": "Attribute/cardinality validation plus placement and shape-ownership rules; not full EXPRESS validation"}
+              "schema_check_scope": "Attribute/cardinality validation plus placement, shape-ownership and custom-type rules; not full EXPRESS validation"}
     slab_review = []
     elevations = sorted(set(s.Elevation for s in f.by_type('IfcBuildingStorey') if s.Elevation is not None))
     gaps = np.diff(elevations)
@@ -665,6 +669,11 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
             if (product.Representation and not product.ObjectPlacement and
                 any(rep.is_a('IfcShapeRepresentation') for rep in product.Representation.Representations)):
                 report['schema_errors'].append(f'IfcProduct.PlacementForShapeRepresentation: #{product.id()} {product.Name} has a shape but no placement')
+        for item in f.by_type('IfcObject') + f.by_type('IfcElementType'):
+            if getattr(item, 'PredefinedType', None) != 'USERDEFINED': continue
+            field = 'ElementType' if item.is_a('IfcElementType') else 'ObjectType'
+            if not getattr(item, field, None):
+                report['schema_errors'].append(f'{item.is_a()}.CorrectPredefinedType: #{item.id()} USERDEFINED requires {field}')
         for shape in f.by_type('IfcShapeModel'):
             owners = (len(shape.OfProductRepresentation) == 1,
                       len(shape.RepresentationMap) == 1, len(shape.OfShapeAspect) == 1)

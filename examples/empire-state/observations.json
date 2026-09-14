@@ -7,88 +7,7 @@
   ],
   "landmarks": [
     {
-      "id": "tip",
-      "pixel": [
-        547,
-        134
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "mast-left",
-      "pixel": [
-        532,
-        319
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "mast-right",
-      "pixel": [
-        560,
-        319
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "crown-left",
-      "pixel": [
-        497,
-        441
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "crown-corner",
-      "pixel": [
-        558,
-        422
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "upper-left",
-      "pixel": [
-        478,
-        460
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "upper-right",
-      "pixel": [
-        614,
-        455
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "mid-left",
-      "pixel": [
-        451,
-        527
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "mid-right",
-      "pixel": [
-        638,
-        522
-      ],
-      "role": "fit",
-      "used_for_fitting": true
-    },
-    {
-      "id": "shaft-left",
+      "id": "main_L",
       "pixel": [
         441,
         620
@@ -97,58 +16,176 @@
       "used_for_fitting": true
     },
     {
-      "id": "shaft-corner",
+      "id": "main_C",
       "pixel": [
-        571,
-        600
+        570,
+        599
       ],
       "role": "fit",
       "used_for_fitting": true
     },
     {
-      "id": "shaft-right",
+      "id": "main_R",
       "pixel": [
-        648,
-        618
+        646,
+        617
       ],
       "role": "fit",
       "used_for_fitting": true
     },
     {
-      "id": "shaft-bottom-left",
+      "id": "main_base_C",
       "pixel": [
-        431,
-        1088
+        582,
+        1085
       ],
       "role": "fit",
       "used_for_fitting": true
     },
     {
-      "id": "shaft-bottom-right",
+      "id": "main_base_R",
       "pixel": [
-        649,
-        1084
+        650,
+        1085
       ],
       "role": "fit",
       "used_for_fitting": true
     },
     {
-      "id": "podium-left",
+      "id": "upper_L",
       "pixel": [
-        400,
-        1147
+        452,
+        528
       ],
       "role": "fit",
       "used_for_fitting": true
     },
     {
-      "id": "podium-right",
+      "id": "upper_C",
       "pixel": [
-        674,
-        1155
+        567,
+        492
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "upper_R",
+      "pixel": [
+        638,
+        523
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cap_L",
+      "pixel": [
+        478,
+        458
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cap_C",
+      "pixel": [
+        561,
+        438
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "cap_R",
+      "pixel": [
+        613,
+        454
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "deck_L",
+      "pixel": [
+        495,
+        440
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "deck_C",
+      "pixel": [
+        558,
+        420
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "deck_R",
+      "pixel": [
+        595,
+        435
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown_bottom",
+      "pixel": [
+        547,
+        412
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown_shoulder",
+      "pixel": [
+        547,
+        318
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "crown_ring",
+      "pixel": [
+        546,
+        295
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "mast_collar",
+      "pixel": [
+        546,
+        268
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "mast_top",
+      "pixel": [
+        547,
+        197
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "antenna_tip",
+      "pixel": [
+        548,
+        133
       ],
       "role": "fit",
       "used_for_fitting": true
     }
-  ]
+  ],
+  "annotation_basis": "Manual image picks. All used for camera and/or geometry fitting. Base obscured by foreground. No independent held-out points or silhouette mask."
 }

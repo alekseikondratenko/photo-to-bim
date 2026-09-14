@@ -1,0 +1,10 @@
+{
+  "claude_plugin_version": "0.8.3",
+  "claude_run": 22,
+  "codex_run": 26,
+  "codex_plugin_version": "0.8.4-dev.3",
+  "files_sha256": {
+    "claude-code-daylight.png": "674a8b7a4558a612b4988ec777bea5de034979f91c800d17bef504093f2b57ee",
+    "claude-code.png": "b700ee9065970441ed416905af31654c79f80e8de91e86afdef0038969ca0991"
+  }
+}

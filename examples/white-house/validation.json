@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "0.8.2",
+  "version": "0.8.4-dev.3",
   "ifc": {
     "schema": "PASS",
     "geometry": "PASS",
@@ -14,33 +14,46 @@
       "IfcChimney": 3,
       "IfcColumn": 8,
       "IfcDoor": 1,
-      "IfcMember": 107,
-      "IfcOpeningElement": 65,
-      "IfcRailing": 23,
+      "IfcOpeningElement": 69,
+      "IfcRailing": 5,
       "IfcRoof": 3,
-      "IfcSlab": 4,
-      "IfcWall": 41,
-      "IfcWindow": 64
+      "IfcSlab": 7,
+      "IfcWall": 17,
+      "IfcWindow": 68
     },
     "proxies": 0,
     "proxy_exceptions": {},
     "uncontained": [],
-    "geometry_checked": 406,
-    "verdict": "PASS"
+    "geometry_checked": 273,
+    "verdict": "PASS",
+    "schema_check_scope": "Attribute/cardinality validation plus placement and shape-ownership rules; not full EXPRESS validation",
+    "bim_review": {
+      "status": "NO_FINDINGS",
+      "scope": {
+        "ModelScope": "photo-derived exterior",
+        "DevelopmentTarget": "Approximate LOD 200 for represented exterior elements",
+        "FloorCoverage": "inferred_floorplates",
+        "FloorStoreys": "[\"Ground\", \"Upper\"]",
+        "FloorOmissions": "{\"Roof\": \"Roof and partly visible rooftop enclosure; no occupied attic floor inferred.\"}",
+        "id": 20
+      },
+      "findings": [],
+      "note": "Advisory BIM completeness, not architectural acceptance or LOD certification. Review element function and suspicious solid slabs using existing geometry."
+    }
   },
   "photographic": {
     "schema_version": 1,
-    "version": "0.8.2",
-    "status": "PASS",
-    "verdict": "satisfied",
-    "loss": 0.6664064734059287,
-    "metric_key": "9011cc3058e21aa383d288325ef177de2a8dd24b26085d9fcefdc94d4b13cf13",
+    "version": "0.8.4-dev.3",
+    "status": "FAIL",
+    "verdict": "needs_refinement",
+    "loss": 2.919276962061704,
+    "metric_key": "bb9c8eeba48ea58d8be96e911109b6c59a5000d81d606cb7ccea055560446285",
     "landmarks": {
-      "status": "PASS",
-      "rms_px": 1.9539612190637523,
-      "max_px": 3.332032367029644,
+      "status": "FAIL",
+      "rms_px": 6.887328090555362,
+      "max_px": 14.596384810308521,
       "tolerance_px": 5,
-      "coverage": 11,
+      "coverage": 8,
       "held_out_count": 0,
       "consumed_check_count": 0,
       "undeclared_check_count": 0,
@@ -48,74 +61,74 @@
       "held_out_rms_px": null,
       "worst": [
         {
-          "id": "right-inner-upper-br",
+          "id": "cornice-right",
           "role": "fit",
           "independence": "used",
           "reference": [
-            1357,
-            689
+            1878,
+            503
           ],
           "projected": [
-            1360.1904692032313,
-            689.9609089229298
+            1889.0650932995,
+            493.480642889146
           ],
-          "error_px": 3.332032367029644
+          "error_px": 14.596384810308521
+        },
+        {
+          "id": "upper-right-br",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            1778,
+            686
+          ],
+          "projected": [
+            1785.1873539876747,
+            690.6242052934535
+          ],
+          "error_px": 8.546422171888464
         },
         {
           "id": "pediment-left",
           "role": "fit",
           "independence": "used",
           "reference": [
-            625,
+            626,
             433
           ],
           "projected": [
-            625.9291979878102,
-            430.52521974998683
+            631.8491839979949,
+            431.6039585973532
           ],
-          "error_px": 2.643472372922736
+          "error_px": 6.013475288076284
         },
         {
-          "id": "pediment-apex",
+          "id": "pediment-right",
           "role": "fit",
           "independence": "used",
           "reference": [
-            950,
-            297
+            1277,
+            425
           ],
           "projected": [
-            949.355028992287,
-            295.01143519462374
+            1271.1118944311747,
+            424.00165682187674
           ],
-          "error_px": 2.0905448060186282
+          "error_px": 5.972141683762734
         },
         {
-          "id": "right-upper-br",
+          "id": "upper-left-tl",
           "role": "fit",
           "independence": "used",
           "reference": [
-            1779,
-            686
+            187,
+            612
           ],
           "projected": [
-            1780.8300186242946,
-            685.5530619476826
+            184.5597866360548,
+            609.5095120896723
           ],
-          "error_px": 1.88380513532429
-        },
-        {
-          "id": "left-upper-br",
-          "role": "fit",
-          "independence": "used",
-          "reference": [
-            232,
-            700
-          ],
-          "projected": [
-            231.53520652225006,
-            701.7879938761923
-          ],
-          "error_px": 1.847418490288586
+          "error_px": 3.4867135375687535
         }
       ],
       "note": "Projection agreement under the supplied camera; does not independently establish physical dimensions."
@@ -127,7 +140,7 @@
     "problems": [],
     "model_binding": {
       "status": "IFC_SNAPSHOT",
-      "ifc_sha256": "360bf61e71b49e2483155dc29753f10596c69f39f7269a4efa52097d02a9319f"
+      "ifc_sha256": "272da424a013f181c29ccf0869a8138b9924c3aee1678161fd8ced2304955fd4"
     },
     "camera_check": {
       "status": "UNDETERMINED",
@@ -137,13 +150,13 @@
   },
   "appearance": {
     "status": "PASS",
-    "linked_objects": 341,
+    "linked_objects": 204,
     "missing_guids": [],
     "unlinked_objects": [],
     "errors": [],
     "material_overrides": [],
     "coordinate_precision": {
-      "maximum_error_m": 2.510632707952709e-06,
+      "maximum_error_m": 2.4770100850446397e-06,
       "maximum_tolerance_m": 1e-05,
       "precision_limited_guids": [],
       "ceiling_m": 0.0001
@@ -154,17 +167,13 @@
     "decision": "accepted",
     "source": "agent",
     "reviewer": "Codex",
-    "basis": "Inspected full 1920x1285 comparison and oblique draft. Main facade proportions, 11-bay rhythm, portico silhouette, roof balustrade and viewpoint are consistent with source. Carved detail and landscaping are simplified; illumination is flatter and cooler, entrance fanlight joinery approximate, and missing left tree changes occlusion. Scale and rear geometry are assumptions. This is a useful exterior reconstruction, not a photoreal or surveyed replica."
+    "basis": "Inspected the final front render and a rear-side Blender overview. Coherent semantic architectural approximation; photographic tolerance still missed, roof enclosure and detail simplified. This is not user acceptance."
   },
   "acceptance": {
     "status": "pending_user_review",
-    "deviations": []
+    "deviations": [
+      "photographic"
+    ]
   },
-  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance.",
-  "limitations": [
-    "No independent held-out landmarks. All 11 were consumed for fitting.",
-    "Silhouette overlap was not measured; source envelope is partly hidden by vegetation.",
-    "Automated appearance check verifies IFC geometry/material linkage, not photographic colour or ornament accuracy."
-  ],
-  "stopping_reason": "Primary exterior, semantic export and fixed-landmark accuracy achieved. Further historical detail and hidden geometry are unsupported by the single photograph; ornamental and landscaping refinements are disproportionate to the available evidence."
+  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance."
 }

@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "version": "0.8.4-dev.2",
+  "ifc": {
+    "schema": "PASS",
+    "geometry": "PASS",
+    "semantics": "PASS",
+    "schema_errors": [],
+    "geometry_errors": [],
+    "semantic_errors": [],
+    "census": {
+      "IfcBuildingElementProxy": 0,
+      "IfcBuildingStorey": 2,
+      "IfcChimney": 1,
+      "IfcColumn": 6,
+      "IfcDoor": 2,
+      "IfcOpeningElement": 34,
+      "IfcRailing": 5,
+      "IfcRoof": 16,
+      "IfcSlab": 7,
+      "IfcWall": 19,
+      "IfcWindow": 32
+    },
+    "proxies": 0,
+    "proxy_exceptions": {},
+    "uncontained": [],
+    "geometry_checked": 344,
+    "verdict": "PASS",
+    "schema_check_scope": "Attribute/cardinality validation plus placement and shape-ownership rules; not full EXPRESS validation",
+    "bim_review": {
+      "status": "NO_FINDINGS",
+      "scope": {
+        "ModelScope": "photo-derived exterior",
+        "DevelopmentTarget": "Approximate LOD 200 for represented exterior elements",
+        "FloorCoverage": "inferred_floorplates",
+        "FloorStoreys": "[\"Ground\", \"Upper\"]",
+        "FloorOmissions": "{}",
+        "id": 19
+      },
+      "findings": [],
+      "note": "Advisory BIM completeness, not architectural acceptance or LOD certification. Review element function and suspicious solid slabs using existing geometry."
+    }
+  },
+  "photographic": {
+    "schema_version": 1,
+    "version": "0.8.4-dev.2",
+    "status": "FAIL",
+    "verdict": "needs_refinement",
+    "loss": 3.035350566313771,
+    "metric_key": "33f4845876f05bf3f7c70565701a336fcbfc4025335c23069796e01511cb71a7",
+    "landmarks": {
+      "status": "FAIL",
+      "rms_px": 8.508988524676797,
+      "max_px": 15.176752831568855,
+      "tolerance_px": 5,
+      "coverage": 16,
+      "held_out_count": 0,
+      "consumed_check_count": 0,
+      "undeclared_check_count": 0,
+      "independence_status": "NO_INDEPENDENT_CHECKS",
+      "held_out_rms_px": null,
+      "worst": [
+        {
+          "id": "dormer-right-base-right",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            961,
+            548
+          ],
+          "projected": [
+            976.1557543148206,
+            548.798083742054
+          ],
+          "error_px": 15.176752831568855
+        },
+        {
+          "id": "shed-left-base",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            543,
+            468
+          ],
+          "projected": [
+            531.8991300376421,
+            475.13489577933234
+          ],
+          "error_px": 13.196061977086764
+        },
+        {
+          "id": "dormer-left-base-right",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            462,
+            487
+          ],
+          "projected": [
+            474.6559326348555,
+            490.23667410697175
+          ],
+          "error_px": 13.063257255858584
+        },
+        {
+          "id": "shed-right-base",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            741,
+            494
+          ],
+          "projected": [
+            730.208328425708,
+            499.9147040744952
+          ],
+          "error_px": 12.30625449339609
+        },
+        {
+          "id": "shed-right-top",
+          "role": "fit",
+          "independence": "used",
+          "reference": [
+            740,
+            425
+          ],
+          "projected": [
+            729.0135898831114,
+            429.7313625823635
+          ],
+          "error_px": 11.961897806880854
+        }
+      ],
+      "note": "Projection agreement under the supplied camera; does not independently establish physical dimensions."
+    },
+    "silhouette": {
+      "status": "UNAVAILABLE",
+      "reason": "Provide a fixed reference subject mask and a rendered subject-only binary mask."
+    },
+    "problems": [],
+    "model_binding": {
+      "status": "IFC_SNAPSHOT",
+      "ifc_sha256": "26ad76818dc0f6f6ba018ccabb5fafe98183f94f53845dfc0bb447f93ea59373"
+    },
+    "camera_check": {
+      "status": "UNDETERMINED",
+      "note": "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either."
+    },
+    "note": "Only fixed observations and explicit masks control this assessment. A threshold miss is not an instruction to repeat; refine only when evidence and expected benefit justify another pass."
+  },
+  "appearance": {
+    "status": "PASS",
+    "linked_objects": 315,
+    "missing_guids": [],
+    "unlinked_objects": [],
+    "errors": [],
+    "material_overrides": [],
+    "coordinate_precision": {
+      "maximum_error_m": 9.155273446026513e-07,
+      "maximum_tolerance_m": 1e-05,
+      "precision_limited_guids": [],
+      "ceiling_m": 0.0001
+    },
+    "note": "Automated linkage/geometry/material checks, not visual acceptance or colour accuracy."
+  },
+  "visual_review": {
+    "decision": "accepted",
+    "source": "agent",
+    "reviewer": "Codex",
+    "basis": "Visual inspection of the final 1470 x 980 render: coherent main envelope, two front gable dormers, shed dormer, chimney, porch and joinery. Accepted as an approximate reconstruction; dormer proportions, roof intersections, materials, porch base and omitted satellite dish differ from the photograph. No user acceptance claimed."
+  },
+  "acceptance": {
+    "status": "pending_user_review",
+    "deviations": [
+      "photographic"
+    ]
+  },
+  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance."
+}

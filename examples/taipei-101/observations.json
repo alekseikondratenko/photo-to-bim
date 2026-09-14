@@ -7,270 +7,257 @@
   ],
   "landmarks": [
     {
-      "id": "tip",
+      "id": "tier1-left",
+      "pixel": [
+        232,
+        920
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier1-front",
+      "pixel": [
+        333,
+        905
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier1-right",
+      "pixel": [
+        415,
+        932
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier2-left",
+      "pixel": [
+        233,
+        835
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier2-front",
+      "pixel": [
+        331,
+        820
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier2-right",
+      "pixel": [
+        415,
+        850
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier3-left",
+      "pixel": [
+        233,
+        752
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier3-front",
+      "pixel": [
+        330,
+        735
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier3-right",
+      "pixel": [
+        415,
+        768
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier4-left",
+      "pixel": [
+        233,
+        669
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier4-front",
+      "pixel": [
+        329,
+        649
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier4-right",
+      "pixel": [
+        415,
+        686
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier5-left",
+      "pixel": [
+        233,
+        585
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier5-front",
+      "pixel": [
+        329,
+        563
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier5-right",
+      "pixel": [
+        415,
+        602
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier6-left",
+      "pixel": [
+        234,
+        502
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier6-front",
+      "pixel": [
+        329,
+        478
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier6-right",
+      "pixel": [
+        415,
+        519
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier7-left",
+      "pixel": [
+        234,
+        417
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier7-front",
+      "pixel": [
+        329,
+        391
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier7-right",
+      "pixel": [
+        415,
+        433
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier8-left",
+      "pixel": [
+        234,
+        334
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier8-front",
+      "pixel": [
+        329,
+        304
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "tier8-right",
+      "pixel": [
+        415,
+        348
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "spire-tip",
       "pixel": [
         326,
         57
       ],
-      "world": [
-        0,
-        0,
-        508
-      ],
       "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        0.0,
-        0.0,
-        508.0
-      ]
+      "used_for_fitting": true
     },
     {
-      "id": "crown_front",
+      "id": "crown-left",
       "pixel": [
-        329,
-        190
-      ],
-      "world": [
-        12,
-        -12,
-        450
+        287,
+        204
       ],
       "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        12.0,
-        -12.0,
-        436.73899263837893
-      ]
+      "used_for_fitting": true
     },
     {
-      "id": "crown_left",
+      "id": "crown-front",
       "pixel": [
-        286,
-        203
-      ],
-      "world": [
-        -12,
-        -12,
-        450
+        328,
+        191
       ],
       "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        -12.0,
-        -12.0,
-        436.73899263837893
-      ]
+      "used_for_fitting": true
     },
     {
-      "id": "crown_right",
+      "id": "crown-right",
       "pixel": [
-        362,
-        210
-      ],
-      "world": [
-        12,
-        12,
-        450
+        361,
+        207
       ],
       "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        12.0,
-        12.0,
-        436.73899263837893
-      ]
-    },
-    {
-      "id": "top_front",
-      "pixel": [
-        332,
-        302
-      ],
-      "world": [
-        29,
-        -29,
-        400
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        27.99659237581963,
-        -27.99659237581963,
-        373.22369716072296
-      ]
-    },
-    {
-      "id": "top_left",
-      "pixel": [
-        234,
-        331
-      ],
-      "world": [
-        -29,
-        -29,
-        400
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        -27.99659237581963,
-        -27.99659237581963,
-        373.22369716072296
-      ]
-    },
-    {
-      "id": "top_right",
-      "pixel": [
-        414,
-        348
-      ],
-      "world": [
-        29,
-        29,
-        400
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        27.99659237581963,
-        27.99659237581963,
-        373.22369716072296
-      ]
-    },
-    {
-      "id": "tier4_front",
-      "pixel": [
-        334,
-        648
-      ],
-      "world": [
-        29,
-        -29,
-        240
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        27.99659237581963,
-        -27.99659237581963,
-        214.72967120714628
-      ]
-    },
-    {
-      "id": "tier4_left",
-      "pixel": [
-        234,
-        671
-      ],
-      "world": [
-        -29,
-        -29,
-        240
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        -27.99659237581963,
-        -27.99659237581963,
-        214.72967120714628
-      ]
-    },
-    {
-      "id": "tier4_right",
-      "pixel": [
-        414,
-        688
-      ],
-      "world": [
-        29,
-        29,
-        240
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        27.99659237581963,
-        27.99659237581963,
-        214.72967120714628
-      ]
-    },
-    {
-      "id": "tier1_front",
-      "pixel": [
-        336,
-        908
-      ],
-      "world": [
-        29,
-        -29,
-        120
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        27.99659237581963,
-        -27.99659237581963,
-        95.85915174196373
-      ]
-    },
-    {
-      "id": "tier1_left",
-      "pixel": [
-        234,
-        921
-      ],
-      "world": [
-        -29,
-        -29,
-        120
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        -27.99659237581963,
-        -27.99659237581963,
-        95.85915174196373
-      ]
-    },
-    {
-      "id": "tier1_right",
-      "pixel": [
-        414,
-        939
-      ],
-      "world": [
-        29,
-        29,
-        120
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        27.99659237581963,
-        27.99659237581963,
-        95.85915174196373
-      ]
-    },
-    {
-      "id": "base_front",
-      "pixel": [
-        336,
-        992
-      ],
-      "world": [
-        25,
-        -25,
-        80
-      ],
-      "role": "fit",
-      "used_for_fitting": true,
-      "final_world": [
-        23.99659237581963,
-        -23.99659237581963,
-        56.23564525356956
-      ]
+      "used_for_fitting": true
     }
-  ]
+  ],
+  "notes": "Manual photo pixels fixed before fit. All used for geometry and camera fitting. No independent holdouts. Base occluded; no mask."
 }

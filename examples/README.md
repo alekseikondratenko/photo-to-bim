@@ -1,32 +1,15 @@
 # Selected reconstruction examples
 
-These snapshots preserve final IFC files, comparison renders, assumptions and
-validation evidence from different development versions. They are not a controlled
-benchmark, and the current packaging revision does not change or rescore them.
+The current selection contains four recent development snapshots and one explicitly retained legacy curved-form example. Models and renders are unchanged; individual pages disclose known issues and the independent IFC review. These are approximate photo-derived models, not surveyed or construction-ready BIM.
 
-| Subject | Plugin |
-| --- | --- |
-| [White House](white-house/README.md) | 0.8.2 |
-| [Empire State Building](empire-state/README.md) | 0.8.0 |
-| [Taipei 101](taipei-101/README.md) | 0.8.3 |
-| [Taipei: Claude Code and Codex](taipei-comparison/README.md) | 0.8.3 |
-| [Heydar Aliyev Center](heydar-aliyev-center/README.md) | 0.8.0 |
-| [Red-roof house](red-roof-house/README.md) | 0.7.2 |
-| [Earlier house renders](early-runs/README.md) | Earlier development runs |
+| Subject | Plugin | Review |
+| --- | --- | --- |
+| [Shingled house](shingled-house/README.md) | 0.8.4-dev.2 | Predates the final prism-winding fix; foundation orientation caveat |
+| [Taipei 101](taipei-101/README.md) | 0.8.4-dev.3 | Full EXPRESS validation passes; 101 inferred floorplates |
+| [White House](white-house/README.md) | 0.8.4-dev.3 | Seven custom-type label errors, addressed in release 0.8.4 |
+| [Empire State Building](empire-state/README.md) | 0.8.4-dev.3 | Full EXPRESS validation passes; 89 inferred floorplates |
+| [Heydar Aliyev Center](heydar-aliyev-center/README.md) | 0.8.0 — legacy | Before the IFC structural fixes; curved-form demonstration |
 
-Each full example includes `example.json` with the original plugin revision,
-reference identity and hashes of published files. Local setup configuration,
-intermediate renders and execution logs are omitted. No per-project `PROMPT.txt`
-or `SETUP.md` is required to use the globally installed plugin.
+Each example includes a reference, render, IFC, assumptions, evidence and file hashes. The four recent runs exceed the recorded 5 px maximum photographic tolerance and have no held-out landmarks or silhouette masks. IFC checks and photographic fit are separate. Historical Claude imagery used for the README comparison lives in [benchmark documentation](../docs/assets/taipei-benchmark/README.md), not this example collection.
 
-## Image credits
-
-- White House: Nishkid64, colour correction by Patrickneil, [public domain source](https://commons.wikimedia.org/wiki/File:North_Fa%C3%A7ade_White_House.JPG).
-- Taipei 101: AngMoKio, edited by Mylius, [source](https://commons.wikimedia.org/wiki/File:Taipei_101_2009_amk-EditMylius.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
-- Empire State Building: Aleksei Kondratenko, 19 August 2020, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-- Heydar Aliyev Center: reference © Iwan Baan, via [ArchDaily](https://www.archdaily.com/448774/heydar-aliyev-center-zaha-hadid-architects), shown for visual comparison with the generated Codex render. The photograph is excluded from the software licence; see the [reference notice](heydar-aliyev-center/README.md#reference).
-- Red-roof house reference: original creator/source not yet documented. The original image is omitted pending attribution confirmation. Its generated reconstruction renders are included.
-
-Included reference images retain their original bytes and are displayed beside
-renders using Markdown, without compositing or changing the source photograph.
-Reference image licenses are separate from the software license.
+Reference image credits and licences are on each example page and in [NOTICE](../NOTICE); they are separate from the software licence. Local setup files, intermediate renders, scripts and logs are omitted.

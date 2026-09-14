@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "reference": "reference.png",
+  "reference_sha256": "9e11b22d6d6b55d58535e3e41658a70af85f548d04aba211d1004b8b714833af",
+  "runtime_version": "0.8.4-dev.2",
+  "camera": {
+    "schema_version": 1,
+    "convention": "Z_UP_RIGHT_HANDED",
+    "image_size": [
+      1470,
+      980
+    ],
+    "focal_px": 2454.930019378662,
+    "principal_point": [
+      735.0,
+      490.0
+    ],
+    "world_from_camera": [
+      [
+        0.7047956585884094,
+        0.09108106046915054,
+        0.7035390138626099,
+        -17.7137393951416
+      ],
+      [
+        -0.70920330286026,
+        0.11441411077976227,
+        0.6956578493118286,
+        -25.915241241455078
+      ],
+      [
+        -0.01713353954255581,
+        -0.989249050617218,
+        0.14523355662822723,
+        -0.20505152642726898
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "scale_anchor": {
+    "status": "assumed",
+    "source": "Porch clear column",
+    "height_m": 2.8,
+    "uncertainty_m": 0.3
+  },
+  "observed_features": [
+    "Two steep front gable dormers",
+    "Central four-light shed dormer",
+    "Full-width covered porch with square columns and rails",
+    "Shingle clad exterior and pitched roof",
+    "Brick chimney",
+    "Glazed front entrance and grouped casement windows"
+  ],
+  "derived_dimensions": {
+    "main_width_m": 17.0,
+    "main_depth_m": 10.0,
+    "ridge_height_m": 9.62,
+    "floor_elevations_m": [
+      0.7,
+      4.4
+    ],
+    "floor_thickness_m": 0.23,
+    "porch_depth_m": 2.8
+  },
+  "assumptions": [
+    "Absolute scale is approximate; no survey dimensions supplied",
+    "10 m depth and unseen exterior openings are inferred",
+    "Two occupied levels with simple floorplates; no unseen rooms or services",
+    "Roof valleys and hidden roof slopes inferred from visible gable arrangement",
+    "Material identities and 145/160 mm shingle course spacing are approximate",
+    "Ground in render is neutral context and is not IFC geometry"
+  ],
+  "detail_policy": "Approximate LOD 200 represented elements; hosted fills, grouped rail assemblies, trim, grouped course articulation; satellite dish and incidental objects omitted",
+  "checks": {
+    "independent_landmarks": 0,
+    "silhouette_mask": "not provided: vegetation, occlusion and cropped envelope",
+    "structural_gate": "PASS"
+  },
+  "stopping_reason": "Coherent semantic house and primary visible features completed. Further metric or hidden-geometry refinement needs independent dimensions or additional photographs."
+}

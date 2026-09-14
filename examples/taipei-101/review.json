@@ -1,0 +1,23 @@
+{
+  "source_ifc_sha256": "3784dd211f38cce6705a1a0bb7fc1cdd9af0e6846d368fc131de2ab8344d81cb",
+  "full_express_errors": 0,
+  "schema_errors": [],
+  "physical_elements": 2666,
+  "typed_elements": 2666,
+  "material_assigned": 2666,
+  "classes": {
+    "IfcCurtainWall": 44,
+    "IfcMember": 1954,
+    "IfcPlate": 444,
+    "IfcRoof": 10,
+    "IfcSlab": 101,
+    "IfcBuildingElementPart": 113
+  },
+  "mapped_occurrences": 1596,
+  "geometry_checked": 2622,
+  "geometry_failures": [],
+  "duplicate_guids": [],
+  "uncontained": [],
+  "notes": "101 inferred floorplates and 44 curtain-wall assemblies. Repeated panels and members retain individual identities, type families and materials. Full EXPRESS validation and all 2,622 represented leaf elements passed conversion; floor winding and volumes were also checked. The assumed height is 508 m; rectangular floor footprints and hidden depth are estimates, not measured building plans.",
+  "limits": "Geometry conversion is not a watertightness, clash, constructability or downstream application certification. Floor plans and unseen geometry are inferred. Original photographic evaluation is preserved."
+}

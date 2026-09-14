@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
-  "runtime_version": "0.8.3",
-  "reference": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
+  "runtime_version": "0.8.4-dev.3",
+  "reference": "reference.jpg",
+  "reference_sha256": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
   "camera": {
     "schema_version": 1,
     "convention": "Z_UP_RIGHT_HANDED",
@@ -9,29 +10,29 @@
       960,
       1547
     ],
-    "focal_px": 15469.993489583334,
+    "focal_px": 3000.0,
     "principal_point": [
-      325.0000047683716,
-      675.0000009536743
+      325.3629398345947,
+      773.5
     ],
     "world_from_camera": [
       [
-        0.8067007660865784,
-        -0.20953035354614258,
-        -0.5525674223899841,
-        3720.828857421875
+        0.8359111547470093,
+        -0.10160105675458908,
+        -0.5393790602684021,
+        625.3072509765625
       ],
       [
-        0.5909577012062073,
-        0.2886195182800293,
-        0.7533045411109924,
-        -5071.07763671875
+        0.5488615036010742,
+        0.1513483077287674,
+        0.8220977783203125,
+        -953.06591796875
       ],
       [
-        0.001641589100472629,
-        -0.9342353940010071,
-        0.3566531836986542,
-        -2185.491943359375
+        -0.0018918955465778708,
+        -0.9832450747489929,
+        0.18227864801883698,
+        2.0
       ],
       [
         0.0,
@@ -42,39 +43,456 @@
     ]
   },
   "scale_anchor": {
-    "height_m": 508,
     "status": "assumed",
-    "source": "Nominal height assumption, not surveyed or independently verified"
+    "height_m": 508,
+    "source": "Nominal overall height assigned to the photographed tower; not verified or surveyed"
   },
   "observed_features": [
     "Eight flared main tiers",
-    "Two visible green curtain-wall faces",
-    "Dense vertical mullions and horizontal spandrels",
-    "Circular podium ornaments",
-    "Setback shoulder, narrower crown and antenna"
+    "Green glazed curtain walls with vertical mullions and horizontal spandrels",
+    "Projecting tier cornices and simplified pendant motifs",
+    "Large circular ornaments",
+    "Tapered upper crown and ringed spire"
   ],
-  "derived_dimensions_m": {
-    "tier_half_width": 27.99659237581963,
-    "podium_height": 56.23564525356956,
-    "tier_height": 39.62350648839418,
-    "tier_top": 373.22369716072296,
-    "crown_top": 436.73899263837893
+  "derived_dimensions": {
+    "main_tier_base_m": 120.0,
+    "main_tier_height_m": 33.35513478447121,
+    "main_tier_upper_width_m": [
+      44.68363887496768,
+      61.65787187793163
+    ],
+    "main_tier_lower_width_m": [
+      39.32160220997156,
+      54.25892725257984
+    ],
+    "crown_top_m": 444.79343214755096,
+    "overall_height_m": 508
   },
-  "assumptions": {
-    "ScaleStatus": "assumed",
-    "ScaleSource": "508 m nominal overall height used as assumption, not surveyed",
-    "Reference": "reference.jpg",
-    "HiddenGeometry": "Four-sided continuation of visible facades; ground obscured; no interior layout",
-    "Floors": "101 nominal levels; individual floor elevations estimated",
-    "Camera": "Perspective-corrected appearance fit; not a recovered physical camera location",
-    "Simplification": "Exterior curtain-wall assemblies and repeated mullions; no guessed window operability or interior fittings"
+  "scope": {
+    "inferred_floorplates": 101,
+    "floor_thickness_m": 0.25,
+    "floor_levels": [
+      {
+        "name": "Level 001",
+        "z_m": 0.0
+      },
+      {
+        "name": "Level 002",
+        "z_m": 4.8
+      },
+      {
+        "name": "Level 003",
+        "z_m": 9.6
+      },
+      {
+        "name": "Level 004",
+        "z_m": 14.4
+      },
+      {
+        "name": "Level 005",
+        "z_m": 19.2
+      },
+      {
+        "name": "Level 006",
+        "z_m": 24.0
+      },
+      {
+        "name": "Level 007",
+        "z_m": 28.8
+      },
+      {
+        "name": "Level 008",
+        "z_m": 33.6
+      },
+      {
+        "name": "Level 009",
+        "z_m": 38.4
+      },
+      {
+        "name": "Level 010",
+        "z_m": 43.2
+      },
+      {
+        "name": "Level 011",
+        "z_m": 48.0
+      },
+      {
+        "name": "Level 012",
+        "z_m": 52.8
+      },
+      {
+        "name": "Level 013",
+        "z_m": 57.6
+      },
+      {
+        "name": "Level 014",
+        "z_m": 62.4
+      },
+      {
+        "name": "Level 015",
+        "z_m": 67.2
+      },
+      {
+        "name": "Level 016",
+        "z_m": 72.0
+      },
+      {
+        "name": "Level 017",
+        "z_m": 76.8
+      },
+      {
+        "name": "Level 018",
+        "z_m": 81.6
+      },
+      {
+        "name": "Level 019",
+        "z_m": 86.4
+      },
+      {
+        "name": "Level 020",
+        "z_m": 91.2
+      },
+      {
+        "name": "Level 021",
+        "z_m": 96.0
+      },
+      {
+        "name": "Level 022",
+        "z_m": 100.8
+      },
+      {
+        "name": "Level 023",
+        "z_m": 105.6
+      },
+      {
+        "name": "Level 024",
+        "z_m": 110.4
+      },
+      {
+        "name": "Level 025",
+        "z_m": 115.2
+      },
+      {
+        "name": "Level 026",
+        "z_m": 120.0
+      },
+      {
+        "name": "Level 027",
+        "z_m": 124.16939184805891
+      },
+      {
+        "name": "Level 028",
+        "z_m": 128.33878369611782
+      },
+      {
+        "name": "Level 029",
+        "z_m": 132.5081755441767
+      },
+      {
+        "name": "Level 030",
+        "z_m": 136.6775673922356
+      },
+      {
+        "name": "Level 031",
+        "z_m": 140.8469592402945
+      },
+      {
+        "name": "Level 032",
+        "z_m": 145.01635108835342
+      },
+      {
+        "name": "Level 033",
+        "z_m": 149.1857429364123
+      },
+      {
+        "name": "Level 034",
+        "z_m": 153.3551347844712
+      },
+      {
+        "name": "Level 035",
+        "z_m": 157.52452663253013
+      },
+      {
+        "name": "Level 036",
+        "z_m": 161.69391848058902
+      },
+      {
+        "name": "Level 037",
+        "z_m": 165.8633103286479
+      },
+      {
+        "name": "Level 038",
+        "z_m": 170.03270217670683
+      },
+      {
+        "name": "Level 039",
+        "z_m": 174.20209402476573
+      },
+      {
+        "name": "Level 040",
+        "z_m": 178.37148587282462
+      },
+      {
+        "name": "Level 041",
+        "z_m": 182.54087772088351
+      },
+      {
+        "name": "Level 042",
+        "z_m": 186.7102695689424
+      },
+      {
+        "name": "Level 043",
+        "z_m": 190.87966141700133
+      },
+      {
+        "name": "Level 044",
+        "z_m": 195.04905326506022
+      },
+      {
+        "name": "Level 045",
+        "z_m": 199.21844511311912
+      },
+      {
+        "name": "Level 046",
+        "z_m": 203.38783696117804
+      },
+      {
+        "name": "Level 047",
+        "z_m": 207.55722880923693
+      },
+      {
+        "name": "Level 048",
+        "z_m": 211.72662065729583
+      },
+      {
+        "name": "Level 049",
+        "z_m": 215.89601250535475
+      },
+      {
+        "name": "Level 050",
+        "z_m": 220.06540435341364
+      },
+      {
+        "name": "Level 051",
+        "z_m": 224.23479620147253
+      },
+      {
+        "name": "Level 052",
+        "z_m": 228.40418804953146
+      },
+      {
+        "name": "Level 053",
+        "z_m": 232.57357989759032
+      },
+      {
+        "name": "Level 054",
+        "z_m": 236.74297174564924
+      },
+      {
+        "name": "Level 055",
+        "z_m": 240.91236359370814
+      },
+      {
+        "name": "Level 056",
+        "z_m": 245.08175544176703
+      },
+      {
+        "name": "Level 057",
+        "z_m": 249.25114728982595
+      },
+      {
+        "name": "Level 058",
+        "z_m": 253.42053913788484
+      },
+      {
+        "name": "Level 059",
+        "z_m": 257.58993098594374
+      },
+      {
+        "name": "Level 060",
+        "z_m": 261.75932283400266
+      },
+      {
+        "name": "Level 061",
+        "z_m": 265.9287146820616
+      },
+      {
+        "name": "Level 062",
+        "z_m": 270.09810653012045
+      },
+      {
+        "name": "Level 063",
+        "z_m": 274.2674983781793
+      },
+      {
+        "name": "Level 064",
+        "z_m": 278.43689022623823
+      },
+      {
+        "name": "Level 065",
+        "z_m": 282.60628207429716
+      },
+      {
+        "name": "Level 066",
+        "z_m": 286.7756739223561
+      },
+      {
+        "name": "Level 067",
+        "z_m": 290.945065770415
+      },
+      {
+        "name": "Level 068",
+        "z_m": 295.11445761847386
+      },
+      {
+        "name": "Level 069",
+        "z_m": 299.28384946653273
+      },
+      {
+        "name": "Level 070",
+        "z_m": 303.45324131459165
+      },
+      {
+        "name": "Level 071",
+        "z_m": 307.6226331626506
+      },
+      {
+        "name": "Level 072",
+        "z_m": 311.7920250107095
+      },
+      {
+        "name": "Level 073",
+        "z_m": 315.96141685876836
+      },
+      {
+        "name": "Level 074",
+        "z_m": 320.1308087068273
+      },
+      {
+        "name": "Level 075",
+        "z_m": 324.30020055488615
+      },
+      {
+        "name": "Level 076",
+        "z_m": 328.46959240294507
+      },
+      {
+        "name": "Level 077",
+        "z_m": 332.638984251004
+      },
+      {
+        "name": "Level 078",
+        "z_m": 336.8083760990629
+      },
+      {
+        "name": "Level 079",
+        "z_m": 340.9777679471218
+      },
+      {
+        "name": "Level 080",
+        "z_m": 345.14715979518064
+      },
+      {
+        "name": "Level 081",
+        "z_m": 349.31655164323956
+      },
+      {
+        "name": "Level 082",
+        "z_m": 353.4859434912985
+      },
+      {
+        "name": "Level 083",
+        "z_m": 357.6553353393574
+      },
+      {
+        "name": "Level 084",
+        "z_m": 361.8247271874163
+      },
+      {
+        "name": "Level 085",
+        "z_m": 365.9941190354752
+      },
+      {
+        "name": "Level 086",
+        "z_m": 370.16351088353406
+      },
+      {
+        "name": "Level 087",
+        "z_m": 374.332902731593
+      },
+      {
+        "name": "Level 088",
+        "z_m": 378.5022945796519
+      },
+      {
+        "name": "Level 089",
+        "z_m": 382.67168642771077
+      },
+      {
+        "name": "Level 090",
+        "z_m": 386.8410782757697
+      },
+      {
+        "name": "Level 091",
+        "z_m": 391.6704410984181
+      },
+      {
+        "name": "Level 092",
+        "z_m": 396.4998039210666
+      },
+      {
+        "name": "Level 093",
+        "z_m": 401.329166743715
+      },
+      {
+        "name": "Level 094",
+        "z_m": 406.1585295663634
+      },
+      {
+        "name": "Level 095",
+        "z_m": 410.9878923890119
+      },
+      {
+        "name": "Level 096",
+        "z_m": 415.8172552116603
+      },
+      {
+        "name": "Level 097",
+        "z_m": 420.64661803430874
+      },
+      {
+        "name": "Level 098",
+        "z_m": 425.4759808569572
+      },
+      {
+        "name": "Level 099",
+        "z_m": 430.30534367960564
+      },
+      {
+        "name": "Level 100",
+        "z_m": 435.13470650225406
+      },
+      {
+        "name": "Level 101",
+        "z_m": 439.96406932490254
+      }
+    ],
+    "rear_facades": "Plausible repeated facade treatment",
+    "interiors": "No room layouts, structural core, services, foundations or construction layers"
   },
-  "detail_policy": "101 nominal storeys with estimated slab elevations, 44 curtain-wall face assemblies; 8 repeated tiers share member geometry. Hidden faces repeat the observed facade language. No unseen interiors or neighboring buildings. Ground and lower podium occluded in photograph; extent is inferred.",
-  "camera_limitation": "Long-lens virtual camera fits apparently perspective-corrected photograph. Its below-ground virtual position is an optical approximation, not a physical location.",
-  "validation_limitations": [
-    "All 14 landmark observations used for fitting geometry and camera",
-    "No held-out points or silhouette mask",
-    "Single photograph does not determine absolute dimensions"
+  "assumptions": [
+    "Absolute scale, floor count, elevations, rectangular plan and hidden lower/rear geometry are inferred",
+    "Camera focal length 3000 px and eye height 2 m are assumed; optical shift and orientation fitted",
+    "Glazing is represented by continuous semantic plates within curtain-wall assemblies, with individual framing and spandrels",
+    "Nominal 101 floors distributed as 25 base levels, 64 main-tier levels and 12 crown levels; not a verified floor schedule",
+    "Ground and neighboring buildings omitted; photo base is occluded",
+    "Glass/metal identities are appearance-based roles; engineering specifications unknown"
   ],
-  "stopping_reason": "Main exterior and visible detail reconstructed; remaining differences and hidden geometry do not justify further unconstrained fitting."
+  "detail_policy": "Approximate LOD 200 exterior with inferred floorplates. Repeated frame geometry uses mapped occurrences. Small ornament shapes simplified. No source-photo texture pasted onto geometry.",
+  "validation_limits": [
+    "28 fixed manually picked landmarks, all consumed by camera and geometry fitting",
+    "No independent heldout points or annotated silhouette/occlusion mask",
+    "Gate validates schema attributes, geometry, spatial hierarchy and selected semantics; not structural adequacy, watertightness or survey accuracy"
+  ],
+  "stopping_reason": "Coherent semantic reconstruction completed. Residual photographic mismatch retained; more precise geometry is not justified from this single partly occluded view."
 }

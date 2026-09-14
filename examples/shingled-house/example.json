@@ -1,0 +1,35 @@
+{
+  "test_number": 25,
+  "plugin_version": "0.8.4-dev.2",
+  "reference_included": true,
+  "reference_file": "reference.png",
+  "reference_original_filename": "house.png",
+  "reference_sha256": "9e11b22d6d6b55d58535e3e41658a70af85f548d04aba211d1004b8b714833af",
+  "source_ifc_sha256": "26ad76818dc0f6f6ba018ccabb5fafe98183f94f53845dfc0bb447f93ea59373",
+  "source_files_sha256": {
+    "house.ifc": "26ad76818dc0f6f6ba018ccabb5fafe98183f94f53845dfc0bb447f93ea59373",
+    "house.ifc.styles.json": "7c06f44828970485d67b653f39bc395642838b0ace9e015814a4ea63b484d52f",
+    "comparison.png": "9081f97612a094dda2cfbdeedca1cc1e6a08d4c31c3e3c20c3cec57e4fb6f980",
+    "observations.json": "f2d6c22a5a9b8916178664e62661b0de202778431a7cdfac6295a9ac3aef531b",
+    "landmarks.json": "143c72832da2d939d9ac23cf0da4cc2931b974e1246eb17bcacc692662bdaf25",
+    "reconstruction.json": "1d9679b4741ec14dc409ede80f495400455f999b05f079bd7ca2fd2da4558401",
+    "validation.json": "8c3d63501c19a11e190a32bc6d24181c7509ccabc2cd534fde6cab4159c918f0",
+    "evaluation.json": "752c55e9d8a7f2a83ac79d8f2d5f810810ec10b499c6df736f64c0a4df283784"
+  },
+  "publication_changes": [
+    "reconstruction.json: normalized local paths/reference filename for publication."
+  ],
+  "files_sha256": {
+    "README.md": "c1eeb25657c12af7cca4d6a6b6808abe18a7c111766cf2f0b8f099c260054177",
+    "comparison.png": "9081f97612a094dda2cfbdeedca1cc1e6a08d4c31c3e3c20c3cec57e4fb6f980",
+    "evaluation.json": "752c55e9d8a7f2a83ac79d8f2d5f810810ec10b499c6df736f64c0a4df283784",
+    "house.ifc": "26ad76818dc0f6f6ba018ccabb5fafe98183f94f53845dfc0bb447f93ea59373",
+    "house.ifc.styles.json": "7c06f44828970485d67b653f39bc395642838b0ace9e015814a4ea63b484d52f",
+    "landmarks.json": "143c72832da2d939d9ac23cf0da4cc2931b974e1246eb17bcacc692662bdaf25",
+    "observations.json": "f2d6c22a5a9b8916178664e62661b0de202778431a7cdfac6295a9ac3aef531b",
+    "reconstruction.json": "f96d45ccf8d0251063bd70ef09c9056d01c12978beda249e28d42ad876060778",
+    "reference.png": "9e11b22d6d6b55d58535e3e41658a70af85f548d04aba211d1004b8b714833af",
+    "review.json": "91cf1aecf039fb0bc2e71a95b18c6ac874244364290f655b87bce97deef20196",
+    "validation.json": "8c3d63501c19a11e190a32bc6d24181c7509ccabc2cd534fde6cab4159c918f0"
+  }
+}

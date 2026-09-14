@@ -1,49 +1,17 @@
 # Taipei 101
 
-Plugin **0.8.3**. Runtime files match the repository revision recorded in
-[publication metadata](example.json).
-
-| Reference | Reconstruction |
+| Reference | IFC reconstruction |
 | --- | --- |
 | ![Reference](reference.jpg) | ![Reconstruction](comparison.png) |
 
-[Download IFC](house.ifc) · [Assumptions and camera](reconstruction.json) ·
-[Original validation report](validation.json) · [Publication metadata](example.json)
+[Download IFC](house.ifc) · [Assumptions](reconstruction.json) · [Independent IFC review](review.json) · [Photographic evaluation](evaluation.json) · [File provenance](example.json)
 
-## Recorded evidence
+Generated with **0.8.4-dev.3**. 101 inferred floorplates and 44 curtain-wall assemblies. Repeated panels and members retain individual identities, type families and materials. Full EXPRESS validation and all 2,622 represented leaf elements passed conversion; floor winding and volumes were also checked. The assumed height is 508 m; rectangular floor footprints and hidden depth are estimates, not measured building plans.
 
-- IFC: **PASS**.
-- Fitted landmarks: **needs refinement**, RMS **4.09 px**, maximum **8.16 px**, tolerance **5 px**.
-- Appearance: **PASS**.
-- Fitted points: **14**; held-out landmarks: **0**; no silhouette mask.
-  No independent photographic accuracy is established.
-- Semantic model: **101 storeys**, **2,035 elements**, including **44 curtain walls**.
+Fitted-landmark error: **4.22 px RMS / 9.34 px maximum**, against a 5 px tolerance. The recorded photographic verdict is **needs_refinement**. No held-out landmarks or silhouette mask were supplied. A pleasing render and a valid IFC structure do not establish survey accuracy.
 
-The run loaded the user-installed skill and used both Blender MCP and the
-measurement MCP. It inspected envelope and detailed drafts, then evaluated the
-final IFC-bound landmarks without a prolonged refinement loop. Hidden faces
-continue the visible façade pattern; the lower podium and ground level are
-inferred. Ground context is omitted. The camera is an appearance-fitting
-approximation, not a recovered physical camera position.
+The IFC and render are unchanged from the run. JSON paths are normalized for distribution. Original run validation is retained alongside the later independent review; consult both when assessing the model. The represented elements target approximate LOD 200, not a certified architectural deliverable. No invented room layouts or building services are included.
 
-These are the original run's reports, not newly scored results. Read the report
-for visual-review limits and outstanding discrepancies. Dimensions and hidden
-geometry are assumptions from one view. This is not a survey model.
+## Reference
 
-## Files
-
-The IFC and comparison render are final delivery snapshots. The style sidecar
-retains Blender appearance metadata; ordinary IFC readers use the IFC itself.
-`observations.json` and `landmarks.json` retain the annotations and IFC bindings
-behind the reported fit. `example.json` records the source revision and published
-file hashes without machine-specific configuration.
-
-Intermediate renders, logs, scripts, local setup files and client configuration
-are intentionally omitted. This is an inspectable output package, not a complete
-replay environment. The IFC bytes and their hashes are unchanged.
-
-## Image credit
-
-Reference photograph: [Taipei 101 2009 amk-EditMylius](https://commons.wikimedia.org/wiki/File:Taipei_101_2009_amk-EditMylius.jpg), AngMoKio, edited by Mylius. [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). The reference bytes are unchanged.
-
-Reference images are separate from the repository's software license.
+Reference: AngMoKio, edited by Mylius, [original photograph](https://commons.wikimedia.org/wiki/File:Taipei_101_2009_amk-EditMylius.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Image terms are separate from the repository's software licence.

@@ -1,5 +1,7 @@
 # Heydar Aliyev Center
 
+**Legacy pipeline example — plugin 0.8.0, before the IFC semantics, placement, mapped-representation and prism-winding fixes released in 0.8.4.** This is a historical curved-form demonstration, not an example of the current IFC-quality checks. It already contains real IFC entities; the newer structural fixes were not applied retrospectively.
+
 Codex reconstruction, plugin **0.8.0**. This example shows how the method can
 represent flowing roof shells, curved openings and curtain-wall assemblies as
 semantic IFC. It is an approximation from one photograph, not the architect's BIM.

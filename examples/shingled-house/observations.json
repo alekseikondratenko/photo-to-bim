@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "reference_sha256": "9e11b22d6d6b55d58535e3e41658a70af85f548d04aba211d1004b8b714833af",
+  "image_size": [
+    1470,
+    980
+  ],
+  "landmarks": [
+    {
+      "id": "porch-eave-near",
+      "pixel": [
+        393,
+        490
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "porch-eave-far",
+      "pixel": [
+        1200,
+        583
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-left-peak",
+      "pixel": [
+        385,
+        122
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-left-eave-left",
+      "pixel": [
+        289,
+        330
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-left-eave-right",
+      "pixel": [
+        471,
+        359
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-left-base-left",
+      "pixel": [
+        295,
+        465
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-left-base-right",
+      "pixel": [
+        462,
+        487
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-right-peak",
+      "pixel": [
+        907,
+        254
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-right-eave-left",
+      "pixel": [
+        851,
+        425
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-right-eave-right",
+      "pixel": [
+        969,
+        438
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-right-base-left",
+      "pixel": [
+        855,
+        533
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "dormer-right-base-right",
+      "pixel": [
+        961,
+        548
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shed-left-top",
+      "pixel": [
+        543,
+        399
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shed-right-top",
+      "pixel": [
+        740,
+        425
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shed-left-base",
+      "pixel": [
+        543,
+        468
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    },
+    {
+      "id": "shed-right-base",
+      "pixel": [
+        741,
+        494
+      ],
+      "role": "fit",
+      "used_for_fitting": true
+    }
+  ],
+  "note": "All landmarks informed geometry or camera; no withheld checks. Vegetation and cropped left envelope prevent a reliable complete silhouette mask."
+}

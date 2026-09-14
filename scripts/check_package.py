@@ -19,6 +19,7 @@ def check():
     assert len({m['name'] for m in manifests}) == 1, 'Plugin identifiers disagree'
     assert len({m['version'] for m in manifests}) == 1, 'Plugin versions disagree'
     catalog = read_json('.claude-plugin/marketplace.json')
+    assert catalog['metadata']['version'] == manifests[0]['version'], 'Marketplace version mismatch'
     entry = catalog['plugins'][0]
     assert entry['name'] == manifests[0]['name'], 'Marketplace identity mismatch'
     assert entry['source'] == './' and entry['strict'] is True
@@ -63,7 +64,7 @@ def check():
         for name in ['house.ifc.styles.json', 'landmarks.json']:
             assert json.loads((folder / name).read_text())['ifc_sha256'] == ifc_hash, name
         if example['reference_included']:
-            assert hashlib.sha256((folder / 'reference.jpg').read_bytes()).hexdigest() == example['reference_sha256']
+            assert hashlib.sha256((folder / example.get('reference_file', 'reference.jpg')).read_bytes()).hexdigest() == example['reference_sha256']
     print('Package metadata, entry points, personal-path scan, links and example hashes: PASS')
 
 

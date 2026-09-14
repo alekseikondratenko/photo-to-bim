@@ -1,0 +1,30 @@
+{
+  "source_ifc_sha256": "26ad76818dc0f6f6ba018ccabb5fafe98183f94f53845dfc0bb447f93ea59373",
+  "full_express_errors": 0,
+  "schema_errors": [],
+  "physical_elements": 315,
+  "typed_elements": 315,
+  "material_assigned": 310,
+  "classes": {
+    "IfcBeam": 4,
+    "IfcChimney": 1,
+    "IfcColumn": 6,
+    "IfcCovering": 37,
+    "IfcDoor": 2,
+    "IfcMember": 154,
+    "IfcRailing": 5,
+    "IfcRoof": 16,
+    "IfcSlab": 7,
+    "IfcWall": 19,
+    "IfcWindow": 32,
+    "IfcBuildingElementPart": 32,
+    "IfcOpeningElement": 34
+  },
+  "mapped_occurrences": 0,
+  "geometry_checked": 344,
+  "geometry_failures": [],
+  "duplicate_guids": [],
+  "uncontained": [],
+  "notes": "Two inferred floorplates, 32 windows and two doors with individual hosted openings. Roof forms, porch and materials follow the photograph. Scale, construction and unseen façades remain inferred. This run used 0.8.4-dev.2, before the final prism-winding fix: four plain foundation walls retain inconsistent face orientation. The source IFC is preserved, not silently repaired.",
+  "limits": "Geometry conversion is not a watertightness, clash, constructability or downstream application certification. Floor plans and unseen geometry are inferred. Original photographic evaluation is preserved."
+}

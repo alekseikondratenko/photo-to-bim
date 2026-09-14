@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "0.8.0",
+  "version": "0.8.4-dev.3",
   "ifc": {
     "schema": "PASS",
     "geometry": "PASS",
@@ -10,37 +10,50 @@
     "semantic_errors": [],
     "census": {
       "IfcBuildingElementProxy": 0,
-      "IfcBuildingStorey": 98,
-      "IfcCommunicationsAppliance": 1,
-      "IfcCurtainWall": 16,
+      "IfcBuildingStorey": 90,
+      "IfcCovering": 377,
       "IfcDoor": 0,
-      "IfcMember": 73,
-      "IfcOpeningElement": 4169,
-      "IfcPlate": 4197,
-      "IfcRoof": 11,
-      "IfcSlab": 1,
-      "IfcWall": 380,
-      "IfcWindow": 4169
+      "IfcElementAssembly": 1,
+      "IfcMember": 42,
+      "IfcOpeningElement": 5892,
+      "IfcRoof": 7,
+      "IfcSlab": 89,
+      "IfcWall": 356,
+      "IfcWindow": 5892
     },
     "proxies": 0,
     "proxy_exceptions": {},
     "uncontained": [],
-    "geometry_checked": 13033,
-    "verdict": "PASS"
+    "geometry_checked": 12655,
+    "verdict": "PASS",
+    "schema_check_scope": "Attribute/cardinality validation plus placement and shape-ownership rules; not full EXPRESS validation",
+    "bim_review": {
+      "status": "NO_FINDINGS",
+      "scope": {
+        "ModelScope": "photo-derived exterior",
+        "DevelopmentTarget": "Approximate LOD 200 for represented exterior elements",
+        "FloorCoverage": "inferred_floorplates",
+        "FloorStoreys": "[\"Level 001\", \"Level 002\", \"Level 003\", \"Level 004\", \"Level 005\", \"Level 006\", \"Level 007\", \"Level 008\", \"Level 009\", \"Level 010\", \"Level 011\", \"Level 012\", \"Level 013\", \"Level 014\", \"Level 015\", \"Level 016\", \"Level 017\", \"Level 018\", \"Level 019\", \"Level 020\", \"Level 021\", \"Level 022\", \"Level 023\", \"Level 024\", \"Level 025\", \"Level 026\", \"Level 027\", \"Level 028\", \"Level 029\", \"Level 030\", \"Level 031\", \"Level 032\", \"Level 033\", \"Level 034\", \"Level 035\", \"Level 036\", \"Level 037\", \"Level 038\", \"Level 039\", \"Level 040\", \"Level 041\", \"Level 042\", \"Level 043\", \"Level 044\", \"Level 045\", \"Level 046\", \"Level 047\", \"Level 048\", \"Level 049\", \"Level 050\", \"Level 051\", \"Level 052\", \"Level 053\", \"Level 054\", \"Level 055\", \"Level 056\", \"Level 057\", \"Level 058\", \"Level 059\", \"Level 060\", \"Level 061\", \"Level 062\", \"Level 063\", \"Level 064\", \"Level 065\", \"Level 066\", \"Level 067\", \"Level 068\", \"Level 069\", \"Level 070\", \"Level 071\", \"Level 072\", \"Level 073\", \"Level 074\", \"Level 075\", \"Level 076\", \"Level 077\", \"Level 078\", \"Level 079\", \"Level 080\", \"Level 081\", \"Level 082\", \"Level 083\", \"Level 084\", \"Level 085\", \"Level 086\", \"Level 087\", \"Level 088\", \"Level 089\"]",
+        "FloorOmissions": "{\"Crown and antenna\": \"Architectural crown and antenna; no occupied floors inferred.\"}",
+        "id": 107
+      },
+      "findings": [],
+      "note": "Advisory BIM completeness, not architectural acceptance or LOD certification. Review element function and suspicious solid slabs using existing geometry."
+    }
   },
   "photographic": {
     "schema_version": 1,
-    "version": "0.8.0",
+    "version": "0.8.4-dev.3",
     "status": "FAIL",
     "verdict": "needs_refinement",
-    "loss": 3.640107514808432,
-    "metric_key": "5f92f44d1ba5c9afaf24148ef35659f1b532bf8375a95a4782a1abeab32b47b9",
+    "loss": 1.2445073525548813,
+    "metric_key": "775dd9dc7941230c6f1dfba2e4e3f3757168e9cb0f7f3bcfbe69b60fa058138c",
     "landmarks": {
       "status": "FAIL",
-      "rms_px": 8.555858059043542,
-      "max_px": 18.20053757404216,
+      "rms_px": 2.7326854195984738,
+      "max_px": 6.222536762774406,
       "tolerance_px": 5,
-      "coverage": 16,
+      "coverage": 20,
       "held_out_count": 0,
       "consumed_check_count": 0,
       "undeclared_check_count": 0,
@@ -48,74 +61,74 @@
       "held_out_rms_px": null,
       "worst": [
         {
-          "id": "shaft-bottom-left",
+          "id": "main_C",
           "role": "fit",
           "independence": "used",
           "reference": [
-            431,
-            1088
+            570,
+            599
           ],
           "projected": [
-            441.30495424713007,
-            1072.997750637032
+            575.4102854525487,
+            595.9261140089426
           ],
-          "error_px": 18.20053757404216
+          "error_px": 6.222536762774406
         },
         {
-          "id": "crown-left",
+          "id": "main_base_C",
           "role": "fit",
           "independence": "used",
           "reference": [
-            497,
-            441
+            582,
+            1085
           ],
           "projected": [
-            497.13235661949227,
-            427.07814169862814
+            576.1026686577991,
+            1085.4340464166514
           ],
-          "error_px": 13.92248745153681
+          "error_px": 5.913282781291047
         },
         {
-          "id": "podium-left",
+          "id": "main_L",
           "role": "fit",
           "independence": "used",
           "reference": [
-            400,
-            1147
+            441,
+            620
           ],
           "projected": [
-            412.41919129145117,
-            1152.0580446065956
+            444.07596104690674,
+            622.9798488463446
           ],
-          "error_px": 13.409702740029958
+          "error_px": 4.282643518803387
         },
         {
-          "id": "shaft-bottom-right",
+          "id": "upper_C",
           "role": "fit",
           "independence": "used",
           "reference": [
-            649,
-            1084
+            567,
+            492
           ],
           "projected": [
-            651.4569564431681,
-            1071.984389905276
+            567.2454630450762,
+            496.0550037497795
           ],
-          "error_px": 12.264237477807546
+          "error_px": 4.062426309143796
         },
         {
-          "id": "mid-left",
+          "id": "upper_L",
           "role": "fit",
           "independence": "used",
           "reference": [
-            451,
-            527
+            452,
+            528
           ],
           "projected": [
-            454.5021787474393,
-            519.7146106415155
+            451.85300911092565,
+            524.9613575168362
           ],
-          "error_px": 8.083449392662445
+          "error_px": 3.0421956646407224
         }
       ],
       "note": "Projection agreement under the supplied camera; does not independently establish physical dimensions."
@@ -127,7 +140,7 @@
     "problems": [],
     "model_binding": {
       "status": "IFC_SNAPSHOT",
-      "ifc_sha256": "ba139936e4fc07cf03466bf1e42c4e5a73565b3d817c9e9500d70386bda83164"
+      "ifc_sha256": "f315ebfb53955f0c45011091323aed2685ba45887fb2738349f6bec7c76703e7"
     },
     "camera_check": {
       "status": "UNDETERMINED",
@@ -137,13 +150,13 @@
   },
   "appearance": {
     "status": "PASS",
-    "linked_objects": 8864,
+    "linked_objects": 6764,
     "missing_guids": [],
     "unlinked_objects": [],
     "errors": [],
     "material_overrides": [],
     "coordinate_precision": {
-      "maximum_error_m": 1.5171595975971286e-05,
+      "maximum_error_m": 1.5241906226037827e-05,
       "maximum_tolerance_m": 6.103515625e-05,
       "precision_limited_guids": [],
       "ceiling_m": 0.0001
@@ -154,7 +167,7 @@
     "decision": "accepted",
     "source": "agent",
     "reviewer": "Codex",
-    "basis": "Exterior reconstruction captures the principal stepped silhouette, two-face facade rhythm and crown. Simplified regular bays, podium and crown remain approximations; city context omitted. No claim of survey or exact photographic match."
+    "basis": "Final PNG inspected. Coherent stepped tower, floor envelope, window rhythm and crown are represented. Accepted as an approximate reconstruction only: regularized facades, simplified podium and crown, different lighting, no city occlusions, maximum fitted-landmark deviation 6.22 px, no held-outs or silhouette mask. User acceptance remains pending."
   },
   "acceptance": {
     "status": "pending_user_review",
@@ -162,20 +175,5 @@
       "photographic"
     ]
   },
-  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance.",
-  "limitations": [
-    "All image points used for geometry/camera refinement; no independent held-out points.",
-    "No subject or occlusion mask; full silhouette IoU unavailable.",
-    "Only visible facade arrangements detailed; rear and occluded base are assumed."
-  ],
-  "final_render": {
-    "file": "comparison.png",
-    "size_px": [
-      1125,
-      1500
-    ],
-    "sha256": "f84872a59e356526f715ce3e48e23630d317c2600637067bf555e911f928a47c",
-    "visual_review": "Inspected final full-resolution render; camera and IFC unchanged after final lighting correction."
-  },
-  "stopping_reason": "Principal exterior complete; finer bay variation, occluded base and crown ornament remain uncertain from this single view. Reported photo residuals retained rather than asserted to have converged."
+  "note": "Visual acceptance never changes an automated check. Agent visual review is not user acceptance."
 }

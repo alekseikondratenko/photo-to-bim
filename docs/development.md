@@ -1,15 +1,16 @@
 # Development and packaging
 
 Everyday users install the [published plugin](installation.md); they do not need
-a source checkout or a build step. This local experimental revision uses runtime 0.8.4-dev.3. It adds scope-aware
-BIM review, semantic repetition and assembly-aware authoring/import. It is not
-published; frozen project installations can be evaluated before a release.
-The local update supplies explicit product placements, valid map-source ownership,
+a source checkout or a build step. The published runtime is 0.8.4. It adds scope-aware
+BIM review, semantic repetition and assembly-aware authoring/import. Frozen project installations can be evaluated before a release.
+The runtime supplies explicit product placements, valid map-source ownership,
 and cheap export checks for both. Full EXPRESS validation is exercised in release
 regressions. Inferred floorplates are preferred when occupied levels are credible;
 room layouts remain outside the default scope. Prism footprints accept either
 winding while producing consistent outward faces, verified by signed-volume and
-opening-subtraction regressions.
+opening-subtraction regressions. Custom USERDEFINED elements/types receive the
+required descriptive labels; the export gate catches missing labels without an
+additional modelling or render loop.
 
 ## What is in the repository?
 

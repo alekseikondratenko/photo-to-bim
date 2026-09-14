@@ -88,22 +88,23 @@ own measurement server; it does **not** distribute Blender, Bonsai, or Blender M
   </tr>
   <tr>
     <td><img src="examples/taipei-101/reference.jpg" alt="Original Taipei 101 photograph" width="320"></td>
-    <td><img src="examples/taipei-comparison/claude-code-daylight.png" alt="Claude Code Fable 5.1 Taipei IFC model re-rendered with blue-sky daylight" width="320"></td>
+    <td><img src="docs/assets/taipei-benchmark/claude-code-daylight.png" alt="Claude Code Fable 5.1 Taipei IFC model re-rendered with blue-sky daylight" width="320"></td>
     <td><img src="examples/taipei-101/comparison.png" alt="Taipei 101 final IFC render from Codex with Astra" width="320"></td>
   </tr>
   <tr>
     <td>Same input photograph</td>
     <td>About <strong>30 minutes</strong></td>
-    <td>About <strong>9 minutes</strong></td>
+    <td>About <strong>12 minutes</strong></td>
   </tr>
 </table>
 
-Both runs used plugin 0.8.3. The Claude model is shown with
-blue-sky lighting applied afterwards, preserving its IFC geometry, colours and
-original camera. The original Claude render is retained in the run notes.
-Times are approximate: Claude is rounded from its session log; Codex is the
-author’s reported estimate. The later presentation render is excluded. These are
-illustrative runs, not a controlled speed comparison. [Run notes](examples/taipei-comparison/README.md).
+Claude used plugin 0.8.3; the newer Codex run used 0.8.4-dev.3. The Claude model
+is shown with blue-sky lighting applied afterwards, preserving its IFC geometry,
+colours and original camera. Codex's image is its unchanged final render.
+Times are rounded to whole minutes from the session logs; installation and the
+later presentation render are excluded. These are illustrative runs with different
+plugin versions, not a controlled speed comparison.
+[Run notes and original Claude render](docs/assets/taipei-benchmark/README.md).
 
 Reference: AngMoKio, edited by Mylius,
 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/),
@@ -115,6 +116,8 @@ Reference: AngMoKio, edited by Mylius,
 | --- | --- |
 | ![Heydar Aliyev Center reference photograph by Iwan Baan](examples/heydar-aliyev-center/reference.jpg) | ![Codex reconstruction with curved roof shells](examples/heydar-aliyev-center/comparison.png) |
 
+**Legacy result, plugin 0.8.0 — before the IFC structural fixes in 0.8.4.**
+This demonstrates curved-form reconstruction, not the current IFC-quality pipeline.
 The curved roof and main opening are reproduced; glazing reflections, panel
 spacing and the right-hand return are simplified. Hidden depth remains assumed.
 [IFC, assumptions and details](examples/heydar-aliyev-center/README.md).
@@ -131,10 +134,15 @@ separately; fitted-landmark agreement alone does not establish independent accur
 
 | Example | Files and evidence | Recorded result |
 | --- | --- | --- |
-| White House | [Photo, render, IFC, assumptions](examples/white-house/README.md) | IFC, fitted landmarks and appearance passed |
-| Empire State Building | [Photo, render, IFC, assumptions](examples/empire-state/README.md) | IFC and appearance passed; photographic fit needs refinement |
-| Taipei 101 | [Photo, render, IFC, assumptions](examples/taipei-101/README.md) | IFC and appearance passed; photographic fit needs refinement |
-| Heydar Aliyev Center | [Render, IFC, assumptions](examples/heydar-aliyev-center/README.md) | Curved roof shells and curtain walls; hidden depth remains assumed |
+| Shingled house | [Photo, render, IFC, assumptions](examples/shingled-house/README.md) | Hosted windows and floorplates; predates the final prism-winding fix |
+| White House | [Photo, render, IFC, assumptions](examples/white-house/README.md) | Types, materials and floorplates; custom-type label errors documented |
+| Empire State Building | [Photo, render, IFC, assumptions](examples/empire-state/README.md) | Full EXPRESS validation passes; 89 inferred floorplates |
+| Taipei 101 | [Photo, render, IFC, assumptions](examples/taipei-101/README.md) | Full EXPRESS validation passes; 101 inferred floorplates |
+| Heydar Aliyev Center — legacy | [Photo, render, IFC, assumptions](examples/heydar-aliyev-center/README.md) | Curved roof shells; generated before the IFC structural fixes |
+
+The four recent examples retain their original files and known limitations. All
+exceed the recorded 5 px maximum fitted-landmark tolerance; none includes held-out
+landmarks or a silhouette-mask check. See each example's independent review.
 
 ## Design decisions and limits
 
@@ -148,7 +156,10 @@ separately; fitted-landmark agreement alone does not establish independent accur
   photo-derived dimensions measured survey data.
 - **The output is semantic IFC.** A project/site/building/storey hierarchy contains
   appropriate typed elements, including curtain walls when applicable. Repeated
-  components can share geometry while retaining IFC identity.
+  components can share geometry while retaining IFC identity, type and material
+  associations. Credible occupied levels receive simple inferred floorplates;
+  their count, footprint and thickness are assumptions, not recovered floor plans.
+  The target is approximate LOD 200 for represented elements, not LOD certification.
 - **Evidence has limits.** IFC validation, appearance checks and photographic
   fit are separate. A good render or fitted-landmark pass does not prove hidden
   geometry, independent accuracy or interoperability with every BIM application.
@@ -168,9 +179,8 @@ what its current version documents.
   `measured` scale anchor should upgrade dependent dimensions from assumed to
   measured, with the uncertainty labels propagating. One real measurement is
   the cheapest large accuracy gain available.
-- **Held-out validation as routine.** Recent runs declare independent held-out
-  landmarks; making that the default for every run is the standing goal for
-  the evidence side.
+- **Held-out validation as routine.** The recent examples use fitted landmarks
+  only. Independent held-out landmarks remain a direction for stronger evidence.
 
 ## For developers
 

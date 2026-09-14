@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "ifc_sha256": "26ad76818dc0f6f6ba018ccabb5fafe98183f94f53845dfc0bb447f93ea59373",
+  "bindings": {
+    "dormer-left-peak": {
+      "global_id": "2WfSJo4uz3DQ7d32do$3K5",
+      "vertex_index": 3,
+      "geometry_sha256": "e7a4482d44bd2f70d811443b0ae4be39ba10dab6789fea6386318d8328938863",
+      "world": [
+        1.8600000000000003,
+        -0.08,
+        9.62
+      ],
+      "snap_distance_m": 2.220446049250313e-16
+    },
+    "dormer-left-base-left": {
+      "global_id": "2WfSJo4uz3DQ7d32do$3K5",
+      "vertex_index": 5,
+      "geometry_sha256": "e7a4482d44bd2f70d811443b0ae4be39ba10dab6789fea6386318d8328938863",
+      "world": [
+        0.35,
+        -0.08,
+        4.72
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-left-base-right": {
+      "global_id": "2WfSJo4uz3DQ7d32do$3K5",
+      "vertex_index": 8,
+      "geometry_sha256": "e7a4482d44bd2f70d811443b0ae4be39ba10dab6789fea6386318d8328938863",
+      "world": [
+        3.36,
+        -0.08,
+        4.72
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-left-eave-left": {
+      "global_id": "2WfSJo4uz3DQ7d32do$3K5",
+      "vertex_index": 0,
+      "geometry_sha256": "e7a4482d44bd2f70d811443b0ae4be39ba10dab6789fea6386318d8328938863",
+      "world": [
+        0.35,
+        -0.08,
+        6.55
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-left-eave-right": {
+      "global_id": "2WfSJo4uz3DQ7d32do$3K5",
+      "vertex_index": 7,
+      "geometry_sha256": "e7a4482d44bd2f70d811443b0ae4be39ba10dab6789fea6386318d8328938863",
+      "world": [
+        3.36,
+        -0.08,
+        6.55
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-right-peak": {
+      "global_id": "3WTT4N2LzCJR$IoDQlYumt",
+      "vertex_index": 3,
+      "geometry_sha256": "742ce68adaee184787d7d4ef9f131322ca662eef7ad958036c6d4a2ad3385f5a",
+      "world": [
+        12.66,
+        -0.08,
+        9.62
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-right-base-left": {
+      "global_id": "3WTT4N2LzCJR$IoDQlYumt",
+      "vertex_index": 5,
+      "geometry_sha256": "742ce68adaee184787d7d4ef9f131322ca662eef7ad958036c6d4a2ad3385f5a",
+      "world": [
+        11.16,
+        -0.08,
+        4.72
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-right-base-right": {
+      "global_id": "3WTT4N2LzCJR$IoDQlYumt",
+      "vertex_index": 8,
+      "geometry_sha256": "742ce68adaee184787d7d4ef9f131322ca662eef7ad958036c6d4a2ad3385f5a",
+      "world": [
+        14.13,
+        -0.08,
+        4.72
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-right-eave-left": {
+      "global_id": "3WTT4N2LzCJR$IoDQlYumt",
+      "vertex_index": 0,
+      "geometry_sha256": "742ce68adaee184787d7d4ef9f131322ca662eef7ad958036c6d4a2ad3385f5a",
+      "world": [
+        11.16,
+        -0.08,
+        6.55
+      ],
+      "snap_distance_m": 0.0
+    },
+    "dormer-right-eave-right": {
+      "global_id": "3WTT4N2LzCJR$IoDQlYumt",
+      "vertex_index": 7,
+      "geometry_sha256": "742ce68adaee184787d7d4ef9f131322ca662eef7ad958036c6d4a2ad3385f5a",
+      "world": [
+        14.13,
+        -0.08,
+        6.55
+      ],
+      "snap_distance_m": 0.0
+    },
+    "shed-left-top": {
+      "global_id": "14mq3wBxXBZuIRPijgq9sW",
+      "vertex_index": 7,
+      "geometry_sha256": "03d6db37c586324e5e47d3bf61c6f194b1b50fa5fed221e781f561738710bfca",
+      "world": [
+        4.66,
+        0.24,
+        6.18
+      ],
+      "snap_distance_m": 0.0
+    },
+    "shed-right-top": {
+      "global_id": "14mq3wBxXBZuIRPijgq9sW",
+      "vertex_index": 5,
+      "geometry_sha256": "03d6db37c586324e5e47d3bf61c6f194b1b50fa5fed221e781f561738710bfca",
+      "world": [
+        8.63,
+        0.24,
+        6.18
+      ],
+      "snap_distance_m": 0.0
+    },
+    "shed-left-base": {
+      "global_id": "14mq3wBxXBZuIRPijgq9sW",
+      "vertex_index": 3,
+      "geometry_sha256": "03d6db37c586324e5e47d3bf61c6f194b1b50fa5fed221e781f561738710bfca",
+      "world": [
+        4.66,
+        0.24,
+        5.0924
+      ],
+      "snap_distance_m": 0.0
+    },
+    "shed-right-base": {
+      "global_id": "14mq3wBxXBZuIRPijgq9sW",
+      "vertex_index": 0,
+      "geometry_sha256": "03d6db37c586324e5e47d3bf61c6f194b1b50fa5fed221e781f561738710bfca",
+      "world": [
+        8.63,
+        0.24,
+        5.0924
+      ],
+      "snap_distance_m": 0.0
+    },
+    "porch-eave-near": {
+      "global_id": "0o1wl9uvvEUfZovhHUj5Sj",
+      "vertex_index": 3,
+      "geometry_sha256": "cac8fd2e93b60e7d592de3cb127c68aa480c67b186dda7ebb870eda3b4d64b30",
+      "world": [
+        -0.11,
+        -2.8,
+        4.09
+      ],
+      "snap_distance_m": 0.0
+    },
+    "porch-eave-far": {
+      "global_id": "0o1wl9uvvEUfZovhHUj5Sj",
+      "vertex_index": 2,
+      "geometry_sha256": "cac8fd2e93b60e7d592de3cb127c68aa480c67b186dda7ebb870eda3b4d64b30",
+      "world": [
+        16.62,
+        -2.8,
+        4.09
+      ],
+      "snap_distance_m": 0.0
+    }
+  },
+  "model_points": {
+    "dormer-left-peak": [
+      1.8600000000000003,
+      -0.08,
+      9.62
+    ],
+    "dormer-left-base-left": [
+      0.35,
+      -0.08,
+      4.72
+    ],
+    "dormer-left-base-right": [
+      3.36,
+      -0.08,
+      4.72
+    ],
+    "dormer-left-eave-left": [
+      0.35,
+      -0.08,
+      6.55
+    ],
+    "dormer-left-eave-right": [
+      3.36,
+      -0.08,
+      6.55
+    ],
+    "dormer-right-peak": [
+      12.66,
+      -0.08,
+      9.62
+    ],
+    "dormer-right-base-left": [
+      11.16,
+      -0.08,
+      4.72
+    ],
+    "dormer-right-base-right": [
+      14.13,
+      -0.08,
+      4.72
+    ],
+    "dormer-right-eave-left": [
+      11.16,
+      -0.08,
+      6.55
+    ],
+    "dormer-right-eave-right": [
+      14.13,
+      -0.08,
+      6.55
+    ],
+    "shed-left-top": [
+      4.66,
+      0.24,
+      6.18
+    ],
+    "shed-right-top": [
+      8.63,
+      0.24,
+      6.18
+    ],
+    "shed-left-base": [
+      4.66,
+      0.24,
+      5.0924
+    ],
+    "shed-right-base": [
+      8.63,
+      0.24,
+      5.0924
+    ],
+    "porch-eave-near": [
+      -0.11,
+      -2.8,
+      4.09
+    ],
+    "porch-eave-far": [
+      16.62,
+      -2.8,
+      4.09
+    ]
+  }
+}

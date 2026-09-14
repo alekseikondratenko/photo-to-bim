@@ -1,0 +1,110 @@
+{
+  "name": "comparison",
+  "schema_version": 1,
+  "version": "0.8.4-dev.3",
+  "status": "FAIL",
+  "verdict": "needs_refinement",
+  "loss": 1.8683278714226774,
+  "metric_key": "a3bf00bad657d36ff9371ad6154585655f443462ef7ba8c5ac0514de8f271f65",
+  "landmarks": {
+    "status": "FAIL",
+    "rms_px": 4.2234167645727885,
+    "max_px": 9.341639357113387,
+    "tolerance_px": 5,
+    "coverage": 28,
+    "held_out_count": 0,
+    "consumed_check_count": 0,
+    "undeclared_check_count": 0,
+    "independence_status": "NO_INDEPENDENT_CHECKS",
+    "held_out_rms_px": null,
+    "worst": [
+      {
+        "id": "tier1-front",
+        "role": "fit",
+        "independence": "used",
+        "reference": [
+          333,
+          905
+        ],
+        "projected": [
+          330.4082276691314,
+          913.9749062425918
+        ],
+        "error_px": 9.341639357113387
+      },
+      {
+        "id": "tier8-front",
+        "role": "fit",
+        "independence": "used",
+        "reference": [
+          329,
+          304
+        ],
+        "projected": [
+          329.07330288132744,
+          311.7437539711274
+        ],
+        "error_px": 7.744100908288961
+      },
+      {
+        "id": "tier4-right",
+        "role": "fit",
+        "independence": "used",
+        "reference": [
+          415,
+          686
+        ],
+        "projected": [
+          415.67652068504304,
+          679.3358610674223
+        ],
+        "error_px": 6.6983899520697054
+      },
+      {
+        "id": "tier8-right",
+        "role": "fit",
+        "independence": "used",
+        "reference": [
+          415,
+          348
+        ],
+        "projected": [
+          413.2238048730637,
+          354.42762807996587
+        ],
+        "error_px": 6.668528463110727
+      },
+      {
+        "id": "tier3-right",
+        "role": "fit",
+        "independence": "used",
+        "reference": [
+          415,
+          768
+        ],
+        "projected": [
+          416.305579600677,
+          762.666518343485
+        ],
+        "error_px": 5.49095298414455
+      }
+    ],
+    "note": "Projection agreement under the supplied camera; does not independently establish physical dimensions."
+  },
+  "silhouette": {
+    "status": "UNAVAILABLE",
+    "reason": "Provide a fixed reference subject mask and a rendered subject-only binary mask."
+  },
+  "problems": [],
+  "model_binding": {
+    "status": "IFC_SNAPSHOT",
+    "ifc_sha256": "3784dd211f38cce6705a1a0bb7fc1cdd9af0e6846d368fc131de2ab8344d81cb"
+  },
+  "camera_check": {
+    "status": "UNDETERMINED",
+    "note": "Image extent alone cannot distinguish camera error from model error. Compare independent correspondences before changing either."
+  },
+  "note": "Only fixed observations and explicit masks control this assessment. A threshold miss is not an instruction to repeat; refine only when evidence and expected benefit justify another pass.",
+  "render_sha256": "a06e54c7712cee9ec050f66afab6f23796a0c4481471d8d76c0ed4b60f6cc028",
+  "camera_sha256": "238f7a2afd265262ec635c839a05d17f3fbb9c3ce7962c0e9bf10221007e4243"
+}

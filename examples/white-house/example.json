@@ -1,21 +1,35 @@
 {
-  "test_number": 19,
-  "plugin_version": "0.8.2",
-  "source_commit": "297f64e108e205bd1f176621f48b0922037580ed",
+  "test_number": 27,
+  "plugin_version": "0.8.4-dev.3",
   "reference_included": true,
-  "reference_original_filename": "North_Façade_White_House.JPG",
+  "reference_file": "reference.jpg",
+  "reference_original_filename": "house.jpg",
   "reference_sha256": "e7aa4177135ac4b476795066ce1d3a636e6ee94f7e9856e4b0a1aad0a03e393d",
+  "source_ifc_sha256": "272da424a013f181c29ccf0869a8138b9924c3aee1678161fd8ced2304955fd4",
+  "source_files_sha256": {
+    "house.ifc": "272da424a013f181c29ccf0869a8138b9924c3aee1678161fd8ced2304955fd4",
+    "house.ifc.styles.json": "34bc846117f10286010ecf46a8637021e8107ae353d638932efe7ad7f9f2f49a",
+    "comparison.png": "173c62964c8d8f229e3d2c58dd52ce49d569a3e2ef8b036a26820b658af71cef",
+    "observations.json": "35a861705929d966af00c6febc8bf42a803f3d7c6443bd402b119b9a0207e760",
+    "landmarks.json": "4e878e5181b62a6012e96b6d1bb7d57a570997085dbab45272aced594285baea",
+    "reconstruction.json": "aab177c9b1ae452cce985c2644c949d70b1a6ae2be0ce0686e0268d7b3963a06",
+    "validation.json": "979698e50547b2ca6a525f24badd559e3a5bcd4bb00a6fcb23ecc9441f02aabc",
+    "evaluation.json": "42a69cdcb487b68cfc0cb0ea4d3762a12533b4511902b2a12917c990c56865d5"
+  },
   "publication_changes": [
-    "Reference filename normalized in reconstruction.json; original filename retained here."
+    "reconstruction.json: normalized local paths/reference filename for publication."
   ],
   "files_sha256": {
-    "comparison.png": "17d5709a38ef7177e48b17d83f5cf359fd50e1836bef186f94e7500250ebed2a",
-    "house.ifc": "360bf61e71b49e2483155dc29753f10596c69f39f7269a4efa52097d02a9319f",
-    "house.ifc.styles.json": "17de24d5f6c7fc37015ad8e11dbc85fce5ef52691421ccfc7e7a912d3e837303",
-    "landmarks.json": "9df084d9080e32fbfa5321abb05cfe902ab3f7bd084e33f0bd7c437031e7a785",
-    "observations.json": "2df5481ca9c33e06373a19c69695216624b672d9ecef1227f0415823f021d661",
-    "reconstruction.json": "ddd64545e14933c643bee5607df3b5393c75742ddd8548594f898e3c9acb2926",
+    "README.md": "a08fa43a9461310e3e8ce4434eeb5277c57c4a6dd73ed21c5e4ebe1ecc068123",
+    "comparison.png": "173c62964c8d8f229e3d2c58dd52ce49d569a3e2ef8b036a26820b658af71cef",
+    "evaluation.json": "42a69cdcb487b68cfc0cb0ea4d3762a12533b4511902b2a12917c990c56865d5",
+    "house.ifc": "272da424a013f181c29ccf0869a8138b9924c3aee1678161fd8ced2304955fd4",
+    "house.ifc.styles.json": "34bc846117f10286010ecf46a8637021e8107ae353d638932efe7ad7f9f2f49a",
+    "landmarks.json": "4e878e5181b62a6012e96b6d1bb7d57a570997085dbab45272aced594285baea",
+    "observations.json": "35a861705929d966af00c6febc8bf42a803f3d7c6443bd402b119b9a0207e760",
+    "reconstruction.json": "2eb84303ee10328155395fb6bb35a403bd276490eff9ebb2fea82fa845c10922",
     "reference.jpg": "e7aa4177135ac4b476795066ce1d3a636e6ee94f7e9856e4b0a1aad0a03e393d",
-    "validation.json": "d4145135dc7f5aca57142f83862eb404769b91db905a398e4dbdc0e4ee7054b0"
+    "review.json": "927c458a779b041b74fc1e7b44ca638f3fe4cc1be925ae60e2fb4dedcdbd79fb",
+    "validation.json": "979698e50547b2ca6a525f24badd559e3a5bcd4bb00a6fcb23ecc9441f02aabc"
   }
 }

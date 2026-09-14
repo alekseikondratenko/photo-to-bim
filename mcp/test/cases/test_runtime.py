@@ -119,7 +119,7 @@ def test_bootstrap_ignores_stale_modules(monkeypatch):
     monkeypatch.setitem(sys.modules,'photostudio',types.SimpleNamespace(VERSION='0.6.0'))
     boot=module('bootstrap')
     first,second=boot.load(),boot.load()
-    assert first['version']=='0.8.4-dev.3'
+    assert first['version']=='0.8.4'
     assert first['studio'] is not second['studio']
     assert first['helpers'] is not second['helpers']
     assert 'ifc_path' in first['studio'].setup.__code__.co_varnames
@@ -147,7 +147,7 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     image=tmp_path/'source.jpg';image.write_bytes(b'test fixture')
     target=tmp_path/'test-project'
     result=setup.install(target,reference=image,node=shutil.which('node'),disable_plugin=['photo-to-ifc-building@photo-to-bim'])
-    assert result['version']=='0.8.4-dev.3'
+    assert result['version']=='0.8.4'
     skill=target/'.agents/skills/photo-to-ifc-building'
     assert skill.is_symlink() and skill.resolve().is_relative_to(target)
     manifest=json.loads((target/'runtime-manifest.json').read_text())
@@ -169,7 +169,7 @@ def test_package_versions_and_mcp_entrypoints_agree():
     codex=json.loads((repo/'.codex-plugin/plugin.json').read_text())
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
-    assert codex['version']==claude['version']==npm['version']=='0.8.4-dev.3'
+    assert codex['version']==claude['version']==npm['version']=='0.8.4'
     portable=json.loads((repo/'mcp.json').read_text())
     assert portable.pop('$schema')=='https://agent-plugins.org/schemas/1.0.0/mcp.schema.json'
     normalized=json.loads(json.dumps(portable).replace('${PLUGIN_ROOT}','${CLAUDE_PLUGIN_ROOT}'))
@@ -564,3 +564,22 @@ def test_wall_gross_and_net_volume_without_repair(H, tmp_path, reverse_axis):
         assert signed == pytest.approx(expected)
     assert H.gate_report(f,required_classes=('IfcWall',))['verdict']=='PASS'
     assert_express_valid(f)
+
+
+@pytest.mark.parametrize('ifc_class', ['IfcChimney', 'IfcMember'])
+def test_custom_element_and_type_labels_pass_express_and_gate_missing_labels(H, ifc_class):
+    ctx = H.new_model('Custom labels', [('Ground', 0)])
+    verts, faces = H.prism_mesh([(0,0),(1,0),(1,1),(0,1)], 0, 2)
+    el = H.element(ctx, ifc_class, 'Custom roof feature', ctx['storeys']['Ground'],
+                   verts, faces, predefined_type='USERDEFINED')
+    assert el.ObjectType == 'Custom roof feature'
+    assert_express_valid(ctx['f'])
+    typ = H.assign_type(ctx, [el], 'Custom family', 'USERDEFINED')
+    assert typ.ElementType == 'Custom family'
+    assert_express_valid(ctx['f'])
+    el.PredefinedType = 'USERDEFINED'
+    el.ObjectType = None
+    typ.ElementType = None
+    report = H.gate_report(ctx['f'], required_classes=())
+    assert report['schema'] == 'FAIL'
+    assert sum('CorrectPredefinedType' in e for e in report['schema_errors']) == 2

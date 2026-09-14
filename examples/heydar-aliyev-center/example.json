@@ -25,5 +25,7 @@
     "separate_republication_permission_verified": false,
     "software_license_applies": false,
     "use": "User-requested visual comparison of the input photograph and generated reconstruction."
-  }
+  },
+  "legacy_pipeline": true,
+  "legacy_note": "Before the IFC structural fixes released in 0.8.4; original model retained."
 }

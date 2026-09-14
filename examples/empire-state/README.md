@@ -1,39 +1,17 @@
 # Empire State Building
 
-Plugin **0.8.0**, source revision `cbd6d319d2da642a96fb3686d96df3e7c3eedb82`.
-
-| Reference | Reconstruction |
+| Reference | IFC reconstruction |
 | --- | --- |
 | ![Reference](reference.jpg) | ![Reconstruction](comparison.png) |
 
-[Download IFC](house.ifc) · [Assumptions and camera](reconstruction.json) ·
-[Original validation report](validation.json) · [Publication metadata](example.json)
+[Download IFC](house.ifc) · [Assumptions](reconstruction.json) · [Independent IFC review](review.json) · [Photographic evaluation](evaluation.json) · [File provenance](example.json)
 
-## Recorded evidence
+Generated with **0.8.4-dev.3**. 89 inferred floorplates, 356 walls and 5,892 individually identifiable hosted windows; 5,854 mapped occurrences share source geometry. All 12,655 represented products, including openings, convert and full EXPRESS validation passes. 67 physical elements lack a type family; the geometry-less assembly parent has no own material. Floor count, setbacks, depth and overall height are assumptions. The entrance is obscured, so no door was invented.
 
-- IFC: **PASS**.
-- Fitted landmarks: **FAIL**, RMS **8.56 px**, maximum **18.20 px**, tolerance **5 px**.
-- Appearance: **PASS**.
-- Held-out landmarks: **0**. No independent photographic accuracy is established.
+Fitted-landmark error: **2.73 px RMS / 6.22 px maximum**, against a 5 px tolerance. The recorded photographic verdict is **needs_refinement**. No held-out landmarks or silhouette mask were supplied. A pleasing render and a valid IFC structure do not establish survey accuracy.
 
-These are the original run's reports, not newly scored results. Read the report
-for visual-review limits and outstanding discrepancies. Dimensions and hidden
-geometry are assumptions from one view. This is not a survey model.
+The IFC and render are unchanged from the run. JSON paths are normalized for distribution. Original run validation is retained alongside the later independent review; consult both when assessing the model. The represented elements target approximate LOD 200, not a certified architectural deliverable. No invented room layouts or building services are included.
 
-## Files
+## Reference
 
-The IFC and comparison render are final delivery snapshots. The style sidecar
-retains Blender appearance metadata; ordinary IFC readers use the IFC itself.
-`observations.json` and `landmarks.json` retain the annotations and IFC bindings
-behind the reported fit. `example.json` records the source revision and published
-file hashes without machine-specific configuration.
-
-Intermediate renders, logs, scripts, local setup files and client configuration
-are intentionally omitted. This is an inspectable output package, not a complete
-replay environment. The IFC bytes and their hashes are unchanged.
-
-## Image credit
-
-Reference photograph: Aleksei Kondratenko, 19 August 2020, Nikon Coolpix P900. [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The reference bytes are unchanged.
-
-Reference images are separate from the repository's software license.
+Reference: Aleksei Kondratenko, 19 August 2020, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Image terms are separate from the repository's software licence.

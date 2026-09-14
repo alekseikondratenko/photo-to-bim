@@ -47,6 +47,13 @@ examples/white-house/reference.jpg
   Nishkid64, colour correction by Patrickneil. Public domain:
   https://commons.wikimedia.org/wiki/File:North_Fa%C3%A7ade_White_House.JPG
 
-The red-roof house source image is not redistributed pending source confirmation.
-Generated reconstruction renders are included. See examples/README.md and the
-individual example pages for run context, attribution and validation limits.
+examples/shingled-house/reference.png
+  Supplied from Unsplash; photographer not yet identified. Unsplash License:
+  https://unsplash.com/license
+  https://images.unsplash.com/photo-1584738766473-61c083514bf4
+
+examples/heydar-aliyev-center/reference.jpg
+  Copyright Iwan Baan, via ArchDaily. Not covered by the software license.
+  https://www.archdaily.com/448774/heydar-aliyev-center-zaha-hadid-architects
+
+See individual example pages for provenance, assumptions and validation limits.

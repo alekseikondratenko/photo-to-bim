@@ -1,22 +1,35 @@
 {
-  "test_number": 23,
-  "plugin_version": "0.8.3",
-  "source_commit": "c1a8d34e87222413b14c46f36ac732418ac532c2",
+  "test_number": 26,
+  "plugin_version": "0.8.4-dev.3",
   "reference_included": true,
-  "reference_original_filename": "Taipei_101_2009_amk-EditMylius.jpg",
+  "reference_file": "reference.jpg",
+  "reference_original_filename": "house.jpg",
   "reference_sha256": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
+  "source_ifc_sha256": "3784dd211f38cce6705a1a0bb7fc1cdd9af0e6846d368fc131de2ab8344d81cb",
+  "source_files_sha256": {
+    "house.ifc": "3784dd211f38cce6705a1a0bb7fc1cdd9af0e6846d368fc131de2ab8344d81cb",
+    "house.ifc.styles.json": "8a5c9fe720c79ceda2b5fefe33d177a4bf9de4be4484660f8ec21e807de71176",
+    "comparison.png": "a06e54c7712cee9ec050f66afab6f23796a0c4481471d8d76c0ed4b60f6cc028",
+    "observations.json": "dd83aa669d637c45a3da6087143d088e5ff06a26b9abb4c3ffdfe8159d661d8e",
+    "landmarks.json": "f7c0090ee80cc00b6ae110630108b8627089ddfdd8928dbff0d91016d878eddf",
+    "reconstruction.json": "f1936d105687b747c5db375c8b3fb54e01591fd5b16b8a5e2302e46ce2225d10",
+    "validation.json": "c417b5137d9654221bbe79cdcd808d783bfe2fc2cdba731a4765e30ebbc142da",
+    "evaluation.json": "5659156ce27aba79da64edc21615c0a8863ef8caf2d20c898828b607b71f887d"
+  },
   "publication_changes": [
-    "Reference filename normalized in reconstruction.json; original filename retained here."
+    "reconstruction.json: normalized local paths/reference filename for publication."
   ],
   "files_sha256": {
-    "comparison.png": "695d040a47994fd27b2d7cd04c3d4ac6779d5ea3d76b4786ba87b9a88cb4bb1a",
-    "house.ifc": "67050017bb54b139e75bc04508dcb43f209df80b1ba5c97582ebd73571013e29",
-    "house.ifc.styles.json": "d454428c818eb7a1356a547a30e7d72f436a9a48f82df04e421456b72d6bc7cc",
-    "landmarks.json": "3dcbadbbf80c7da2f5e7809138777d7b5e36f37f5c613f3356aef45e8111f7c8",
-    "observations.json": "9f5c6fd70a6e01f3fc6f7879208f17f2f1cac2effd3e32d5eed32a087ce0430d",
-    "reconstruction.json": "a525d0af3d7244cb51bb8270d9c250701a942bc952e65e3398aed9ad440eb5c6",
+    "README.md": "906909589f11e34a98f3e8c4d14fa5f0aa3de4f1305672a1d660cef284c739af",
+    "comparison.png": "a06e54c7712cee9ec050f66afab6f23796a0c4481471d8d76c0ed4b60f6cc028",
+    "evaluation.json": "5659156ce27aba79da64edc21615c0a8863ef8caf2d20c898828b607b71f887d",
+    "house.ifc": "3784dd211f38cce6705a1a0bb7fc1cdd9af0e6846d368fc131de2ab8344d81cb",
+    "house.ifc.styles.json": "8a5c9fe720c79ceda2b5fefe33d177a4bf9de4be4484660f8ec21e807de71176",
+    "landmarks.json": "f7c0090ee80cc00b6ae110630108b8627089ddfdd8928dbff0d91016d878eddf",
+    "observations.json": "dd83aa669d637c45a3da6087143d088e5ff06a26b9abb4c3ffdfe8159d661d8e",
+    "reconstruction.json": "e16e1ed9039dfd4181bd3a8e97fa38319b35cd5619cad70cb736bdd51d75a83d",
     "reference.jpg": "6f0b28ec33cf348a6abb4439e29e998841dc12a99e8f9287a0747af80f4ed3da",
-    "validation.json": "2d8dc888269d9ed23faeea8c9579e7c2f90f1ce28e4c91b7a2455c36bdcad4d8"
-  },
-  "source_revision_basis": "Runtime helper files verified byte-for-byte against this repository revision."
+    "review.json": "ae18242c64696fcc61719c6db5089cdf40490378513317bbf08bf5606267ff09",
+    "validation.json": "c417b5137d9654221bbe79cdcd808d783bfe2fc2cdba731a4765e30ebbc142da"
+  }
 }
