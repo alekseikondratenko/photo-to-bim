@@ -1,4 +1,39 @@
-# Shipping verification — 13 September 2026
+# Shipping verification — 0.8.4, 14 September 2026
+
+Release commit `e7c87c5` was pushed to main and installed from the GitHub marketplace
+into the existing user-level Codex and Claude Code installations. Frozen local
+experiment folders were preserved.
+
+| Check | Result |
+| --- | --- |
+| Release suite | PASS: measurement regressions and 40 Python tests |
+| TypeScript typecheck; plugin and skill validators | PASS |
+| Package identities, versions, personal-path scan, links and example hashes | PASS |
+| Separate background Blender 5.2.1 LTS / Bonsai integration | PASS |
+| GitHub CI on release commit | PASS |
+| Codex and Claude installed plugin versions | Both 0.8.4, downloaded from GitHub main |
+| Installed skill/helper/server files compared with main | 12 files per client, no differences |
+| Fresh Codex project discovery | One enabled 0.8.4 skill; six measurement tools and Blender MCP visible |
+| Installed measurement server handshake and read-only classification | PASS from both client caches |
+| Blender MCP read-only scene query | PASS |
+
+This release verification did not launch a new reconstruction or modify the live
+Blender scene. Claude's updated cache/server was checked directly; the full Claude
+prompt-driven installation exercise below belongs to the earlier packaging test.
+Restart clients and open fresh tasks to load the new version. Existing numbered
+tests intentionally retain their frozen versions.
+
+The four refreshed examples preserve original model/render bytes. Independent
+reviews found full EXPRESS passes for the house, Taipei and Empire State, and
+seven custom-type label errors in the White House. Release 0.8.4 fixes helper
+creation and detection of that label issue; it does not rewrite historical models.
+The house predates the final prism-winding fix. None of these photographic fits
+has independent held-out or silhouette-mask validation. Each example documents
+its own scope and remaining issues.
+
+---
+
+# Earlier packaging verification — 13 September 2026
 
 The packaging in commit `c2c0fe2` was installed from the GitHub
 `docs/public-installation` branch into fresh, isolated user-level configurations
