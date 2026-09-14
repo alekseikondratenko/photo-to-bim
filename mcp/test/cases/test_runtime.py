@@ -119,7 +119,7 @@ def test_bootstrap_ignores_stale_modules(monkeypatch):
     monkeypatch.setitem(sys.modules,'photostudio',types.SimpleNamespace(VERSION='0.6.0'))
     boot=module('bootstrap')
     first,second=boot.load(),boot.load()
-    assert first['version']=='0.8.4-dev.2'
+    assert first['version']=='0.8.4-dev.3'
     assert first['studio'] is not second['studio']
     assert first['helpers'] is not second['helpers']
     assert 'ifc_path' in first['studio'].setup.__code__.co_varnames
@@ -147,7 +147,7 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     image=tmp_path/'source.jpg';image.write_bytes(b'test fixture')
     target=tmp_path/'test-project'
     result=setup.install(target,reference=image,node=shutil.which('node'),disable_plugin=['photo-to-ifc-building@photo-to-bim'])
-    assert result['version']=='0.8.4-dev.2'
+    assert result['version']=='0.8.4-dev.3'
     skill=target/'.agents/skills/photo-to-ifc-building'
     assert skill.is_symlink() and skill.resolve().is_relative_to(target)
     manifest=json.loads((target/'runtime-manifest.json').read_text())
@@ -169,7 +169,7 @@ def test_package_versions_and_mcp_entrypoints_agree():
     codex=json.loads((repo/'.codex-plugin/plugin.json').read_text())
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
-    assert codex['version']==claude['version']==npm['version']=='0.8.4-dev.2'
+    assert codex['version']==claude['version']==npm['version']=='0.8.4-dev.3'
     portable=json.loads((repo/'mcp.json').read_text())
     assert portable.pop('$schema')=='https://agent-plugins.org/schemas/1.0.0/mcp.schema.json'
     normalized=json.loads(json.dumps(portable).replace('${PLUGIN_ROOT}','${CLAUDE_PLUGIN_ROOT}'))
@@ -528,3 +528,39 @@ def test_house_floor_scope_and_hosted_repeats_pass_full_express(H, tmp_path):
     assert_express_valid(f)
     f.by_type('IfcSlab')[1].PredefinedType = 'ROOF'
     assert any(x['code']=='FLOOR_COVERAGE' for x in H.bim_review(f)['findings'])
+
+
+@pytest.mark.parametrize('footprint,area', [
+    ([(0,0),(4,0),(4,3),(0,3)], 12),
+    ([(0,0),(4,0),(4,1),(1,1),(1,3),(0,3)], 6),
+])
+@pytest.mark.parametrize('clockwise', [False, True])
+def test_prism_winding_outward_volume_and_unchanged_input(H, footprint, area, clockwise):
+    from collections import Counter
+    polygon = list(reversed(footprint)) if clockwise else list(footprint)
+    before = list(polygon)
+    verts, faces = H.prism_mesh(polygon, 7, 9)
+    assert polygon == before
+    directed = Counter((a,b) for face in faces for a,b in zip(face, face[1:]+face[:1]))
+    assert all(count == 1 and directed[b,a] == 1 for (a,b),count in directed.items())
+    triangles = np.array([(face[0],face[i],face[i+1]) for face in faces for i in range(1,len(face)-1)])
+    v = np.asarray(verts)
+    signed = np.einsum('ij,ij->i',v[triangles[:,0]],np.cross(v[triangles[:,1]],v[triangles[:,2]])).sum()/6
+    assert signed == pytest.approx(area*2)  # no absolute value: inverted shells fail
+
+
+@pytest.mark.parametrize('reverse_axis', [False, True])
+def test_wall_gross_and_net_volume_without_repair(H, tmp_path, reverse_axis):
+    ctx = H.new_model('Volume fixture', [('Ground',0)])
+    p1,p2 = ((8,0),(0,0)) if reverse_axis else ((0,0),(8,0))
+    wall = H.wall(ctx,ctx['storeys']['Ground'],p1,p2,3,thickness=.3,z0=2)
+    H.opening(ctx,wall,1,.8,1.2,1.4)
+    f = ifcopenshell.open(H.save(ctx,tmp_path/'wall.ifc'));wall=f.by_guid(wall.GlobalId)
+    for disable_voids,expected in [(True,8*.3*3),(False,8*.3*3-1.2*1.4*.3)]:
+        settings=ifcopenshell.geom.settings();settings.set('disable-opening-subtractions',disable_voids)
+        shape=ifcopenshell.geom.create_shape(settings,wall)
+        v=np.array(shape.geometry.verts).reshape(-1,3);t=np.array(shape.geometry.faces).reshape(-1,3)
+        signed=np.einsum('ij,ij->i',v[t[:,0]],np.cross(v[t[:,1]],v[t[:,2]])).sum()/6
+        assert signed == pytest.approx(expected)
+    assert H.gate_report(f,required_classes=('IfcWall',))['verdict']=='PASS'
+    assert_express_valid(f)

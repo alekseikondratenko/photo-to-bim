@@ -1,7 +1,7 @@
 """IFC4 authoring in SI metres. Geometry and evidence remain separate.
 Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
-VERSION = "0.8.4-dev.2"
+VERSION = "0.8.4-dev.3"
 import math
 
 import ifcopenshell
@@ -209,7 +209,12 @@ def _inside(a, b, c, p):
 
 
 def prism_mesh(footprint, z0, z1):
-    """Vertical prism over a 2D footprint polygon: (verts, faces)."""
+    """Outward-oriented vertical prism; accepts either footprint winding."""
+    # Caps are triangulated counterclockwise. Match side winding to them without
+    # mutating the caller's polygon; otherwise clockwise input reverses only sides.
+    footprint = list(footprint)
+    if _area(footprint) < 0:
+        footprint.reverse()
     n = len(footprint)
     verts = [(x, y, z0) for x, y in footprint] + [(x, y, z1) for x, y in footprint]
     faces = [[i, (i + 1) % n, (i + 1) % n + n, i + n] for i in range(n)]

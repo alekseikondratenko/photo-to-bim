@@ -3,7 +3,7 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.8.4-dev.2
+# Photo to IFC building — 0.8.4-dev.3
 
 For a photo-to-IFC request, produce an editable, dimensioned building model and
 a comparison render without requiring the user to repeat the technical brief.

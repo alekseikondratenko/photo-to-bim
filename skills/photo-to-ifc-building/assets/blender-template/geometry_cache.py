@@ -3,7 +3,7 @@
 The IFC iterator owns representation reuse and opening evaluation. Never bypass
 opening subtraction or guess that two occurrences have interchangeable geometry.
 """
-VERSION = "0.8.4-dev.2"
+VERSION = "0.8.4-dev.3"
 import hashlib
 from pathlib import Path
 from types import SimpleNamespace
