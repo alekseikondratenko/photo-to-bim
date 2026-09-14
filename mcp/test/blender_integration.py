@@ -25,7 +25,7 @@ def run(repo, output, node):
     boot = types.ModuleType('integration_bootstrap'); boot.__file__ = str(path)
     exec(compile(path.read_text(), str(path), 'exec'), boot.__dict__)
     rt = boot.load(); H, S, P, V = (rt[k] for k in ('helpers','scene','studio','validation'))
-    assert rt['version'] == '0.8.3'
+    assert rt['version'] == '0.8.4-dev.1'
     original_scene = bpy.context.window.scene
     original_objects = {ob.name: (tuple(tuple(row) for row in ob.matrix_world), ob.BIMObjectProperties.ifc_definition_id)
                         for ob in original_scene.objects}
@@ -36,7 +36,7 @@ def run(repo, output, node):
     report = None
     try:
         IfcStore.id_map={}; IfcStore.guid_map={}; IfcStore.history=[]; IfcStore.future=[]; IfcStore.edited_objs=set()
-        scene = bpy.data.scenes.new('PhotoToBIM 0.8.3 integration')
+        scene = bpy.data.scenes.new('PhotoToBIM 0.8.4-dev.1 integration')
         bpy.context.window.scene = scene
         ctx = H.new_model('Adapter fixture',[('Ground',0)])
         st=ctx['storeys']['Ground']
@@ -48,6 +48,9 @@ def run(repo, output, node):
         repeated=H.mapped_copy(ctx,slab,st,(0,0,443.123456789),'High repeated slab')
         H.mapped_copy(ctx,slab,st,(12,0,0),'Offset repeated slab')
         H.roof(ctx,st,[[(0,0,3),(4,0,5),(4,5,5),(0,5,3)],[(4,0,5),(8,0,3),(8,5,3),(4,5,5)]],style_name='roof')
+        verts, faces = H.prism_mesh([(9,0),(11,0),(11,.1),(9,.1)],0,3)
+        panel = H.element(ctx,'IfcPlate','Assembly panel',st,verts,faces,style_name='glass')
+        facade = H.assembly(ctx,'IfcCurtainWall','Component facade',ctx['building'],[panel])
         ifc=H.save(ctx,output/'fixture.ifc')
         gate=H.gate_report(ifc,required_classes=('IfcWall','IfcRoof','IfcSlab','IfcWindow','IfcDoor'))
         assert gate['verdict']=='PASS',gate
@@ -62,6 +65,10 @@ def run(repo, output, node):
         assert job.phase=='complete',job.status()
         imported=job.result
         assert imported['appearance']['status']=='PASS', imported
+        parent_object = Ifc.get_object(Ifc.get().by_guid(facade.GlobalId))
+        panel_object = Ifc.get_object(Ifc.get().by_guid(panel.GlobalId))
+        assert parent_object.type == 'EMPTY' and panel_object.type == 'MESH'
+        assert parent_object.users_collection[0] == panel_object.users_collection[0]
         assert imported['unique_meshes']<imported['objects'],imported
         assert job.checked==job.imported==job.status()['total']
         cache=H._geometry().snapshot(ifc)

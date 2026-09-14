@@ -9,7 +9,7 @@ import subprocess
 
 REPO = Path(__file__).resolve().parents[1]
 
-def install(target, reference=None, node=None, blender_command=None, blender_args=None, disable_mcp=None):
+def install(target, reference=None, node=None, blender_command=None, blender_args=None, disable_mcp=None, disable_plugin=None):
     target = Path(target).expanduser().resolve()
     if target.exists() and any(target.iterdir()):
         raise ValueError(f"Destination must be new or empty: {target}. Use a new test folder to preserve previous runs.")
@@ -62,6 +62,8 @@ startup_timeout_sec = 60
 '''
     for name in disable_mcp or []:
         config += f'\n[mcp_servers.{quote(name)}]\nenabled = false\n'
+    for name in disable_plugin or []:
+        config += f'\n[plugins.{quote(name)}]\nenabled = false\n'
     (target / '.codex').mkdir()
     (target / '.codex/config.toml').write_text(config)
     files = {str(p.relative_to(package)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(package.rglob('*')) if p.is_file()}
@@ -71,6 +73,7 @@ startup_timeout_sec = 60
     except subprocess.CalledProcessError:
         commit,dirty=None,None
     manifest = {'schema_version':1,'version':version,'source_commit':commit,'source_dirty':dirty,'files_sha256':files}
+    manifest['disabled_inherited_plugins'] = disable_plugin or []
     (target / 'runtime-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if reference:
         shutil.copy2(reference,target / ('house'+reference.suffix.lower()))
@@ -105,6 +108,7 @@ calibrate_camera, place_features and compare_model. Legacy score_render and
 solve_camera are not part of this runtime. Other unrelated global tools may still
 be present. If an older photo-to-bim marketplace plugin is globally installed,
 disable it for this project before comparing runs to avoid duplicate tool sets.
+Disabled inherited plugins in this project: {', '.join(disable_plugin or []) or 'none'}.
 
 For Claude Code, load this same frozen plugin for the session with:
 `claude --plugin-dir {package}`
@@ -121,6 +125,7 @@ if __name__ == '__main__':
     parser.add_argument('--node')
     parser.add_argument('--blender-command', help='Optional existing Blender MCP executable, for example uvx')
     parser.add_argument('--disable-mcp', action='append', help='Disable an inherited MCP server only in this project; repeat for multiple names')
+    parser.add_argument('--disable-plugin', action='append', help='Disable an inherited plugin only in this project, using its exact name@marketplace key')
     parser.add_argument('--blender-arg', action='append', help='Repeat for Blender MCP arguments; defaults to blender-mcp')
     args=parser.parse_args()
-    print(json.dumps(install(args.target,args.reference,args.node,args.blender_command,args.blender_arg,args.disable_mcp),indent=2))
+    print(json.dumps(install(args.target,args.reference,args.node,args.blender_command,args.blender_arg,args.disable_mcp,args.disable_plugin),indent=2))

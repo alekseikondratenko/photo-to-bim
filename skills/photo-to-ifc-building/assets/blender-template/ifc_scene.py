@@ -1,5 +1,5 @@
 """Material-aware IFC import and non-mutating appearance checks for Bonsai."""
-VERSION = "0.8.3"
+VERSION = "0.8.4-dev.1"
 import hashlib
 import json
 from pathlib import Path
@@ -113,9 +113,21 @@ class ImportJob:
             ob = bpy.data.objects.new(el.is_a()+'/'+(el.Name or el.GlobalId), None)
             co.objects.link(ob); Ifc.link(el, ob); ob['ptb.global_id'] = el.GlobalId
         self.elements = [el for el in f.by_type('IfcElement') if not el.is_a('IfcOpeningElement')]
+        parents = [el for el in self.elements if _geometry().is_assembly_container(el)]
+        parent_ids = {el.id() for el in parents}
+        self.assemblies = {el.id(): bpy.data.collections.new(el.is_a()+'/'+(el.Name or el.GlobalId)) for el in parents}
+        from ifcopenshell.util.element import get_aggregate, get_container
+        for el in parents:
+            parent, st = get_aggregate(el), get_container(el)
+            container = self.assemblies.get(parent.id() if parent else None) or self.spatial.get(st.id() if st else None, self.collection)
+            container.children.link(self.assemblies[el.id()])
         self.imported = self.checked = 0
         self.phase, self.error, self.result = 'importing', None, None
-        self.iterator = self.snapshot.iter_records([self.snapshot.file.by_guid(el.GlobalId) for el in self.elements])
+        def records():
+            for el in parents: yield el.GlobalId, None
+            leaves = [self.snapshot.file.by_guid(el.GlobalId) for el in self.elements if el.id() not in parent_ids]
+            yield from self.snapshot.iter_records(leaves)
+        self.iterator = records()
         self.scene.unit_settings.system = 'METRIC'; self.scene.unit_settings.scale_length = 1
         self.scene.BIMProperties.ifc_file = self.path
 
@@ -133,7 +145,7 @@ class ImportJob:
         import time
         from mathutils import Matrix
         from bonsai.tool import Ifc
-        from ifcopenshell.util.element import get_container
+        from ifcopenshell.util.element import get_container, get_aggregate
         if max_elements < 1 or max_seconds <= 0: raise ValueError('Positive batch limits required')
         if self.phase not in ('importing', 'checking'): return self.status()
         start = time.monotonic()
@@ -160,7 +172,16 @@ class ImportJob:
                     self.checked += 1
                 else:
                     guid, record = item
-                    el = self.file.by_guid(guid); geometry = record.geometry
+                    el = self.file.by_guid(guid)
+                    if record is None:
+                        ob = bpy.data.objects.new(el.is_a()+'/'+(el.Name or guid), None)
+                        self.assemblies[el.id()].objects.link(ob)
+                        Ifc.link(el, ob); ob['ptb.global_id'] = guid
+                        ob['ptb.ifc_sha256'] = self.snapshot.digest
+                        self.imported += 1
+                        if time.monotonic()-start >= max_seconds: break
+                        continue
+                    geometry = record.geometry
                     mesh = self.meshes.get(geometry.key)
                     if mesh is None:
                         mesh = bpy.data.meshes.new(el.Name or guid)
@@ -170,7 +191,9 @@ class ImportJob:
                     else: fresh = False
                     ob = bpy.data.objects.new(el.is_a()+'/'+(el.Name or guid), mesh)
                     st = get_container(el)
-                    self.spatial.get(st.id() if st else None, self.collection).objects.link(ob)
+                    parent = get_aggregate(el)
+                    container = self.assemblies.get(parent.id() if parent else None) or self.spatial.get(st.id() if st else None, self.collection)
+                    container.objects.link(ob)
                     ob.matrix_world = Matrix(record.matrix.tolist())
                     Ifc.link(el, ob); ob['ptb.global_id'] = guid
                     if fresh: _assign_materials(ob, geometry, self.snapshot.digest)
@@ -203,8 +226,8 @@ def _linked(objects):
     from bonsai.tool import Ifc
     found,unlinked,duplicates = {},[],[]
     for ob in _objects(objects):
-        if ob.type != 'MESH': continue
         el = Ifc.get_entity(ob)
+        if ob.type != 'MESH' and not (el and el.is_a('IfcElement') and _geometry().is_assembly_container(el)): continue
         guid = ob.get('ptb.global_id')
         if el and el.is_a('IfcElement') and not el.is_a('IfcOpeningElement'):
             if guid and guid != el.GlobalId: unlinked.append(ob.name); continue
@@ -226,6 +249,11 @@ def _appearance(ifc_path, objects, snapshot):
     for el in expected:
         ob = found.get(el.GlobalId)
         if ob is None:
+            yield None
+            continue
+        if _geometry().is_assembly_container(el):
+            if ob.type != 'EMPTY' or ob.get('ptb.ifc_sha256') != reg['ifc_sha256']:
+                errors.append(f'{el.GlobalId}: stale or invalid assembly object')
             yield None
             continue
         if ob.hide_render or any(mod.show_render for mod in ob.modifiers) or ob.data.shape_keys:
@@ -275,7 +303,8 @@ def check_appearance(ifc_path, objects=None):
         return {'status':'INCOMPLETE','reason':str(exc)}
     # Populate in one iterator so repeated representations share kernel work.
     try:
-        list(snapshot.iter_records([el for el in snapshot.file.by_type('IfcElement') if not el.is_a('IfcOpeningElement')]))
+        list(snapshot.iter_records([el for el in snapshot.file.by_type('IfcElement')
+            if not el.is_a('IfcOpeningElement') and not _geometry().is_assembly_container(el)]))
         return _drain(_appearance(ifc_path, objects, snapshot))
     except Exception as exc:
         return {'status':'FAIL', 'errors':[str(exc)], 'note':'IFC geometry unavailable for appearance comparison'}
@@ -292,5 +321,6 @@ def apply_materials(ifc_path, objects=None):
     for guid,ob in found.items():
         try: el = f.by_guid(guid)
         except RuntimeError: continue
+        if _geometry().is_assembly_container(el): continue
         _assign_materials(ob,snapshot.get(el).geometry,reg['ifc_sha256'])
     return check_appearance(ifc_path, objects)

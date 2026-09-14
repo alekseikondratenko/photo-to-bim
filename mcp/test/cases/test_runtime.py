@@ -119,7 +119,7 @@ def test_bootstrap_ignores_stale_modules(monkeypatch):
     monkeypatch.setitem(sys.modules,'photostudio',types.SimpleNamespace(VERSION='0.6.0'))
     boot=module('bootstrap')
     first,second=boot.load(),boot.load()
-    assert first['version']=='0.8.3'
+    assert first['version']=='0.8.4-dev.1'
     assert first['studio'] is not second['studio']
     assert first['helpers'] is not second['helpers']
     assert 'ifc_path' in first['studio'].setup.__code__.co_varnames
@@ -146,8 +146,8 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     setup=importlib.util.module_from_spec(spec);spec.loader.exec_module(setup)
     image=tmp_path/'source.jpg';image.write_bytes(b'test fixture')
     target=tmp_path/'test-project'
-    result=setup.install(target,reference=image,node=shutil.which('node'))
-    assert result['version']=='0.8.3'
+    result=setup.install(target,reference=image,node=shutil.which('node'),disable_plugin=['photo-to-ifc-building@photo-to-bim'])
+    assert result['version']=='0.8.4-dev.1'
     skill=target/'.agents/skills/photo-to-ifc-building'
     assert skill.is_symlink() and skill.resolve().is_relative_to(target)
     manifest=json.loads((target/'runtime-manifest.json').read_text())
@@ -157,6 +157,10 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     assert (target/'house.jpg').read_bytes()==image.read_bytes()
     assert (target/'house.jpg').name in (target/'PROMPT.txt').read_text()
     assert str(package/'mcp/dist/ifc-server.mjs') in (target/'.codex/config.toml').read_text()
+    import tomllib
+    config=tomllib.loads((target/'.codex/config.toml').read_text())
+    assert config['plugins']['photo-to-ifc-building@photo-to-bim']['enabled'] is False
+    assert config['mcp_servers']['photo-to-bim']['enabled'] is True
     with pytest.raises(ValueError,match='new or empty'):
         setup.install(target,node=shutil.which('node'))
 
@@ -165,7 +169,7 @@ def test_package_versions_and_mcp_entrypoints_agree():
     codex=json.loads((repo/'.codex-plugin/plugin.json').read_text())
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
-    assert codex['version']==claude['version']==npm['version']=='0.8.3'
+    assert codex['version']==claude['version']==npm['version']=='0.8.4-dev.1'
     portable=json.loads((repo/'mcp.json').read_text())
     assert portable.pop('$schema')=='https://agent-plugins.org/schemas/1.0.0/mcp.schema.json'
     normalized=json.loads(json.dumps(portable).replace('${PLUGIN_ROOT}','${CLAUDE_PLUGIN_ROOT}'))
@@ -368,3 +372,80 @@ def test_documented_bootstrap_survives_fresh_mcp_namespaces(monkeypatch):
     exec("wall = H.wall(ctx, ctx['storeys']['Ground'], (0, 0), (4, 0), 3)", third['state'])
     assert third['state'] is state and state['ctx']['f'] is original_file
     assert original_file.by_type('IfcWall') == [state['wall']]
+
+
+def test_repetition_preserves_semantics_without_copying_occurrence_evidence(H, tmp_path):
+    from ifcopenshell.util.element import get_type, get_material, get_psets
+    ctx, wall, opening, win = model(H)
+    typ = H.assign_type(ctx, [win], 'W1 1200x1400', 'WINDOW')
+    mat = H.assign_material(ctx, [win], 'Unspecified glazing')
+    H.element_evidence(ctx, win, 'observed', 'Visible front opening')
+    copy = H.mapped_copy(ctx, win, ctx['storeys']['Ground'], (3, 0, 0),
+                         evidence={'status': 'inferred', 'basis': 'Rear continuation'})
+    H.host_fill(ctx, H.opening(ctx, wall, 5, .8, 1.2, 1.4), copy)
+    f = ifcopenshell.open(H.save(ctx, tmp_path/'copies.ifc'))
+    a, b = [f.by_guid(e.GlobalId) for e in (win, copy)]
+    assert a.GlobalId != b.GlobalId and get_type(a) == get_type(b)
+    assert get_material(a) == get_material(b)
+    assert get_psets(a)['Reconstruction_Element']['Status'] == 'observed'
+    assert get_psets(b)['Reconstruction_Element']['Status'] == 'inferred'
+    assert get_psets(a)['Qto_WindowBaseQuantities']['Width'] == get_psets(b)['Qto_WindowBaseQuantities']['Width']
+    assert get_psets(a)['Reconstruction_Host']['OpeningGlobalId'] != get_psets(b)['Reconstruction_Host']['OpeningGlobalId']
+    assert H.gate_report(f)['verdict'] == 'PASS'
+
+
+def test_assembly_parent_has_no_body_and_children_supply_geometry(H, tmp_path):
+    ctx = H.new_model('Facade', [('Ground', 0)])
+    st = ctx['storeys']['Ground']
+    verts, faces = H.prism_mesh([(0, 0), (4, 0), (4, .1), (0, .1)], 0, 3)
+    panel = H.element(ctx, 'IfcPlate', 'Panel', st, verts, faces)
+    parent = H.assembly(ctx, 'IfcCurtainWall', 'Facade', ctx['building'], [panel])
+    path = H.save(ctx, tmp_path/'assembly.ifc')
+    report = H.gate_report(path, required_classes=('IfcCurtainWall',))
+    assert report['verdict'] == 'PASS', report
+    assert report['geometry_checked'] == 1
+    parent.Representation = panel.Representation
+    assert H.gate_report(ctx['f'], required_classes=('IfcCurtainWall',))['semantics'] == 'FAIL'
+    parent.Representation = None
+    panel.Representation = None
+    assert H.gate_report(ctx['f'], required_classes=('IfcCurtainWall',))['geometry'] == 'FAIL'
+
+
+def test_opening_without_fill_and_free_window_are_valid_but_lost_host_fails(H):
+    ctx, wall, opening, win = model(H)
+    H.opening(ctx, wall, 5, .8, 1, 1)
+    vertices, faces = H.prism_mesh([(0, 4), (1, 4), (1, 4.1), (0, 4.1)], 1, 2)
+    free = H.element(ctx, 'IfcWindow', 'Freestanding window', ctx['storeys']['Ground'], vertices, faces)
+    free.OverallWidth = free.OverallHeight = 1
+    assert H.gate_report(ctx['f'])['verdict'] == 'PASS'
+    ctx['f'].remove(opening.HasFillings[0])
+    assert H.gate_report(ctx['f'])['semantics'] == 'FAIL'
+
+
+def test_floor_scope_is_advisory_and_deep_solids_are_reviewed(H):
+    ctx = H.new_model('Tower', [('Ground', 0), ('Upper', 4)])
+    st = ctx['storeys']['Ground']
+    H.slab(ctx, st, [(0, 0), (52, 0), (52, 52), (0, 52)], 2.5)
+    H.declare_scope(ctx, 'exterior_only')
+    report = H.gate_report(ctx['f'], required_classes=('IfcSlab',))
+    codes = {x['code'] for x in report['bim_review']['findings']}
+    assert report['verdict'] == 'PASS' and 'DEEP_FLOOR_SOLID' in codes
+    assert 'FLOOR_COVERAGE' not in codes
+    H.declare_scope(ctx, 'inferred_floorplates')
+    assert 'FLOOR_COVERAGE' in {x['code'] for x in H.bim_review(ctx['f'])['findings']}
+    H.declare_scope(ctx, 'inferred_floorplates', omissions={'Upper': 'Open multiheight space'})
+    assert 'FLOOR_COVERAGE' not in {x['code'] for x in H.bim_review(ctx['f'])['findings']}
+
+
+def test_default_copy_evidence_and_user_defined_identity(H):
+    from ifcopenshell.util.element import get_pset
+    ctx = H.new_model('Trim', [('Ground', 0)])
+    st = ctx['storeys']['Ground']
+    verts, faces = H.prism_mesh([(0, 0), (1, 0), (1, 1), (0, 1)], 0, 1)
+    source = H.element(ctx, 'IfcMember', 'Trim', st, verts, faces, predefined_type='USERDEFINED')
+    source.ObjectType = 'Decorative trim'
+    H.element_evidence(ctx, source, 'observed', 'Front trim')
+    duplicate = H.mapped_copy(ctx, source, st, (2, 0, 0))
+    assert duplicate.ObjectType == source.ObjectType
+    assert get_pset(duplicate, 'Reconstruction_Element', 'Status') == 'unknown'
+    assert get_pset(source, 'Reconstruction_Element', 'Status') == 'observed'

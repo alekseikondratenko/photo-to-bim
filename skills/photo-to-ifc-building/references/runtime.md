@@ -1,4 +1,4 @@
-# Runtime API 0.8.3
+# Runtime API 0.8.4-dev.1
 
 The IFC MCP contains six tools: `classify_reference`, `view_crop`, `trace_edges`,
 `calibrate_camera`, `place_features`, `compare_model`. Tool schemas carry exact
@@ -82,6 +82,43 @@ report = H.gate_report('/workspace/house.ifc',
   units, task-required classes, containment, opening/fill relations and semantic
   dimensions. It rejects massing and unexplained proxies. A justified proxy
   exception is `{GlobalId: reason}`. It is not a watertightness or survey test.
+
+### BIM authoring and review
+
+`H.declare_scope(ctx, floor_coverage='exterior_only')` records approximate exterior
+LOD 200 intent. Use `inferred_floorplates` or `supplied_floorplates` when appropriate,
+with `floor_storeys=['Ground', ...]` and optional `omissions={'Roof':'No floor intended'}`.
+The gate checks assigned FLOOR slabs against that declaration, not one slab per
+storey universally. The declaration is an assumption, not LOD certification.
+
+- `H.assign_type(ctx, products, name, predefined_type=None)` reuses a named IFC type
+  without replacing geometry. Group meaningful product variants; use sensible
+  dimension tolerances rather than splitting types for numerical noise.
+- `H.assign_material(ctx, products, name, basis=...)` assigns material identity
+  separately from presentation styles. Record assumed roles; do not guess ratings
+  or hidden layers. Material absence remains advisory.
+- `H.element_evidence(ctx, product, status, basis)` records `observed`, `inferred`,
+  `supplied` or `unknown`. It describes evidence, not survey accuracy.
+- `H.assembly(ctx, 'IfcCurtainWall', name, storey, components)` creates a parent
+  without its own Body. Components retain their geometry and inherited containment.
+  Put unique frame geometry in a component, not on the parent. Import creates a
+  linked empty and collection for the assembly and meshes for its components.
+- `mapped_copy(..., evidence={'status':'inferred', 'basis':'Rear facade continuation'})`
+  retains types, materials and transferable properties/quantities with a new GlobalId.
+  Copies default to unknown occurrence evidence. Host IDs are not copied; use
+  `H.host_fill(ctx, opening, product)` for a new hosted window/door. `fill` and
+  `opening_grid` do this automatically. Translation preserves dimensions; after
+  further shape edits update quantities and types as appropriate.
+
+`gate_report` includes `bim_review` advisories for scope, floor coverage, types,
+materials, facade grouping and unusually deep floor solids relative to level
+spacing. Review findings using existing views and evidence; legitimate transfer
+slabs or deliberate omissions can remain. These advisories neither change the IFC
+validity verdict nor establish architectural acceptance. No extra MCP call or
+render loop is needed. Geometry-less assembly parents are checked through their
+components; missing leaf geometry still fails. Valid building/site containment,
+unfilled openings and unhosted windows are permitted; tracked hosted fills must
+retain their intended opening.
 
 `S.import_ifc('/workspace/house.ifc')` creates a new collection containing the spatial
 hierarchy and linked IFC meshes with exact per-face material indices. It sets the

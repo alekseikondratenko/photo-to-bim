@@ -1,7 +1,7 @@
 """IFC4 authoring in SI metres. Geometry and evidence remain separate.
 Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
-VERSION = "0.8.3"
+VERSION = "0.8.4-dev.1"
 import math
 
 import ifcopenshell
@@ -81,6 +81,77 @@ def evidence_pset(ctx, properties, name="Reconstruction_Evidence"):
     ps = _run("pset.add_pset", product=ctx["building"], name=name)
     _run("pset.edit_pset", pset=ps, properties=properties)
     return ps
+
+
+def declare_scope(ctx, floor_coverage="exterior_only", floor_storeys=None, omissions=None):
+    """Record intended floor coverage, not a claim of surveyed completeness."""
+    import json
+    if floor_coverage not in ("exterior_only", "inferred_floorplates", "supplied_floorplates"):
+        raise ValueError("Unknown floor coverage")
+    names = list(ctx['storeys'] if floor_storeys is None else floor_storeys)
+    omissions = omissions or {}
+    if any(n not in ctx['storeys'] for n in names + list(omissions)):
+        raise ValueError("Floor scope references unknown storeys")
+    if any(not isinstance(reason, str) or not reason.strip() for reason in omissions.values()):
+        raise ValueError("Floor omissions need reasons")
+    return evidence_pset(ctx, {'ModelScope': 'photo-derived exterior',
+        'DevelopmentTarget': 'Approximate LOD 200 for represented exterior elements',
+        'FloorCoverage': floor_coverage, 'FloorStoreys': json.dumps(names),
+        'FloorOmissions': json.dumps(omissions)}, name='Reconstruction_Scope')
+
+
+def element_evidence(ctx, product, status, basis):
+    """Per-occurrence provenance; visible shape does not establish construction."""
+    if status not in ('observed', 'inferred', 'supplied', 'unknown') or not basis.strip():
+        raise ValueError('Evidence needs a valid status and nonempty basis')
+    ps = _run('pset.add_pset', product=product, name='Reconstruction_Element')
+    _run('pset.edit_pset', pset=ps, properties={'Status': status, 'Basis': basis})
+    return ps
+
+
+def assign_type(ctx, products, name, predefined_type=None):
+    """Reuse an explicit type family without replacing occurrence geometry.
+
+    The caller chooses meaningful families/dimension tolerances, not one type
+    per floating-point variant or one family for every window in a building.
+    """
+    from ifcopenshell.util.type import get_applicable_types
+    products = list(products)
+    if not products or len({p.is_a() for p in products}) != 1:
+        raise ValueError('Type assignment needs products of one IFC class')
+    classes = get_applicable_types(products[0].is_a(), ctx['f'].schema)
+    if not classes: raise ValueError('No applicable IFC type')
+    cls = classes[0]
+    existing = [t for t in ctx['f'].by_type(cls) if t.Name == name]
+    typ = existing[0] if existing else _run('root.create_entity', ifc_class=cls, name=name,
+                                           predefined_type=predefined_type)
+    if existing and predefined_type and typ.PredefinedType != predefined_type:
+        raise ValueError('Existing type has a different predefined type')
+    _run('type.assign_type', related_objects=products, relating_type=typ, should_map_representations=False)
+    return typ
+
+
+def assign_material(ctx, products, name, basis='assumed appearance-based material role'):
+    """Assign a material identity independently of render styles; no guessed ratings/layers."""
+    if not name.strip() or not basis.strip(): raise ValueError('Material needs a name and basis')
+    materials = [m for m in ctx['f'].by_type('IfcMaterial') if m.Name == name]
+    material = materials[0] if materials else _run('material.add_material', name=name)
+    products = list(products)
+    _run('material.assign_material', products=products, type='IfcMaterial', material=material)
+    for product in products:
+        ps = _run('pset.add_pset', product=product, name='Reconstruction_Material')
+        _run('pset.edit_pset', pset=ps, properties={'Basis': basis})
+    return material
+
+
+def assembly(ctx, ifc_class, name, storey, components):
+    """Create a geometry-less parent whose components supply its Body."""
+    components = list(components)
+    if not components: raise ValueError('An assembly needs components')
+    parent = _run('root.create_entity', ifc_class=ifc_class, name=name)
+    _run('spatial.assign_container', products=[parent], relating_structure=storey)
+    _run('aggregate.assign_object', products=components, relating_object=parent)
+    return parent
 
 
 # ---------------------------------------------------------------- geometry core
@@ -328,7 +399,7 @@ def fill(ctx, opening_el, kind="window", storey=None, name=None, style_name=None
     verts, faces = prism_mesh(footprint, z0, z0 + h)
     cls = "IfcDoor" if kind == "door" else "IfcWindow"
     el = element(ctx, cls, name or kind.capitalize(), storey, verts, faces, style_name=style_name)
-    _run("feature.add_filling", opening=opening_el, element=el)
+    host_fill(ctx, opening_el, el)
     el.OverallWidth = math.dist(A, B)
     el.OverallHeight = h
     qto = _run("pset.add_qto", product=el, name=f"Qto_{cls[3:]}BaseQuantities")
@@ -336,7 +407,14 @@ def fill(ctx, opening_el, kind="window", storey=None, name=None, style_name=None
     return el
 
 
-def mapped_copy(ctx, source, storey, translation, name=None):
+def host_fill(ctx, opening_el, product):
+    """Record the intended host so loss of a hosted filling remains detectable."""
+    _run('feature.add_filling', opening=opening_el, element=product)
+    ps = _run('pset.add_pset', product=product, name='Reconstruction_Host')
+    _run('pset.edit_pset', pset=ps, properties={'OpeningGlobalId': opening_el.GlobalId})
+
+
+def mapped_copy(ctx, source, storey, translation, name=None, evidence=None):
     """Reuse a source Body with a translated mapped representation.
     Source geometry must be in world coordinates with no ObjectPlacement;
     use one unmoved prototype for a repetition group.
@@ -354,6 +432,25 @@ def mapped_copy(ctx, source, storey, translation, name=None):
     _run("geometry.edit_object_placement", product=el, matrix=matrix, is_si=True)
     _run("spatial.assign_container", products=[el], relating_structure=storey)
     if hasattr(el, "PredefinedType"): el.PredefinedType = source.PredefinedType
+    el.ObjectType = source.ObjectType
+    from ifcopenshell.util.element import get_type, copy_deep
+    typ = get_type(source)
+    if typ:
+        _run('type.assign_type', related_objects=[el], relating_type=typ, should_map_representations=False)
+    # Keep shared material identity (including usage), but independent property
+    # sets/quantities and a new occurrence GlobalId. Translation preserves sizes.
+    for rel in source.HasAssociations:
+        if rel.is_a('IfcRelAssociatesMaterial'):
+            rel.RelatedObjects = tuple(rel.RelatedObjects) + (el,)
+    for rel in source.IsDefinedBy:
+        if rel.is_a('IfcRelDefinesByProperties'):
+            if rel.RelatingPropertyDefinition.Name == 'Reconstruction_Host': continue
+            definition = copy_deep(ctx['f'], rel.RelatingPropertyDefinition)
+            ctx['f'].create_entity('IfcRelDefinesByProperties', GlobalId=ifcopenshell.guid.new(),
+                RelatedObjects=[el], RelatingPropertyDefinition=definition)
+    # A visible prototype does not prove that another occurrence was observed.
+    element_evidence(ctx, el, **(evidence or {'status': 'unknown',
+        'basis': 'Repeated geometry; occurrence evidence not supplied'}))
     if source.GlobalId in _ELEMENT_STYLES:
         _ELEMENT_STYLES[el.GlobalId] = _ELEMENT_STYLES[source.GlobalId]
     if el.is_a("IfcWindow") or el.is_a("IfcDoor"):
@@ -381,7 +478,7 @@ def opening_grid(ctx, wall_el, rows, cols, width, height, sill0, storey_h, x0, g
             else:
                 dx = c * (width + gap)
                 el = mapped_copy(ctx, out[0], storey, (ux*dx, uy*dx, r*storey_h), name)
-                _run("feature.add_filling", opening=op, element=el)
+                host_fill(ctx, op, el)
             out.append(el)
     return out
 
@@ -533,6 +630,10 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
     report = {"schema": "PASS", "geometry": "PASS", "semantics": "PASS", "schema_errors": [],
               "geometry_errors": [], "semantic_errors": [], "census": {}, "proxies": 0,
               "proxy_exceptions": {}, "uncontained": [], "geometry_checked": 0, "verdict": "PASS"}
+    slab_review = []
+    elevations = sorted(set(s.Elevation for s in f.by_type('IfcBuildingStorey') if s.Elevation is not None))
+    gaps = np.diff(elevations)
+    typical_height = float(np.median(gaps[gaps > 0])) if len(gaps) else None
     try:
         import ifcopenshell.validate as v
         logger = v.json_logger(); v.validate(f, logger)
@@ -543,10 +644,12 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
     try:
         import ifcopenshell.geom as geom
         settings = geom.settings()
+        elements = f.by_type('IfcElement')
+        leaves = [el for el in elements if not _geometry().is_assembly_container(el)]
         if snapshot:
-            try: list(snapshot.iter_records(f.by_type("IfcElement")))
+            try: list(snapshot.iter_records(leaves))
             except ValueError: pass  # Per-product errors are reported below, never skipped.
-        for el in f.by_type("IfcElement"):
+        for el in leaves:
             if not el.Representation:
                 report["geometry_errors"].append(f"{el.GlobalId} {el.is_a()} {el.Name}: missing representation")
                 continue
@@ -559,6 +662,11 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
                     coords, faces = np.asarray(shape.geometry.verts), shape.geometry.faces
                 if not len(coords) or not len(faces) or not np.isfinite(coords).all():
                     raise ValueError("empty or non-finite geometry")
+                if typical_height and el.is_a('IfcSlab'):
+                    from ifcopenshell.util.element import get_predefined_type
+                    size = np.ptp(np.asarray(coords).reshape(-1, 3), axis=0)
+                    if get_predefined_type(el) == 'FLOOR' and size[2] > .4 * typical_height and min(size[:2]) > 2 * size[2]:
+                        slab_review.append(el.GlobalId)
                 report["geometry_checked"] += 1
             except Exception as e:
                 report["geometry_errors"].append(f"{el.GlobalId} {el.Name}: {e}")
@@ -586,8 +694,10 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
     for el in f.by_type("IfcElement"):
         if el.is_a("IfcOpeningElement"): continue
         container = get_container(el)
-        if not container or not container.is_a("IfcBuildingStorey"):
-            report["uncontained"].append(el.GlobalId); errors.append(f"No storey container: {el.Name}")
+        if not container or not any(container.is_a(c) for c in ('IfcBuildingStorey', 'IfcBuilding', 'IfcSite')):
+            report["uncontained"].append(el.GlobalId); errors.append(f"No spatial container: {el.Name}")
+        if el.is_a('IfcCurtainWall') and _geometry().aggregate_children(el) and not _geometry().is_assembly_container(el):
+            errors.append(f'{el.GlobalId}: Aggregated curtain wall must derive Body from components: {el.Name}')
     exceptions = proxy_exceptions or {}
     for el in f.by_type("IfcBuildingElementProxy"):
         report["proxies"] += 1
@@ -597,12 +707,58 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
         else: errors.append(f"Unexplained proxy or massing placeholder: {el.Name}")
     for op in f.by_type("IfcOpeningElement"):
         if len(op.VoidsElements) != 1: errors.append(f"Opening needs one host: {op.Name}")
-        if len(op.HasFillings) != 1: errors.append(f"Opening needs one filling: {op.Name}")
+        if len(op.HasFillings) > 1: errors.append(f"Opening has multiple fillings: {op.Name}")
     for el in f.by_type("IfcWindow") + f.by_type("IfcDoor"):
-        if len(el.FillsVoids) != 1: errors.append(f"Window/door needs one opening: {el.Name}")
+        from ifcopenshell.util.element import get_pset
+        expected = get_pset(el, 'Reconstruction_Host', 'OpeningGlobalId')
+        if len(el.FillsVoids) > 1 or (expected and (not el.FillsVoids or el.FillsVoids[0].RelatingOpeningElement.GlobalId != expected)):
+            errors.append(f"Hosted window/door lost its intended opening: {el.Name}")
         if not el.OverallWidth or el.OverallWidth <= 0 or not el.OverallHeight or el.OverallHeight <= 0:
             errors.append(f"Missing semantic width/height: {el.Name}")
+    report['bim_review'] = bim_review(f)
+    if slab_review:
+        report['bim_review']['findings'].append({'code': 'DEEP_FLOOR_SOLID', 'count': len(slab_review),
+            'sample_guids': slab_review[:10], 'message': 'FLOOR solids are deep relative to the model level spacing. Review whether these are floors, transfer structures or perimeter features; no automatic reclassification.'})
+        report['bim_review']['status'] = 'REVIEW'
     if errors: report["semantics"] = "FAIL"
     statuses = [report[k] for k in ("schema", "geometry", "semantics")]
     report["verdict"] = "FAIL" if "FAIL" in statuses else "INCOMPLETE" if "UNAVAILABLE" in statuses else "PASS"
     return report
+
+
+def bim_review(f):
+    """Cheap, advisory graph review. Findings neither invent data nor trigger a render loop."""
+    import json
+    from ifcopenshell.util.element import get_container, get_type, get_material, get_psets
+    physical = [e for e in f.by_type('IfcElement') if not e.is_a('IfcFeatureElement')]
+    findings = []
+    def finding(code, message, ids=()):
+        findings.append({'code': code, 'message': message, 'count': len(ids), 'sample_guids': list(ids)[:10]})
+    untyped = [e.GlobalId for e in physical if (e.is_a('IfcWindow') or e.is_a('IfcDoor') or
+        (e.Representation and any(r.RepresentationType == 'MappedRepresentation' for r in e.Representation.Representations))) and not get_type(e)]
+    if untyped: finding('UNTYPED_PRODUCTS', 'Review reusable types for repeated products; mapped geometry is not a type.', untyped)
+    no_material = [e.GlobalId for e in physical if not _geometry().is_assembly_container(e) and get_material(e) is None]
+    if no_material: finding('MATERIAL_INFORMATION', 'Material information is absent. Add supported or explicitly assumed roles; leave unknown specifications unknown.', no_material)
+    scopes = [get_psets(b).get('Reconstruction_Scope', {}) for b in f.by_type('IfcBuilding')]
+    scope = scopes[0] if scopes else {}
+    if not scope.get('FloorCoverage'):
+        finding('UNDECLARED_SCOPE', 'Record intended floor coverage and the approximate development target.')
+    elif scope['FloorCoverage'] != 'exterior_only':
+        try:
+            expected = json.loads(scope.get('FloorStoreys', '[]'))
+            omissions = json.loads(scope.get('FloorOmissions', '{}'))
+            if not isinstance(expected, list) or not isinstance(omissions, dict): raise ValueError('Invalid floor scope')
+            covered = set()
+            for slab in f.by_type('IfcSlab'):
+                typ = get_type(slab)
+                if (getattr(typ, 'PredefinedType', None) or slab.PredefinedType) != 'FLOOR': continue
+                st = get_container(slab)
+                if st: covered.add(st.Name)
+            absent = [s for s in expected if s not in covered and not omissions.get(s)]
+            if absent: finding('FLOOR_COVERAGE', 'No FLOOR slab assigned to declared levels: '+', '.join(absent[:10]))
+        except (ValueError, TypeError): finding('INVALID_SCOPE', 'Floor coverage metadata could not be read.')
+    loose = [e.GlobalId for e in f.by_type('IfcMember')+f.by_type('IfcPlate') if not e.Decomposes]
+    if f.by_type('IfcCurtainWall') and loose:
+        finding('FACADE_ASSEMBLIES', 'Review whether standalone plates/members belong to facade assemblies; unrelated members may remain standalone.', loose)
+    return {'status': 'REVIEW' if findings else 'NO_FINDINGS', 'scope': scope,
+            'findings': findings, 'note': 'Advisory BIM completeness, not architectural acceptance or LOD certification. Review element function and suspicious solid slabs using existing geometry.'}

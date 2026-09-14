@@ -3,7 +3,7 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.8.3
+# Photo to IFC building — 0.8.4-dev.1
 
 For a photo-to-IFC request, produce an editable, dimensioned building model and
 a comparison render without requiring the user to repeat the technical brief.
@@ -38,6 +38,11 @@ scene without checking whether it contains work that must be preserved.
    and occlusions. Batch useful crops and edge traces. Choose a scale anchor;
    record its source and whether it is assumed or measured. Classification and
    automatic edge detection are optional hints to inspect, not ground truth.
+   Choose the model scope and record it with `H.declare_scope` when creating the IFC:
+   default to approximate LOD 200
+   for represented exterior elements, and state whether inferred floorplates are
+   included. Interior partitions/services and floorplates are separate scope choices;
+   do not imply a complete building solely because storeys exist.
 2. **Establish a frame.** Calibrate from clear parallel line families (at least
    two edges per family), or refine an initial camera against fixed 3D landmarks
    with `method: landmarks`. Keep metric scale explicit in either mode. Preserve the full Z-up camera transform, focal length,
@@ -65,15 +70,26 @@ scene without checking whether it contains work that must be preserved.
    reliably; exclude occluded pixels explicitly. Change camera or geometry
    when correspondences support that diagnosis. Do not alter annotations to
    make a score improve. Corrected annotations start a new evaluation series.
-5. **Author semantics.** Model real building elements with their appropriate IFC classes.
-   Openings void their host walls; doors/windows fill them and carry width and
-   height. Replace massing proxies. Use `profile_wall` for gables; model real
+5. **Author and review semantics.** Choose classes by element function. Hosted
+   openings void their walls; their doors/windows fill them and carry width and
+   height. Curtain-wall components and intentionally unfilled openings need no
+   invented host or filling. Replace massing proxies. Use `profile_wall` for gables; model real
    parts, rather than one wall entity per triangle. `framed_fill` preserves separate
    frame/glass items; `runtime["scene"].import_ifc` imports their styles into Bonsai.
+   Before final export, review floor coverage against scope, component assemblies,
+   and meaningful types for repeated products. A perimeter feature should not
+   become a full solid floor merely to match its silhouette. Keep components under
+   their assembly; an aggregated curtain wall derives its Body from its children.
+   Use the runtime's type/material/evidence helpers; distinguish render colour from
+   material information and observed geometry from inferred copies. Leave unknown
+   construction layers and engineering properties unknown. Correct relevant issues
+   using existing geometry and views; no additional scored pass is required.
 6. **Finish and verify.** Save and reopen the IFC. Run the structural gate with
    the classes required by the task. Render the final viewpoint at the exact
    reference dimensions and evaluate fixed landmarks and/or explicit masks.
    Inspect the image visually as well: a numeric pass is limited to its evidence.
+   Review the gate's advisory `bim_review` findings and document intentional omissions;
+   they are not a requirement to iterate until every advisory disappears.
 
 ## Detail and stopping policy
 

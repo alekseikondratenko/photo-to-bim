@@ -4,7 +4,7 @@ import importlib.util
 import pathlib
 import sys
 
-VERSION = "0.8.3"
+VERSION = "0.8.4-dev.1"
 
 def load():
     root = pathlib.Path(__file__).resolve().parent
@@ -28,4 +28,4 @@ def load():
     return {"version": VERSION, "helpers": modules["ifc_helpers"], "studio": modules["photostudio"],
             "scene": modules["ifc_scene"], "validation": modules["validation"],
             "capabilities": ["camera_frame_v1", "canonical_evaluation_v1", "ifc_gate_v1", "profile_wall",
-                             "item_materials_v2", "framed_fill", "ifc_landmarks_v1", "acceptance_v1", "incremental_import_v1", "geometry_cache_v1", "bounded_precision_v1"]}
+                             "item_materials_v2", "framed_fill", "ifc_landmarks_v1", "acceptance_v1", "incremental_import_v1", "geometry_cache_v1", "bounded_precision_v1", "bim_review_v1", "semantic_repetition_v1", "ifc_assemblies_v1"]}

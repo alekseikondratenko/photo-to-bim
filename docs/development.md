@@ -1,8 +1,9 @@
 # Development and packaging
 
 Everyday users install the [published plugin](installation.md); they do not need
-a source checkout or a build step. The modelling skill and Python helper runtime
-remain at 0.8.3 in this documentation/packaging revision.
+a source checkout or a build step. This local experimental revision uses runtime 0.8.4-dev.1. It adds scope-aware
+BIM review, semantic repetition and assembly-aware authoring/import. It is not
+published; frozen project installations can be evaluated before a release.
 
 ## What is in the repository?
 
@@ -92,6 +93,13 @@ those files are not intended for publication.
 This installer configures the project directly. A real global install must also
 be tested independently through the marketplace, since copying components can
 hide manifest or client-discovery failures.
+
+When comparing a local experimental copy with a globally installed release, pass
+`--disable-plugin photo-to-ifc-building@photo-to-bim` to disable that inherited
+plugin only in the test project's configuration. Use its actual installation key
+if your marketplace has a different name. Start a fresh trusted project session;
+the global plugin and other projects are unchanged. The manifest records this
+override alongside the copied runtime's revision and hashes.
 
 ## Shipping check
 

@@ -1,5 +1,5 @@
 """Combine evidence without turning visual acceptance into an automated pass."""
-VERSION = "0.8.3"
+VERSION = "0.8.4-dev.1"
 
 def combine(ifc, photographic, appearance, visual_review=None):
     review = visual_review or {"decision": "not_reviewed"}

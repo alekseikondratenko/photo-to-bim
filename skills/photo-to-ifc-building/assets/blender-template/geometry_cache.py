@@ -3,7 +3,7 @@
 The IFC iterator owns representation reuse and opening evaluation. Never bypass
 opening subtraction or guess that two occurrences have interchangeable geometry.
 """
-VERSION = "0.8.3"
+VERSION = "0.8.4-dev.1"
 import hashlib
 from pathlib import Path
 from types import SimpleNamespace
@@ -12,6 +12,17 @@ import ifcopenshell
 import ifcopenshell.geom as geom
 from ifcopenshell.util.shape import get_shape_matrix
 import numpy as np
+
+
+def aggregate_children(element):
+    return [child for rel in getattr(element, 'IsDecomposedBy', ())
+            if rel.is_a('IfcRelAggregates') for child in rel.RelatedObjects]
+
+
+def is_assembly_container(element):
+    """A physical assembly obtains its Body from children, not its own mesh."""
+    reps = element.Representation.Representations if element.Representation else ()
+    return bool(aggregate_children(element)) and not any(r.RepresentationIdentifier == 'Body' for r in reps)
 
 
 def settings():
