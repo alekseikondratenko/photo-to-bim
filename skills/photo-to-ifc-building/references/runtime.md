@@ -1,4 +1,4 @@
-# Runtime API 0.8.4-dev.1
+# Runtime API 0.8.4-dev.2
 
 The IFC MCP contains six tools: `classify_reference`, `view_crop`, `trace_edges`,
 `calibrate_camera`, `place_features`, `compare_model`. Tool schemas carry exact
@@ -70,7 +70,9 @@ report = H.gate_report('/workspace/house.ifc',
   3D roof-plane polygons. See helper signatures for optional names/styles.
 - `opening_grid` creates semantic openings/fills with shared fill geometry.
   It does not infer hidden windows. `mapped_copy` supports translated repeats
-  of an unplaced world-coordinate prototype, not arbitrary nested transforms.
+  using world-space offsets from the source placement (including a rotated source).
+  The source and map have separate representation wrappers over shared geometry;
+  helper-authored products have explicit placements.
 - `framed_fill` supports windows and glazed doors, with separate frame/glass items,
   semantic overall dimensions and the existing opening/fill relationship. Omit
   `crossbar_at` for a plain frame; it otherwise specifies a height fraction.
@@ -81,13 +83,20 @@ report = H.gate_report('/workspace/house.ifc',
 - The gate checks schema, nonempty finite geometry, spatial hierarchy, metre
   units, task-required classes, containment, opening/fill relations and semantic
   dimensions. It rejects massing and unexplained proxies. A justified proxy
-  exception is `{GlobalId: reason}`. It is not a watertightness or survey test.
+  exception is `{GlobalId: reason}`. Its schema check includes attribute/cardinality
+  validation and explicit placement/shape-ownership rules; full EXPRESS validation
+  runs in release tests. It is not a watertightness or survey test.
 
 ### BIM authoring and review
 
-`H.declare_scope(ctx, floor_coverage='exterior_only')` records approximate exterior
-LOD 200 intent. Use `inferred_floorplates` or `supplied_floorplates` when appropriate,
-with `floor_storeys=['Ground', ...]` and optional `omissions={'Roof':'No floor intended'}`.
+`H.declare_scope(ctx, floor_coverage='inferred_floorplates')` records approximate
+LOD 200 intent; inferred floorplates are the default when occupied levels can
+reasonably be inferred. Set `floor_storeys=['Ground', ...]` to intended occupied
+levels and optional `omissions={'Roof':'No floor intended'}`. Create simple
+`H.slab(..., predefined='FLOOR', z_top=...)` occurrences with assumed footprints and
+thicknesses, labelled with `H.element_evidence(..., 'inferred', basis)`.
+Use `supplied_floorplates` for supplied plans, or `exterior_only` for an explicit
+exterior-only request or uncertain floor organisation; document the reason.
 The gate checks assigned FLOOR slabs against that declaration, not one slab per
 storey universally. The declaration is an assumption, not LOD certification.
 

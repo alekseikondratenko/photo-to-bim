@@ -3,7 +3,7 @@ name: photo-to-ifc-building
 description: Reconstruct a photographed building as semantic IFC using Blender MCP and Bonsai. Use for photo-to-BIM tasks requiring real walls, roofs, slabs, openings and a matching comparison render; not geometry-only scenes.
 ---
 
-# Photo to IFC building — 0.8.4-dev.1
+# Photo to IFC building — 0.8.4-dev.2
 
 For a photo-to-IFC request, produce an editable, dimensioned building model and
 a comparison render without requiring the user to repeat the technical brief.
@@ -39,10 +39,13 @@ scene without checking whether it contains work that must be preserved.
    record its source and whether it is assumed or measured. Classification and
    automatic edge detection are optional hints to inspect, not ground truth.
    Choose the model scope and record it with `H.declare_scope` when creating the IFC:
-   default to approximate LOD 200
-   for represented exterior elements, and state whether inferred floorplates are
-   included. Interior partitions/services and floorplates are separate scope choices;
-   do not imply a complete building solely because storeys exist.
+   target approximate LOD 200 for represented elements. When occupied levels can
+   reasonably be inferred from the visible opening rhythm and building form, include
+   simple inferred floorplates by default, following the envelope at each level.
+   Record assumed floor count, elevations, footprints and thicknesses; façade bands
+   alone do not prove floors. Exclude roof/spire levels and documented multiheight
+   voids. Use exterior-only scope when requested or floor organisation is too uncertain,
+   with the reason recorded. Floorplates do not imply known interior room layouts.
 2. **Establish a frame.** Calibrate from clear parallel line families (at least
    two edges per family), or refine an initial camera against fixed 3D landmarks
    with `method: landmarks`. Keep metric scale explicit in either mode. Preserve the full Z-up camera transform, focal length,
@@ -98,8 +101,8 @@ exterior surfaces using plausible continuations of observed opening patterns,
 materials and surface articulation where appropriate to the building’s form.
 Do not default to blank façades solely because they are unseen. Keep inferred
 detail subordinate to visible evidence, label it as assumed, and avoid unsupported
-major additions or distinctive features. Omit unseen interiors and subpixel
-decoration unless requested. Keep decorative render context outside IFC. Repeated real
+major additions or distinctive features. Omit unseen room layouts, services and subpixel
+decoration unless requested; simple floorplates follow the scope chosen above. Keep decorative render context outside IFC. Repeated real
 components remain semantic occurrences but should share geometry where possible
 (`opening_grid` uses mapped fill geometry). For dense openings, keep host walls
 simple and let IFC openings cut them; avoid manually pre-cutting the same holes

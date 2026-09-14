@@ -3,7 +3,7 @@
 The IFC iterator owns representation reuse and opening evaluation. Never bypass
 opening subtraction or guess that two occurrences have interchangeable geometry.
 """
-VERSION = "0.8.4-dev.1"
+VERSION = "0.8.4-dev.2"
 import hashlib
 from pathlib import Path
 from types import SimpleNamespace
@@ -88,10 +88,18 @@ class Snapshot:
                     record = self.record(shape)
                     yield shape.guid, record
                     if not iterator.next(): break
-            # An iterator can silently omit invalid products. Never treat that as PASS.
+            # The iterator can omit a valid mapped prototype as well as invalid
+            # products. Resolve each omission once with the same geometry settings;
+            # cache the actual result or failure, never assume that omission is PASS.
             for el in missing:
                 if el.GlobalId not in self.records:
-                    self.errors[el.GlobalId] = 'No geometry returned by IFC iterator'
+                    try:
+                        shape = geom.create_shape(self.settings, el)
+                        record = self.record(shape)
+                    except Exception as error:
+                        self.errors[el.GlobalId] = f'No geometry returned by IFC iterator; individual conversion failed: {error}'
+                    else:
+                        yield el.GlobalId, record
         pending_ids = {e.GlobalId for e in missing}
         for el in elements:
             if el.GlobalId in self.errors: raise ValueError(f'{el.GlobalId}: {self.errors[el.GlobalId]}')

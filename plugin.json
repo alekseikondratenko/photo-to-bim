@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "photo-to-ifc-building",
-  "version": "0.8.4-dev.1",
+  "version": "0.8.4-dev.2",
   "description": "Reconstruct photographed buildings as semantic IFC with explicit assumptions and independent validation.",
   "author": {
     "name": "Aleksei Kondratenko"

@@ -119,7 +119,7 @@ def test_bootstrap_ignores_stale_modules(monkeypatch):
     monkeypatch.setitem(sys.modules,'photostudio',types.SimpleNamespace(VERSION='0.6.0'))
     boot=module('bootstrap')
     first,second=boot.load(),boot.load()
-    assert first['version']=='0.8.4-dev.1'
+    assert first['version']=='0.8.4-dev.2'
     assert first['studio'] is not second['studio']
     assert first['helpers'] is not second['helpers']
     assert 'ifc_path' in first['studio'].setup.__code__.co_varnames
@@ -147,7 +147,7 @@ def test_scoped_installer_is_frozen_and_refuses_overwrite(tmp_path):
     image=tmp_path/'source.jpg';image.write_bytes(b'test fixture')
     target=tmp_path/'test-project'
     result=setup.install(target,reference=image,node=shutil.which('node'),disable_plugin=['photo-to-ifc-building@photo-to-bim'])
-    assert result['version']=='0.8.4-dev.1'
+    assert result['version']=='0.8.4-dev.2'
     skill=target/'.agents/skills/photo-to-ifc-building'
     assert skill.is_symlink() and skill.resolve().is_relative_to(target)
     manifest=json.loads((target/'runtime-manifest.json').read_text())
@@ -169,7 +169,7 @@ def test_package_versions_and_mcp_entrypoints_agree():
     codex=json.loads((repo/'.codex-plugin/plugin.json').read_text())
     claude=json.loads((repo/'plugin.json').read_text())
     npm=json.loads((repo/'mcp/package.json').read_text())
-    assert codex['version']==claude['version']==npm['version']=='0.8.4-dev.1'
+    assert codex['version']==claude['version']==npm['version']=='0.8.4-dev.2'
     portable=json.loads((repo/'mcp.json').read_text())
     assert portable.pop('$schema')=='https://agent-plugins.org/schemas/1.0.0/mcp.schema.json'
     normalized=json.loads(json.dumps(portable).replace('${PLUGIN_ROOT}','${CLAUDE_PLUGIN_ROOT}'))
@@ -302,7 +302,7 @@ def test_geometry_snapshot_different_voids_and_styles(H, tmp_path):
 
 def test_export_iterator_omission_is_not_pass(H, tmp_path):
     ctx, wall, *_ = model(H); path = H.save(ctx, tmp_path/'invalid.ifc')
-    with patch('ifcopenshell.geom.iterator') as iterator:
+    with patch('ifcopenshell.geom.iterator') as iterator, patch('ifcopenshell.geom.create_shape', side_effect=RuntimeError('invalid geometry')):
         iterator.return_value.initialize.return_value = False
         report = H.gate_report(path)
     assert report['geometry'] == report['verdict'] == 'FAIL'
@@ -449,3 +449,82 @@ def test_default_copy_evidence_and_user_defined_identity(H):
     assert duplicate.ObjectType == source.ObjectType
     assert get_pset(duplicate, 'Reconstruction_Element', 'Status') == 'unknown'
     assert get_pset(source, 'Reconstruction_Element', 'Status') == 'observed'
+
+
+def assert_express_valid(f):
+    logger = ifcopenshell.validate.json_logger()
+    ifcopenshell.validate.validate(f, logger, express_rules=True)
+    assert not logger.statements, [(s.get('attribute'), s.get('message')) for s in logger.statements[:5]]
+
+
+def test_placed_repetition_preserves_world_geometry_and_passes_express(H, tmp_path):
+    from ifcopenshell.util.placement import get_local_placement
+    ctx = H.new_model('Placed facade', [('Ground', 0), ('Upper', 4)])
+    st = ctx['storeys']['Ground']
+    H.style('glass', (.1, .3, .4))
+    verts, faces = H.prism_mesh([(0,0),(2,0),(2,.1),(0,.1)], 0, 3)
+    source = H.element(ctx, 'IfcPlate', 'Panel', st, verts, faces, style_name='glass')
+    assert np.allclose(get_local_placement(source.ObjectPlacement), np.eye(4))
+    transform = np.eye(4); transform[:2,:2] = [[0.,-1.],[1.,0.]]; transform[:3,3] = [9.,8.,4.]
+    H._run('geometry.edit_object_placement', product=source, matrix=transform, is_si=True)
+    H.assign_type(ctx, [source], 'Glazing panel')
+    H.assign_material(ctx, [source], 'Assumed glass')
+    a = H.mapped_copy(ctx, source, ctx['storeys']['Upper'], (3,0,0))
+    b = H.mapped_copy(ctx, source, st, (6,0,0))
+    c = H.mapped_copy(ctx, a, st, (0,5,0))
+    H.assembly(ctx, 'IfcCurtainWall', 'Facade assembly', st, [source,a,b,c])
+    path = H.save(ctx, tmp_path/'placed.ifc'); f = ifcopenshell.open(path)
+    settings = ifcopenshell.geom.settings(); settings.set(settings.USE_WORLD_COORDS, True)
+    def points(el):
+        sh = ifcopenshell.geom.create_shape(settings, f.by_guid(el.GlobalId))
+        return np.asarray(sh.geometry.verts).reshape(-1,3)
+    original = points(source)
+    for el, offset in [(a,[3,0,0]),(b,[6,0,0]),(c,[3,5,0])]:
+        assert np.allclose(points(el), original + offset)
+    assert len(f.by_type('IfcRepresentationMap')) == 2  # one shared source, one nested source
+    report = H.gate_report(path, required_classes=('IfcCurtainWall',))
+    assert report['verdict'] == 'PASS', report
+    assert_express_valid(f)
+
+
+def test_gate_rejects_missing_placement_and_conflicting_shape_ownership(H):
+    ctx, wall, *_ = model(H)
+    original = wall.ObjectPlacement; wall.ObjectPlacement = None
+    report = H.gate_report(ctx['f'])
+    assert report['schema'] == 'FAIL'
+    assert any('PlacementForShapeRepresentation' in e for e in report['schema_errors'])
+    wall.ObjectPlacement = original
+    # Reproduce the old mapped_copy defect: give a direct product Body a second owner.
+    rep = wall.Representation.Representations[0]
+    mapped = H._run('geometry.map_representation', representation=rep)
+    occurrence = H._run('root.create_entity', ifc_class='IfcWall', name='Bad repeat')
+    H._run('geometry.assign_representation', product=occurrence, representation=mapped)
+    H._run('geometry.edit_object_placement', product=occurrence, matrix=np.eye(4), is_si=True)
+    H._run('spatial.assign_container', products=[occurrence], relating_structure=ctx['storeys']['Ground'])
+    report = H.gate_report(ctx['f'])
+    assert report['schema'] == 'FAIL'
+    assert any('IfcShapeModel.WR11' in e for e in report['schema_errors'])
+
+
+def test_house_floor_scope_and_hosted_repeats_pass_full_express(H, tmp_path):
+    ctx = H.new_model('House', [('Ground',0),('Upper',3),('Roof',6)])
+    ground, upper = ctx['storeys']['Ground'], ctx['storeys']['Upper']
+    H.declare_scope(ctx, floor_storeys=['Ground','Upper'])
+    for st in (ground,upper):
+        el = H.slab(ctx, st, [(0,0),(8,0),(8,6),(0,6)], thickness=.2, z_top=st.Elevation)
+        H.element_evidence(ctx, el, 'inferred', 'Assumed floorplate following the envelope')
+    wall = H.wall(ctx, ground, (0,0), (8,0), 6)
+    H.style('frame',(.6,.5,.4)); H.style('glass',(.1,.2,.3))
+    source = H.framed_fill(ctx,H.opening(ctx,wall,1,.8,1.2,1.4),storey=ground)
+    H.assign_type(ctx,[source],'Window 1200x1400','WINDOW')
+    H.assign_material(ctx,[source],'Assumed window assembly')
+    copied = H.mapped_copy(ctx,source,upper,(3,0,3))
+    H.host_fill(ctx,H.opening(ctx,wall,4,3.8,1.2,1.4),copied)
+    H.framed_fill(ctx,H.opening(ctx,wall,6,0,1,2.1),kind='door',storey=ground)
+    H.roof(ctx,ctx['storeys']['Roof'],[[(0,0,6),(8,0,6),(8,6,7),(0,6,7)]])
+    f = ifcopenshell.open(H.save(ctx,tmp_path/'house.ifc'))
+    assert not any(x['code']=='FLOOR_COVERAGE' for x in H.bim_review(f)['findings'])
+    assert H.gate_report(f)['verdict']=='PASS'
+    assert_express_valid(f)
+    f.by_type('IfcSlab')[1].PredefinedType = 'ROOF'
+    assert any(x['code']=='FLOOR_COVERAGE' for x in H.bim_review(f)['findings'])

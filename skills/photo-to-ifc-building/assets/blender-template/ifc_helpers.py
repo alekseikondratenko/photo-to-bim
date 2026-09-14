@@ -1,7 +1,7 @@
 """IFC4 authoring in SI metres. Geometry and evidence remain separate.
 Pure IfcOpenShell; load the saved file into Bonsai to view it.
 """
-VERSION = "0.8.4-dev.1"
+VERSION = "0.8.4-dev.2"
 import math
 
 import ifcopenshell
@@ -29,6 +29,7 @@ def _run(cmd, **kw):
 
 
 _CTX = {}
+_MAPPED_SOURCES = {}
 
 
 # ---------------------------------------------------------------- model shell
@@ -38,7 +39,7 @@ def new_model(project_name, storeys, site_name="Site", building_name="Building")
 
     Returns the ctx dict every other helper takes first.
     """
-    for registry in (_WALL_AXES, _OPENING_GEO, _STYLES, _STYLE_RGB, _ELEMENT_STYLES):
+    for registry in (_WALL_AXES, _OPENING_GEO, _STYLES, _STYLE_RGB, _ELEMENT_STYLES, _MAPPED_SOURCES):
         registry.clear()
     f = ifcopenshell.api.run("project.create_file", version="IFC4")
     _CTX["f"] = f
@@ -83,7 +84,7 @@ def evidence_pset(ctx, properties, name="Reconstruction_Evidence"):
     return ps
 
 
-def declare_scope(ctx, floor_coverage="exterior_only", floor_storeys=None, omissions=None):
+def declare_scope(ctx, floor_coverage="inferred_floorplates", floor_storeys=None, omissions=None):
     """Record intended floor coverage, not a claim of surveyed completeness."""
     import json
     if floor_coverage not in ("exterior_only", "inferred_floorplates", "supplied_floorplates"):
@@ -275,6 +276,10 @@ def element(ctx, ifc_class, name, storey, verts, faces, predefined_type=None, st
         _ELEMENT_STYLES[el.GlobalId] = style_name
     if storey is not None:
         _run("spatial.assign_container", products=[el], relating_structure=storey)
+    # Mesh vertices already use the model frame; identity keeps their world position.
+    # A Body requires an explicit placement even when no transform is needed.
+    import numpy as np
+    _run("geometry.edit_object_placement", product=el, matrix=np.eye(4), is_si=True)
     return el
 
 
@@ -416,19 +421,30 @@ def host_fill(ctx, opening_el, product):
 
 def mapped_copy(ctx, source, storey, translation, name=None, evidence=None):
     """Reuse a source Body with a translated mapped representation.
-    Source geometry must be in world coordinates with no ObjectPlacement;
-    use one unmoved prototype for a repetition group.
+    Translation is a world-space offset from the source occurrence. Preserve its
+    placement and share geometric items through a separately owned map source.
     """
     import numpy as np
-    if source.ObjectPlacement is not None:
-        raise ValueError("Mapped-copy source must be an unplaced prototype")
+    from ifcopenshell.util.placement import get_local_placement
+    offset = np.asarray(translation, dtype=float)
+    if offset.shape != (3,) or not np.isfinite(offset).all():
+        raise ValueError("Translation must contain three finite metre values")
     if ctx["f"] is not _CTX.get("f"):
         raise ValueError("Inactive model context")
     el = _run("root.create_entity", ifc_class=source.is_a(), name=name or source.Name)
     rep = next(r for r in source.Representation.Representations if r.RepresentationIdentifier == "Body")
-    mapped = _run("geometry.map_representation", representation=rep)
+    # WR11: a representation cannot belong to both a product and a map.
+    # Keep the prototype's Body; the map owns a lightweight wrapper over its items.
+    map_source = _MAPPED_SOURCES.get(rep.id())
+    if map_source is None:
+        map_source = ctx['f'].create_entity('IfcShapeRepresentation',
+            ContextOfItems=rep.ContextOfItems, RepresentationIdentifier=rep.RepresentationIdentifier,
+            RepresentationType=rep.RepresentationType, Items=rep.Items)
+        _MAPPED_SOURCES[rep.id()] = map_source
+    mapped = _run("geometry.map_representation", representation=map_source)
     _run("geometry.assign_representation", product=el, representation=mapped)
-    matrix = np.eye(4); matrix[:3, 3] = translation
+    matrix = get_local_placement(source.ObjectPlacement).copy() if source.ObjectPlacement else np.eye(4)
+    matrix[:3, 3] += offset
     _run("geometry.edit_object_placement", product=el, matrix=matrix, is_si=True)
     _run("spatial.assign_container", products=[el], relating_structure=storey)
     if hasattr(el, "PredefinedType"): el.PredefinedType = source.PredefinedType
@@ -629,7 +645,8 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
     f = snapshot.file if snapshot else path_or_file
     report = {"schema": "PASS", "geometry": "PASS", "semantics": "PASS", "schema_errors": [],
               "geometry_errors": [], "semantic_errors": [], "census": {}, "proxies": 0,
-              "proxy_exceptions": {}, "uncontained": [], "geometry_checked": 0, "verdict": "PASS"}
+              "proxy_exceptions": {}, "uncontained": [], "geometry_checked": 0, "verdict": "PASS",
+              "schema_check_scope": "Attribute/cardinality validation plus placement and shape-ownership rules; not full EXPRESS validation"}
     slab_review = []
     elevations = sorted(set(s.Elevation for s in f.by_type('IfcBuildingStorey') if s.Elevation is not None))
     gaps = np.diff(elevations)
@@ -638,6 +655,16 @@ def gate_report(path_or_file, required_classes=("IfcWall", "IfcRoof", "IfcSlab")
         import ifcopenshell.validate as v
         logger = v.json_logger(); v.validate(f, logger)
         report["schema_errors"] = [str(e)[:400] for e in logger.statements]
+        # Targeted formal rules are linear graph checks: no extra tessellation or render.
+        for product in f.by_type('IfcProduct'):
+            if (product.Representation and not product.ObjectPlacement and
+                any(rep.is_a('IfcShapeRepresentation') for rep in product.Representation.Representations)):
+                report['schema_errors'].append(f'IfcProduct.PlacementForShapeRepresentation: #{product.id()} {product.Name} has a shape but no placement')
+        for shape in f.by_type('IfcShapeModel'):
+            owners = (len(shape.OfProductRepresentation) == 1,
+                      len(shape.RepresentationMap) == 1, len(shape.OfShapeAspect) == 1)
+            if not (owners[0] ^ owners[1] ^ owners[2]):
+                report['schema_errors'].append(f'IfcShapeModel.WR11: #{shape.id()} has invalid representation ownership')
         if report["schema_errors"]: report["schema"] = "FAIL"
     except Exception as e:
         report["schema"] = "UNAVAILABLE"; report["schema_errors"].append(str(e))
